@@ -1,9 +1,12 @@
 'use client'
-import { useEffect } from 'react'
+import { useLayoutEffect } from 'react'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { useIssueStore } from '@/lib/stores/issue.store'
-import type { BoardColumn, Issue, Project, Epic, Sprint } from '@/lib/supabase/types'
-import { createClient } from '@/lib/supabase/client'
+import type { BoardColumn, Issue, Project, Epic, Sprint, MemberSummary } from '@/lib/supabase/types'
+
+const EMPTY_EPICS: Epic[] = []
+const EMPTY_SPRINTS: Sprint[] = []
+const EMPTY_MEMBERS: MemberSummary[] = []
 
 interface Props {
   project: Project
@@ -11,6 +14,7 @@ interface Props {
   issues: Issue[]
   epics?: Epic[]
   sprints?: Sprint[]
+  members?: MemberSummary[]
   children: React.ReactNode
 }
 
@@ -18,47 +22,14 @@ export function BoardDataLoader({
   project,
   columns,
   issues,
-  epics = [],
-  sprints = [],
+  epics = EMPTY_EPICS,
+  sprints = EMPTY_SPRINTS,
+  members = EMPTY_MEMBERS,
   children,
 }: Props) {
-  const { setCurrentProject, setColumns, setEpics, setSprints } = useProjectStore()
-  const { setIssues } = useIssueStore()
-
-  useEffect(() => {
-    setCurrentProject(project)
-    setColumns(columns)
-    setIssues(issues)
-    setEpics(epics)
-    setSprints(sprints)
-  }, [project, columns, issues, epics, sprints, setCurrentProject, setColumns, setIssues, setEpics, setSprints])
-
-  useEffect(() => {
-    const supabase = createClient()
-    const channel = supabase
-      .channel(`board-${project.id}`)
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'issues',
-          filter: `project_id=eq.${project.id}`,
-        },
-        (payload) => {
-          if (payload.eventType === 'UPDATE') {
-            useIssueStore.getState().updateIssue(
-              (payload.new as Issue).id,
-              payload.new as Partial<Issue>
-            )
-          }
-        }
-      )
-      .subscribe()
-
-    return () => {
-      supabase.removeChannel(channel)
-    }
+  useLayoutEffect(() => {
+    useProjectStore.getState().hydrateProjectView({ project, columns, epics, sprints, members })
+    useIssueStore.getState().setIssues(issues)
   }, [project.id])
 
   return <>{children}</>

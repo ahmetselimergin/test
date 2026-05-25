@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 import { Plus, MoreHorizontal } from 'lucide-react'
-import type { BoardColumn as BoardColumnType, Issue, Project } from '@/lib/supabase/types'
+import type { BoardColumn as BoardColumnType, Issue, Project, MemberSummary } from '@/lib/supabase/types'
 import { IssueCard } from '@/components/issues/IssueCard'
 import { CreateIssueDialog } from '@/components/board/CreateIssueDialog'
 import { Button } from '@/components/ui/button'
@@ -21,6 +21,7 @@ interface BoardColumnProps {
   issues: Issue[]
   project: Project
   workspaceSlug: string
+  members: MemberSummary[]
 }
 
 export function BoardColumn({
@@ -28,6 +29,7 @@ export function BoardColumn({
   issues,
   project,
   workspaceSlug,
+  members,
 }: BoardColumnProps) {
   const [createOpen, setCreateOpen] = useState(false)
   const { setNodeRef, isOver } = useDroppable({ id: column.id })
@@ -87,6 +89,7 @@ export function BoardColumn({
         project={project}
         column={column}
         workspaceSlug={workspaceSlug}
+        members={members}
         open={createOpen}
         onOpenChange={setCreateOpen}
       />

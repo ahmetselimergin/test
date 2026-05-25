@@ -15,13 +15,31 @@ import { AnimatePresence } from 'framer-motion'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import { createClient } from '@/lib/supabase/client'
-import { BoardColumn } from './BoardColumn'
+import { BoardColumn as BoardColumnComponent } from './BoardColumn'
+import { AddColumnButton } from './AddColumnButton'
 import { IssueCard } from '@/components/issues/IssueCard'
-import type { Issue, Project } from '@/lib/supabase/types'
+import type { BoardColumn, Issue, Project, MemberSummary } from '@/lib/supabase/types'
 
-export function KanbanBoard({ project }: { project: Project }) {
-  const { columns } = useProjectStore()
-  const { issues, moveIssue } = useIssueStore()
+interface KanbanBoardProps {
+  project: Project
+  workspaceSlug: string
+  columns?: BoardColumn[]
+  issues?: Issue[]
+  members?: MemberSummary[]
+}
+
+export function KanbanBoard({
+  project,
+  workspaceSlug,
+  columns: columnsProp,
+  issues: issuesProp,
+  members = [],
+}: KanbanBoardProps) {
+  const storeColumns = useProjectStore((s) => s.columns)
+  const storeIssues = useIssueStore((s) => s.issues)
+  const moveIssue = useIssueStore((s) => s.moveIssue)
+  const columns = columnsProp ?? storeColumns
+  const issues = issuesProp ?? storeIssues
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null)
 
   const sensors = useSensors(
@@ -76,22 +94,25 @@ export function KanbanBoard({ project }: { project: Project }) {
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="flex gap-4 p-6 h-full overflow-x-auto">
+      <div className="flex gap-4 p-5 h-full overflow-x-auto items-start">
         <SortableContext
           items={columns.map((c) => c.id)}
           strategy={horizontalListSortingStrategy}
         >
           <AnimatePresence>
             {columns.map((column) => (
-              <BoardColumn
+              <BoardColumnComponent
                 key={column.id}
                 column={column}
                 issues={issues.filter((i) => i.board_column_id === column.id)}
                 project={project}
+                workspaceSlug={workspaceSlug}
+                members={members}
               />
             ))}
           </AnimatePresence>
         </SortableContext>
+        <AddColumnButton project={project} workspaceSlug={workspaceSlug} />
       </div>
 
       <DragOverlay>
