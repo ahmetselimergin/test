@@ -13,8 +13,15 @@ import { createClient } from '@/lib/supabase/client'
 import type { IssueStatus, Priority } from '@/lib/supabase/types'
 
 export function IssueDetailPanel() {
-  const { selectedIssue, setSelectedIssue, updateIssue } = useIssueStore()
+  const { selectedIssue, setSelectedIssue, updateIssue, removeIssue } = useIssueStore()
   const { currentProject } = useProjectStore()
+
+  async function handleDelete() {
+    if (!selectedIssue) return
+    const supabase = createClient()
+    await supabase.from('issues').delete().eq('id', selectedIssue.id)
+    removeIssue(selectedIssue.id)
+  }
 
   async function handleStatusChange(status: IssueStatus) {
     if (!selectedIssue) return
@@ -70,6 +77,7 @@ export function IssueDetailPanel() {
                   variant="ghost"
                   size="icon"
                   className="w-7 h-7 text-rose-400 hover:text-rose-300"
+                  onClick={handleDelete}
                 >
                   <Trash2 size={14} />
                 </Button>
