@@ -1,62 +1,103 @@
 'use client'
+
+import { useState } from 'react'
 import { useDroppable } from '@dnd-kit/core'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { motion } from 'framer-motion'
 import { Plus, MoreHorizontal } from 'lucide-react'
 import type { BoardColumn as BoardColumnType, Issue, Project } from '@/lib/supabase/types'
 import { IssueCard } from '@/components/issues/IssueCard'
+import { CreateIssueDialog } from '@/components/board/CreateIssueDialog'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
 interface BoardColumnProps {
   column: BoardColumnType
   issues: Issue[]
   project: Project
+  workspaceSlug: string
 }
 
-export function BoardColumn({ column, issues, project }: BoardColumnProps) {
+export function BoardColumn({
+  column,
+  issues,
+  project,
+  workspaceSlug,
+}: BoardColumnProps) {
+  const [createOpen, setCreateOpen] = useState(false)
   const { setNodeRef, isOver } = useDroppable({ id: column.id })
   const sorted = [...issues].sort((a, b) => a.order - b.order)
-  const isOverLimit = column.wip_limit !== null && issues.length > column.wip_limit
+  const isOverLimit =
+    column.wip_limit !== null && issues.length >= column.wip_limit
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      className="flex-shrink-0 w-72 flex flex-col"
-    >
-      {/* Column header */}
-      <div className="flex items-center justify-between mb-3 px-1">
-        <div className="flex items-center gap-2">
-          <div className="w-2 h-2 rounded-full" style={{ backgroundColor: column.color }} />
-          <span className="text-sm font-medium">{column.name}</span>
+    <div className="flex-shrink-0 w-[272px] flex flex-col max-h-full">
+      <div className="flex items-center justify-between gap-2 mb-2 px-0.5">
+        <div className="flex items-center gap-2 min-w-0">
+          <span
+            className="size-1.5 rounded-full shrink-0"
+            style={{ backgroundColor: column.color }}
+          />
+          <h3 className="text-[11px] font-semibold uppercase tracking-widest text-foreground truncate">
+            {column.name}
+          </h3>
           <span
             className={cn(
-              'text-xs px-1.5 py-0.5 rounded-full font-medium',
+              'text-[11px] font-mono px-1 py-0 rounded tabular-nums',
               isOverLimit
                 ? 'bg-rose-500/15 text-rose-400'
-                : 'bg-white/5 text-muted'
+                : 'bg-subtle text-muted'
             )}
           >
             {issues.length}
-            {column.wip_limit != null && `/${column.wip_limit}`}
+            {column.wip_limit != null && ` / ${column.wip_limit}`}
           </span>
         </div>
-        <div className="flex items-center gap-1">
-          <button className="p-1 rounded hover:bg-white/5 text-muted hover:text-foreground transition-colors">
-            <Plus size={14} />
-          </button>
-          <button className="p-1 rounded hover:bg-white/5 text-muted hover:text-foreground transition-colors">
-            <MoreHorizontal size={14} />
-          </button>
+        <div className="flex items-center gap-0.5">
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className="size-6 text-muted"
+            onClick={() => setCreateOpen(true)}
+            aria-label="Add issue"
+          >
+            <Plus size={13} />
+          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger className="inline-flex size-6 items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-foreground">
+              <MoreHorizontal size={13} />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem onClick={() => setCreateOpen(true)}>
+                Add issue
+              </DropdownMenuItem>
+              <DropdownMenuItem disabled>Edit column</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
-      {/* Drop zone */}
+      <CreateIssueDialog
+        project={project}
+        column={column}
+        workspaceSlug={workspaceSlug}
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+      />
+
       <div
         ref={setNodeRef}
         className={cn(
-          'flex-1 rounded-xl p-2 space-y-2 min-h-[200px] transition-colors',
-          isOver ? 'bg-indigo-500/5 border border-indigo-500/30' : 'bg-white/[0.02]'
+          'flex-1 rounded-lg border p-1.5 flex flex-col gap-1.5 min-h-[120px] overflow-y-auto transition-colors',
+          isOver
+            ? 'border-accent/50 bg-accent-muted/30'
+            : 'border-subtle bg-card/40'
         )}
       >
         <SortableContext
@@ -67,7 +108,16 @@ export function BoardColumn({ column, issues, project }: BoardColumnProps) {
             <IssueCard key={issue.id} issue={issue} project={project} />
           ))}
         </SortableContext>
+        {sorted.length === 0 && (
+          <button
+            type="button"
+            onClick={() => setCreateOpen(true)}
+            className="w-full py-5 text-xs text-muted hover:text-accent border border-dashed border-subtle rounded-lg hover:border-accent/40 transition-colors"
+          >
+            + Add issue
+          </button>
+        )}
       </div>
-    </motion.div>
+    </div>
   )
 }
