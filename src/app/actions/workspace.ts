@@ -173,28 +173,22 @@ export async function getWorkspaceMembers(workspaceSlug: string): Promise<Member
 
   if (!workspace) return []
 
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('workspace_members')
     .select('user_id, profiles(id, full_name, email, avatar_url, job_title)')
     .eq('workspace_id', workspace.id)
 
-  if (!data) return []
+  if (error || !data) return []
 
-  return data.map((row) => {
-    const rawProfile = row.profiles
-    const p = (Array.isArray(rawProfile) ? rawProfile[0] : rawProfile) as {
-      id: string
-      full_name: string | null
-      email: string | null
-      avatar_url: string | null
-      job_title: string | null
-    } | null | undefined
-    return {
+  return data.flatMap((row) => {
+    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
+    if (!profile) return []
+    return [{
       id: row.user_id,
-      full_name: p?.full_name ?? null,
-      email: p?.email ?? null,
-      avatar_url: p?.avatar_url ?? null,
-      job_title: p?.job_title ?? null,
-    }
+      full_name: (profile as { full_name: string | null }).full_name ?? null,
+      email: (profile as { email: string | null }).email ?? null,
+      avatar_url: (profile as { avatar_url: string | null }).avatar_url ?? null,
+      job_title: (profile as { job_title: string | null }).job_title ?? null,
+    }]
   })
 }
