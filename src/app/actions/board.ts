@@ -53,7 +53,8 @@ export async function createIssue(formData: FormData) {
   const workspaceSlug = formData.get('workspace_slug') as string
   const description = (formData.get('description') as string)?.trim() || null
   const estimateRaw = formData.get('estimate') as string
-  const estimate = estimateRaw ? parseInt(estimateRaw, 10) : null
+  const parsed = estimateRaw ? parseInt(estimateRaw, 10) : NaN
+  const estimate = isNaN(parsed) ? null : parsed
   const assigneeId = (formData.get('assignee_id') as string) || null
   let labels: string[] = []
   try {

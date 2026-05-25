@@ -5,7 +5,10 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { MemberSummary } from '@/lib/supabase/types'
 
-export async function updateProfile(formData: FormData) {
+export async function updateProfile(
+  _prevState: { error?: string; success?: boolean } | null,
+  formData: FormData,
+) {
   const supabase = await createClient()
   const {
     data: { user },
@@ -21,12 +24,13 @@ export async function updateProfile(formData: FormData) {
   })
   if (authError) return { error: authError.message }
 
-  await supabase.from('profiles').upsert({
+  const { error: upsertError } = await supabase.from('profiles').upsert({
     id: user.id,
     email: user.email ?? null,
     full_name: fullName,
     job_title: jobTitle,
   })
+  if (upsertError) return { error: upsertError.message }
 
   revalidatePath('/profile')
   return { success: true }
@@ -165,6 +169,9 @@ export async function createProjectAction(formData: FormData) {
 export async function getWorkspaceMembers(workspaceSlug: string): Promise<MemberSummary[]> {
   const supabase = await createClient()
 
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return []
+
   const { data: workspace } = await supabase
     .from('workspaces')
     .select('id')
@@ -185,10 +192,10 @@ export async function getWorkspaceMembers(workspaceSlug: string): Promise<Member
     if (!profile) return []
     return [{
       id: row.user_id,
-      full_name: (profile as { full_name: string | null }).full_name ?? null,
-      email: (profile as { email: string | null }).email ?? null,
-      avatar_url: (profile as { avatar_url: string | null }).avatar_url ?? null,
-      job_title: (profile as { job_title: string | null }).job_title ?? null,
+      full_name: profile.full_name ?? null,
+      email: profile.email ?? null,
+      avatar_url: profile.avatar_url ?? null,
+      job_title: profile.job_title ?? null,
     }]
   })
 }

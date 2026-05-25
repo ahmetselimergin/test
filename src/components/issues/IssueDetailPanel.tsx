@@ -246,6 +246,7 @@ export function IssueDetailPanel() {
             className="fixed right-0 top-0 bottom-0 w-full max-w-[480px] z-50 flex flex-col surface-elevated border-l border-subtle shadow-panel"
           >
             <IssueDetailContent
+              key={selectedIssue.id}
               issue={selectedIssue}
               issueKey={issueKey}
               onClose={() => setSelectedIssue(null)}

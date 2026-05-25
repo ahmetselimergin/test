@@ -107,6 +107,7 @@ export interface Profile {
   email: string | null
   full_name: string | null
   avatar_url: string | null
+  job_title: string | null
   created_at: string
 }
 
