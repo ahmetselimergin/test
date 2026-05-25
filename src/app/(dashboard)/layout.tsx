@@ -2,6 +2,7 @@ import { Sidebar } from '@/components/layout/Sidebar'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { DataLoader } from '@/components/layout/DataLoader'
+import { IssueDetailPanel } from '@/components/issues/IssueDetailPanel'
 
 export default function DashboardLayout({
   children,
@@ -21,6 +22,7 @@ export default function DashboardLayout({
           </div>
         </div>
       </DataLoader>
+      <IssueDetailPanel />
     </TooltipProvider>
   )
 }
