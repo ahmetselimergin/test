@@ -54,6 +54,7 @@ export async function createIssue(formData: FormData) {
   const description = (formData.get('description') as string)?.trim() || null
   const estimateRaw = formData.get('estimate') as string
   const estimate = estimateRaw ? parseInt(estimateRaw, 10) : null
+  const assigneeId = (formData.get('assignee_id') as string) || null
   let labels: string[] = []
   try {
     const raw = formData.get('labels') as string
@@ -100,6 +101,7 @@ export async function createIssue(formData: FormData) {
       estimate,
       status,
       reporter_id: user.id,
+      assignee_id: assigneeId,
       order: nextOrder,
     })
     .select()
