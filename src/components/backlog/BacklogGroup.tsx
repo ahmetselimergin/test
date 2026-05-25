@@ -4,7 +4,6 @@ import { ChevronRight } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Issue, Project } from '@/lib/supabase/types'
 import { IssueCard } from '@/components/issues/IssueCard'
-import { cn } from '@/lib/utils'
 
 interface BacklogGroupProps {
   title: string
