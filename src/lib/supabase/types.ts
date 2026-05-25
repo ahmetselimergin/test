@@ -101,3 +101,23 @@ export interface WorkspaceMember {
   role: Role
   joined_at: string
 }
+
+export interface Profile {
+  id: string
+  email: string | null
+  full_name: string | null
+  avatar_url: string | null
+  created_at: string
+}
+
+export type WorkspaceMemberWithProfile = WorkspaceMember & {
+  profile: Profile | null
+}
+
+export interface MemberSummary {
+  id: string
+  full_name: string | null
+  email: string | null
+  avatar_url: string | null
+  job_title: string | null
+}
