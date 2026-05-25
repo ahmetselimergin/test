@@ -1,21 +1,22 @@
 'use client'
+
 import { signIn } from '@/app/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { useState } from 'react'
+import { Loader2 } from 'lucide-react'
 
 export default function LoginPage() {
-  const [error, setError] = useState<string>('')
+  const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setLoading(true)
     setError('')
-    const formData = new FormData(e.currentTarget)
-    const result = await signIn(formData)
+    const result = await signIn(new FormData(e.currentTarget))
     if (result?.error) {
       setError(result.error)
       setLoading(false)
@@ -23,49 +24,58 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="bg-card border border-subtle rounded-2xl p-8 glass">
-      <h1 className="text-2xl font-semibold mb-1">Giriş Yap</h1>
-      <p className="text-muted text-sm mb-6">Hesabına giriş yap</p>
-
+    <div>
+      <div className="mb-7">
+        <h1 className="text-lg font-medium tracking-tight mb-1">Sign in</h1>
+        <p className="text-sm text-muted">Enter your credentials to continue</p>
+      </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email" className="text-[12px]">Email</Label>
           <Input
             id="email"
             name="email"
             type="email"
             required
-            placeholder="ornek@sirket.com"
-            className="bg-white/5 border-white/10"
+            placeholder="you@company.com"
+            className="h-10 border-[rgb(var(--border-strong))] bg-[rgb(var(--bg-card))]"
           />
         </div>
         <div className="space-y-1.5">
-          <Label htmlFor="password">Şifre</Label>
+          <Label htmlFor="password" className="text-[12px]">Password</Label>
           <Input
             id="password"
             name="password"
             type="password"
             required
             placeholder="••••••••"
-            className="bg-white/5 border-white/10"
+            className="h-10 border-[rgb(var(--border-strong))] bg-[rgb(var(--bg-card))]"
           />
         </div>
-
-        {error && <p className="text-rose-400 text-sm">{error}</p>}
-
+        {error && (
+          <p className="text-sm text-destructive bg-destructive/10 rounded-lg px-3 py-2">
+            {error}
+          </p>
+        )}
         <Button
           type="submit"
-          className="w-full bg-indigo-600 hover:bg-indigo-500"
           disabled={loading}
+          className="w-full h-10 bg-accent text-white hover:brightness-110"
         >
-          {loading ? 'Giriş yapılıyor...' : 'Giriş Yap'}
+          {loading ? (
+            <>
+              <Loader2 className="animate-spin" size={15} />
+              Signing in…
+            </>
+          ) : (
+            'Sign in'
+          )}
         </Button>
       </form>
-
       <p className="text-center text-sm text-muted mt-6">
-        Hesabın yok mu?{' '}
-        <Link href="/register" className="text-indigo-400 hover:text-indigo-300">
-          Kayıt ol
+        No account?{' '}
+        <Link href="/register" className="text-accent font-medium hover:underline">
+          Create one
         </Link>
       </p>
     </div>
