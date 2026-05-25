@@ -1,170 +1,234 @@
 'use client'
+
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ExternalLink, Trash2 } from 'lucide-react'
+import { X, Trash2, Copy, Link2 } from 'lucide-react'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { TypeIcon } from './TypeIcon'
 import { PriorityBadge } from './PriorityBadge'
 import { StatusBadge } from './StatusBadge'
 import { IssueEditor } from './IssueEditor'
-import { formatIssueId } from '@/lib/utils'
+import { IssuePropertyRow } from './IssuePropertyRow'
+import { formatIssueId, statusConfig, priorityConfig, typeConfig } from '@/lib/utils'
 import { Button } from '@/components/ui/button'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Separator } from '@/components/ui/separator'
+import { Badge } from '@/components/ui/badge'
 import { createClient } from '@/lib/supabase/client'
-import type { IssueStatus, Priority } from '@/lib/supabase/types'
+import type { Issue, IssueStatus, Priority } from '@/lib/supabase/types'
+import { toast } from 'sonner'
 
-export function IssueDetailPanel() {
-  const { selectedIssue, setSelectedIssue, updateIssue, removeIssue } = useIssueStore()
-  const { currentProject } = useProjectStore()
+function IssueDetailContent({
+  issue,
+  issueKey,
+  onClose,
+}: {
+  issue: Issue
+  issueKey: string | null
+  onClose: () => void
+}) {
+  const { updateIssue, removeIssue } = useIssueStore()
 
   async function handleDelete() {
-    if (!selectedIssue) return
     const supabase = createClient()
-    await supabase.from('issues').delete().eq('id', selectedIssue.id)
-    removeIssue(selectedIssue.id)
+    await supabase.from('issues').delete().eq('id', issue.id)
+    removeIssue(issue.id)
+    onClose()
+    toast.success('Issue deleted')
   }
 
   async function handleStatusChange(status: IssueStatus) {
-    if (!selectedIssue) return
-    updateIssue(selectedIssue.id, { status })
+    updateIssue(issue.id, { status })
     const supabase = createClient()
-    await supabase.from('issues').update({ status }).eq('id', selectedIssue.id)
+    await supabase.from('issues').update({ status }).eq('id', issue.id)
   }
 
   async function handlePriorityChange(priority: Priority) {
-    if (!selectedIssue) return
-    updateIssue(selectedIssue.id, { priority })
+    updateIssue(issue.id, { priority })
     const supabase = createClient()
-    await supabase.from('issues').update({ priority }).eq('id', selectedIssue.id)
+    await supabase.from('issues').update({ priority }).eq('id', issue.id)
   }
 
-  const statuses: IssueStatus[] = ['todo', 'in_progress', 'review', 'done']
-  const priorities: Priority[] = ['critical', 'high', 'medium', 'low']
+  function copyKey() {
+    if (issueKey) {
+      navigator.clipboard.writeText(issueKey)
+      toast.success('Copied to clipboard')
+    }
+  }
+
+  const statuses = Object.keys(statusConfig) as IssueStatus[]
+  const priorities = Object.keys(priorityConfig) as Priority[]
+
+  return (
+    <>
+      <div className="flex items-center justify-between px-5 h-11 border-b border-subtle shrink-0">
+        <div className="flex items-center gap-2 min-w-0">
+          <TypeIcon type={issue.type} size={18} />
+          <button
+            type="button"
+            onClick={copyKey}
+            className="font-mono text-sm text-accent hover:underline flex items-center gap-1"
+          >
+            {issueKey}
+            <Copy size={12} className="opacity-60" />
+          </button>
+        </div>
+        <div className="flex items-center gap-0.5">
+          <Button variant="ghost" size="icon" className="size-8" onClick={copyKey}>
+            <Link2 size={15} />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="size-8 text-destructive"
+            onClick={handleDelete}
+          >
+            <Trash2 size={15} />
+          </Button>
+          <Button variant="ghost" size="icon" className="size-8" onClick={onClose}>
+            <X size={16} />
+          </Button>
+        </div>
+      </div>
+
+      <div className="px-5 py-3 border-b border-subtle">
+        <h2 className="text-lg font-semibold leading-snug tracking-tight">
+          {issue.title}
+        </h2>
+      </div>
+
+      <Tabs defaultValue="details" className="flex-1 flex flex-col min-h-0">
+        <TabsList
+          variant="line"
+          className="px-5 w-full justify-start border-b border-subtle rounded-none bg-transparent h-10"
+        >
+          <TabsTrigger value="details" className="text-xs">
+            Details
+          </TabsTrigger>
+          <TabsTrigger value="activity" className="text-xs">
+            Activity
+          </TabsTrigger>
+          <TabsTrigger value="comments" className="text-xs">
+            Comments
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="details" className="flex-1 overflow-y-auto px-5 py-2 mt-0">
+          <IssuePropertyRow label="Status">
+            <div className="flex gap-1 overflow-x-auto">
+              {statuses.map((s) => (
+                <button
+                  key={s}
+                  type="button"
+                  onClick={() => handleStatusChange(s)}
+                  className={
+                    issue.status === s
+                      ? 'ring-2 ring-accent/50 rounded-md'
+                      : 'opacity-70 hover:opacity-100'
+                  }
+                >
+                  <StatusBadge status={s} />
+                </button>
+              ))}
+            </div>
+          </IssuePropertyRow>
+
+          <IssuePropertyRow label="Priority">
+            <div className="flex gap-1 overflow-x-auto">
+              {priorities.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => handlePriorityChange(p)}
+                  className={
+                    issue.priority === p
+                      ? 'ring-2 ring-accent/50 rounded-md px-1'
+                      : 'opacity-70 hover:opacity-100'
+                  }
+                >
+                  <PriorityBadge priority={p} showLabel />
+                </button>
+              ))}
+            </div>
+          </IssuePropertyRow>
+
+          <IssuePropertyRow label="Type">
+            <Badge variant="secondary" className="gap-1.5 font-normal">
+              <TypeIcon type={issue.type} size={12} />
+              {typeConfig[issue.type].label}
+            </Badge>
+          </IssuePropertyRow>
+
+          <IssuePropertyRow label="Description">
+            <IssueEditor
+              issueId={issue.id}
+              initialContent={issue.description ?? ''}
+            />
+          </IssuePropertyRow>
+
+          {issue.labels.length > 0 && (
+            <IssuePropertyRow label="Labels">
+              <div className="flex flex-wrap gap-1.5">
+                {issue.labels.map((label) => (
+                  <Badge key={label} variant="outline">
+                    {label}
+                  </Badge>
+                ))}
+              </div>
+            </IssuePropertyRow>
+          )}
+        </TabsContent>
+
+        <TabsContent value="activity" className="flex-1 overflow-y-auto px-5 py-6 mt-0">
+          <p className="text-sm text-muted text-center">Activity timeline coming soon</p>
+        </TabsContent>
+
+        <TabsContent value="comments" className="flex-1 overflow-y-auto px-5 py-6 mt-0">
+          <p className="text-sm text-muted text-center">Comments coming soon</p>
+        </TabsContent>
+      </Tabs>
+
+      <Separator />
+      <div className="px-5 py-3 text-[11px] text-muted flex justify-between shrink-0">
+        <span>Updated {new Date(issue.updated_at).toLocaleDateString('tr-TR')}</span>
+        <span className="font-mono">#{issue.issue_number}</span>
+      </div>
+    </>
+  )
+}
+
+export function IssueDetailPanel() {
+  const { selectedIssue, setSelectedIssue } = useIssueStore()
+  const currentProject = useProjectStore((s) => s.currentProject)
+
+  const issueKey =
+    selectedIssue && currentProject
+      ? formatIssueId(currentProject.key, selectedIssue.issue_number)
+      : null
 
   return (
     <AnimatePresence>
       {selectedIssue && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]"
             onClick={() => setSelectedIssue(null)}
           />
-          {/* Panel */}
           <motion.aside
-            initial={{ x: '100%', opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            exit={{ x: '100%', opacity: 0 }}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className="fixed right-0 top-0 bottom-0 w-[440px] z-50 flex flex-col bg-card border-l border-subtle shadow-2xl overflow-hidden"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 36, stiffness: 420 }}
+            className="fixed right-0 top-0 bottom-0 w-full max-w-[480px] z-50 flex flex-col surface-elevated border-l border-subtle shadow-panel"
           >
-            {/* Header */}
-            <div className="flex items-center justify-between px-5 py-4 border-b border-subtle flex-shrink-0">
-              <div className="flex items-center gap-2">
-                <TypeIcon type={selectedIssue.type} size={16} />
-                <span className="text-xs text-muted font-mono">
-                  {currentProject &&
-                    formatIssueId(currentProject.key, selectedIssue.issue_number)}
-                </span>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" className="w-7 h-7">
-                  <ExternalLink size={14} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-7 h-7 text-rose-400 hover:text-rose-300"
-                  onClick={handleDelete}
-                >
-                  <Trash2 size={14} />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="w-7 h-7"
-                  onClick={() => setSelectedIssue(null)}
-                >
-                  <X size={14} />
-                </Button>
-              </div>
-            </div>
-
-            {/* Content */}
-            <div className="flex-1 overflow-y-auto px-5 py-4 space-y-5">
-              <h2 className="text-lg font-semibold leading-snug">
-                {selectedIssue.title}
-              </h2>
-
-              {/* Meta fields */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <span className="text-xs text-muted block">Durum</span>
-                  <div className="flex flex-col gap-1">
-                    {statuses.map((s) => (
-                      <button
-                        key={s}
-                        onClick={() => handleStatusChange(s)}
-                        className={`flex items-center gap-2 px-2 py-1 rounded text-left text-xs transition-colors ${
-                          selectedIssue.status === s
-                            ? 'bg-indigo-500/15 text-indigo-300'
-                            : 'hover:bg-white/5 text-muted'
-                        }`}
-                      >
-                        <StatusBadge status={s} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="space-y-1">
-                  <span className="text-xs text-muted block">Öncelik</span>
-                  <div className="flex flex-col gap-1">
-                    {priorities.map((p) => (
-                      <button
-                        key={p}
-                        onClick={() => handlePriorityChange(p)}
-                        className={`flex items-center gap-2 px-2 py-1 rounded text-left text-xs transition-colors ${
-                          selectedIssue.priority === p
-                            ? 'bg-indigo-500/15 text-indigo-300'
-                            : 'hover:bg-white/5 text-muted'
-                        }`}
-                      >
-                        <PriorityBadge priority={p} showLabel />
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* Description editor */}
-              <div className="space-y-2">
-                <span className="text-xs text-muted block">Açıklama</span>
-                <IssueEditor
-                  issueId={selectedIssue.id}
-                  initialContent={selectedIssue.description ?? ''}
-                />
-              </div>
-
-              {/* Labels */}
-              {selectedIssue.labels.length > 0 && (
-                <div className="space-y-2">
-                  <span className="text-xs text-muted block">Etiketler</span>
-                  <div className="flex flex-wrap gap-1.5">
-                    {selectedIssue.labels.map((label) => (
-                      <span
-                        key={label}
-                        className="text-xs bg-white/5 border border-white/10 rounded px-2 py-0.5 text-muted"
-                      >
-                        {label}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
+            <IssueDetailContent
+              issue={selectedIssue}
+              issueKey={issueKey}
+              onClose={() => setSelectedIssue(null)}
+            />
           </motion.aside>
         </>
       )}
