@@ -72,7 +72,7 @@ export function AddColumnButton({ project, workspaceSlug }: Props) {
               name="name"
               required
               placeholder="Ör: Testing"
-              className="bg-white/5 border-white/10"
+              className="bg-[rgb(var(--bg-card))] border-[rgb(var(--border-strong))]"
             />
           </div>
           <div className="space-y-1.5">
