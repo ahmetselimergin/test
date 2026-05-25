@@ -21,17 +21,20 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
-import type { Issue, IssueStatus, Priority } from '@/lib/supabase/types'
+import type { Issue, IssueStatus, Priority, MemberSummary } from '@/lib/supabase/types'
 import { toast } from 'sonner'
+import { MemberPicker } from './MemberPicker'
 
 function IssueDetailContent({
   issue,
   issueKey,
   onClose,
+  members,
 }: {
   issue: Issue
   issueKey: string | null
   onClose: () => void
+  members: MemberSummary[]
 }) {
   const { updateIssue, removeIssue } = useIssueStore()
 
@@ -53,6 +56,12 @@ function IssueDetailContent({
     updateIssue(issue.id, { priority })
     const supabase = createClient()
     await supabase.from('issues').update({ priority }).eq('id', issue.id)
+  }
+
+  async function handleAssigneeChange(id: string | null) {
+    updateIssue(issue.id, { assignee_id: id })
+    const supabase = createClient()
+    await supabase.from('issues').update({ assignee_id: id }).eq('id', issue.id)
   }
 
   function copyKey() {
@@ -154,6 +163,14 @@ function IssueDetailContent({
             </DropdownMenu>
           </IssuePropertyRow>
 
+          <IssuePropertyRow label="Atanan">
+            <MemberPicker
+              members={members}
+              value={issue.assignee_id}
+              onChange={handleAssigneeChange}
+            />
+          </IssuePropertyRow>
+
           <IssuePropertyRow label="Type">
             <Badge variant="secondary" className="gap-1.5 font-normal">
               <TypeIcon type={issue.type} size={12} />
@@ -163,6 +180,7 @@ function IssueDetailContent({
 
           <IssuePropertyRow label="Description">
             <IssueEditor
+              mode="edit"
               issueId={issue.id}
               initialContent={issue.description ?? ''}
             />
@@ -202,6 +220,7 @@ function IssueDetailContent({
 export function IssueDetailPanel() {
   const { selectedIssue, setSelectedIssue } = useIssueStore()
   const currentProject = useProjectStore((s) => s.currentProject)
+  const members = useProjectStore((s) => s.members)
 
   const issueKey =
     selectedIssue && currentProject
@@ -230,6 +249,7 @@ export function IssueDetailPanel() {
               issue={selectedIssue}
               issueKey={issueKey}
               onClose={() => setSelectedIssue(null)}
+              members={members}
             />
           </motion.aside>
         </>
