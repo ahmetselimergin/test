@@ -12,6 +12,13 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import { createIssue } from '@/app/actions/board'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import type { BoardColumn, Project } from '@/lib/supabase/types'
@@ -32,6 +39,8 @@ export function CreateIssueDialog({
   onOpenChange,
 }: Props) {
   const [loading, setLoading] = useState(false)
+  const [type, setType] = useState('task')
+  const [priority, setPriority] = useState('medium')
   const router = useRouter()
   const addIssue = useIssueStore((s) => s.addIssue)
 
@@ -42,6 +51,8 @@ export function CreateIssueDialog({
     formData.set('project_id', project.id)
     formData.set('board_column_id', column.id)
     formData.set('workspace_slug', workspaceSlug)
+    formData.set('type', type)
+    formData.set('priority', priority)
 
     const result = await createIssue(formData)
     setLoading(false)
@@ -81,32 +92,32 @@ export function CreateIssueDialog({
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
-              <Label htmlFor="issue-type">Tür</Label>
-              <select
-                id="issue-type"
-                name="type"
-                defaultValue="task"
-                className="w-full h-10 rounded-lg border border-[rgb(var(--border-strong))] bg-[rgb(var(--bg-card))] px-3 text-sm"
-              >
-                <option value="task">Task</option>
-                <option value="story">Story</option>
-                <option value="bug">Bug</option>
-                <option value="feature">Feature</option>
-              </select>
+              <Label>Tür</Label>
+              <Select value={type} onValueChange={(v) => v && setType(v)}>
+                <SelectTrigger className="w-full bg-[rgb(var(--bg-card))] border-[rgb(var(--border-strong))]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="task">Task</SelectItem>
+                  <SelectItem value="story">Story</SelectItem>
+                  <SelectItem value="bug">Bug</SelectItem>
+                  <SelectItem value="feature">Feature</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="issue-priority">Öncelik</Label>
-              <select
-                id="issue-priority"
-                name="priority"
-                defaultValue="medium"
-                className="w-full h-10 rounded-lg border border-[rgb(var(--border-strong))] bg-[rgb(var(--bg-card))] px-3 text-sm"
-              >
-                <option value="critical">Critical</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-              </select>
+              <Label>Öncelik</Label>
+              <Select value={priority} onValueChange={(v) => v && setPriority(v)}>
+                <SelectTrigger className="w-full bg-[rgb(var(--bg-card))] border-[rgb(var(--border-strong))]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="critical">Critical</SelectItem>
+                  <SelectItem value="high">High</SelectItem>
+                  <SelectItem value="medium">Medium</SelectItem>
+                  <SelectItem value="low">Low</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <Button

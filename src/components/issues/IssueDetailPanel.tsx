@@ -1,7 +1,7 @@
 'use client'
 
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Trash2, Copy, Link2 } from 'lucide-react'
+import { X, Trash2, Copy, Link2, ChevronDown, Check } from 'lucide-react'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { TypeIcon } from './TypeIcon'
@@ -14,6 +14,12 @@ import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Separator } from '@/components/ui/separator'
 import { Badge } from '@/components/ui/badge'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
 import type { Issue, IssueStatus, Priority } from '@/lib/supabase/types'
 import { toast } from 'sonner'
@@ -115,41 +121,37 @@ function IssueDetailContent({
 
         <TabsContent value="details" className="flex-1 overflow-y-auto px-5 py-2 mt-0">
           <IssuePropertyRow label="Status">
-            <div className="flex gap-1 overflow-x-auto">
-              {statuses.map((s) => (
-                <button
-                  key={s}
-                  type="button"
-                  onClick={() => handleStatusChange(s)}
-                  className={
-                    issue.status === s
-                      ? 'ring-2 ring-accent/50 rounded-md'
-                      : 'opacity-70 hover:opacity-100'
-                  }
-                >
-                  <StatusBadge status={s} />
-                </button>
-              ))}
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1.5 outline-none hover:opacity-75 transition-opacity">
+                <StatusBadge status={issue.status} />
+                <ChevronDown size={11} className="text-muted" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-44">
+                {statuses.map((s) => (
+                  <DropdownMenuItem key={s} onClick={() => handleStatusChange(s)}>
+                    <StatusBadge status={s} />
+                    {issue.status === s && <Check size={12} className="ml-auto text-accent shrink-0" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </IssuePropertyRow>
 
           <IssuePropertyRow label="Priority">
-            <div className="flex gap-1 overflow-x-auto">
-              {priorities.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => handlePriorityChange(p)}
-                  className={
-                    issue.priority === p
-                      ? 'ring-2 ring-accent/50 rounded-md px-1'
-                      : 'opacity-70 hover:opacity-100'
-                  }
-                >
-                  <PriorityBadge priority={p} showLabel />
-                </button>
-              ))}
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1.5 outline-none hover:opacity-75 transition-opacity">
+                <PriorityBadge priority={issue.priority} showLabel />
+                <ChevronDown size={11} className="text-muted" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-40">
+                {priorities.map((p) => (
+                  <DropdownMenuItem key={p} onClick={() => handlePriorityChange(p)}>
+                    <PriorityBadge priority={p} showLabel />
+                    {issue.priority === p && <Check size={12} className="ml-auto text-accent shrink-0" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </IssuePropertyRow>
 
           <IssuePropertyRow label="Type">
