@@ -8,7 +8,9 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
-  closestCenter,
+  pointerWithin,
+  rectIntersection,
+  type CollisionDetection,
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, horizontalListSortingStrategy } from '@dnd-kit/sortable'
 import { useState, useCallback } from 'react'
@@ -20,6 +22,16 @@ import { BoardColumn as BoardColumnComponent } from './BoardColumn'
 import { AddColumnButton } from './AddColumnButton'
 import { IssueCard } from '@/components/issues/IssueCard'
 import type { BoardColumn, Issue, Project, MemberSummary } from '@/lib/supabase/types'
+
+// Pointer-first collision: cursor position wins, rect intersection as fallback.
+// This is critical for DragOverlay setups where the original element stays in
+// place (opacity 0) — without it, closestCenter uses the hidden original's rect,
+// making left-ward cross-column drags undetectable.
+const collisionDetection: CollisionDetection = (args) => {
+  const pointer = pointerWithin(args)
+  if (pointer.length > 0) return pointer
+  return rectIntersection(args)
+}
 
 interface KanbanBoardProps {
   project: Project
@@ -38,8 +50,6 @@ export function KanbanBoard({
 }: KanbanBoardProps) {
   const storeColumns = useProjectStore((s) => s.columns)
   const storeIssues = useIssueStore((s) => s.issues)
-  const setIssues = useIssueStore((s) => s.setIssues)
-  const moveIssue = useIssueStore((s) => s.moveIssue)
   const columns = columnsProp ?? storeColumns
   const issues = issuesProp ?? storeIssues
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null)
@@ -56,82 +66,76 @@ export function KanbanBoard({
     [issues]
   )
 
-  // Live reorder while dragging over other cards
+  // Read fresh state from store to avoid stale-closure bugs during rapid drag events.
   const handleDragOver = useCallback(
     ({ active, over }: DragOverEvent) => {
       if (!over || active.id === over.id) return
 
+      const { issues: freshIssues, setIssues } = useIssueStore.getState()
       const activeId = active.id as string
       const overId = over.id as string
 
-      const activeIssueItem = issues.find((i) => i.id === activeId)
-      if (!activeIssueItem) return
+      const activeItem = freshIssues.find((i) => i.id === activeId)
+      if (!activeItem) return
 
-      // Check if dragging over a column (empty column drop zone)
+      // Dropped over a column droppable (empty column or column border)
       const overColumn = columns.find((c) => c.id === overId)
       if (overColumn) {
-        if (activeIssueItem.board_column_id !== overColumn.id) {
-          const updated = issues.map((i) =>
+        if (activeItem.board_column_id === overColumn.id) return
+        setIssues(
+          freshIssues.map((i) =>
             i.id === activeId ? { ...i, board_column_id: overColumn.id } : i
           )
-          setIssues(updated)
-        }
+        )
         return
       }
 
-      // Dragging over another issue
-      const overIssue = issues.find((i) => i.id === overId)
-      if (!overIssue) return
+      // Dropped over another issue card
+      const overItem = freshIssues.find((i) => i.id === overId)
+      if (!overItem) return
 
-      const newColumnId = overIssue.board_column_id
-
-      // Get ordered list of issues in the target column (after potential column switch)
-      const columnIssues = issues.filter((i) => i.board_column_id === newColumnId)
-      const oldIndex = columnIssues.findIndex((i) => i.id === activeId)
-      const newIndex = columnIssues.findIndex((i) => i.id === overId)
+      const targetColumnId = overItem.board_column_id
+      const targetColumnIssues = freshIssues.filter((i) => i.board_column_id === targetColumnId)
+      const oldIndex = targetColumnIssues.findIndex((i) => i.id === activeId)
+      const newIndex = targetColumnIssues.findIndex((i) => i.id === overId)
 
       if (oldIndex === -1) {
-        // Moving from another column — insert at overIssue position
-        const updated = issues.map((i) =>
-          i.id === activeId ? { ...i, board_column_id: newColumnId } : i
+        // Moving from a different column — place after the over item
+        setIssues(
+          freshIssues.map((i) =>
+            i.id === activeId ? { ...i, board_column_id: targetColumnId } : i
+          )
         )
-        setIssues(updated)
       } else if (oldIndex !== newIndex) {
-        // Reorder within same column
-        const reordered = arrayMove(columnIssues, oldIndex, newIndex)
-        const withNewOrders = reordered.map((i, idx) => ({ ...i, order: idx }))
-        const updated = issues.map((i) => {
-          const reorderedItem = withNewOrders.find((r) => r.id === i.id)
-          return reorderedItem ?? i
-        })
-        setIssues(updated)
+        // Reordering within the same column
+        const reordered = arrayMove(targetColumnIssues, oldIndex, newIndex).map((i, idx) => ({
+          ...i,
+          order: idx,
+        }))
+        setIssues(
+          freshIssues.map((i) => reordered.find((r) => r.id === i.id) ?? i)
+        )
       }
     },
-    [issues, columns, setIssues]
+    [columns]
   )
 
-  const handleDragEnd = useCallback(
-    async ({ active, over }: DragEndEvent) => {
-      setActiveIssue(null)
-      if (!over) return
-
-      const issueId = active.id as string
-      const movedIssue = issues.find((i) => i.id === issueId)
-      if (!movedIssue) return
-
-      const supabase = createClient()
-      await supabase
-        .from('issues')
-        .update({ board_column_id: movedIssue.board_column_id, order: movedIssue.order })
-        .eq('id', issueId)
-    },
-    [issues]
-  )
+  const handleDragEnd = useCallback(async ({ active }: DragEndEvent) => {
+    setActiveIssue(null)
+    const { issues: freshIssues } = useIssueStore.getState()
+    const moved = freshIssues.find((i) => i.id === active.id)
+    if (!moved) return
+    const supabase = createClient()
+    await supabase
+      .from('issues')
+      .update({ board_column_id: moved.board_column_id, order: moved.order })
+      .eq('id', moved.id)
+  }, [])
 
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCenter}
+      collisionDetection={collisionDetection}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
