@@ -38,7 +38,7 @@ export function BoardColumn({
     column.wip_limit !== null && issues.length >= column.wip_limit
 
   return (
-    <div className="flex-shrink-0 w-[272px] flex flex-col max-h-full">
+    <div className="flex-shrink-0 w-[272px] flex flex-col h-full">
       <div className="flex items-center justify-between gap-2 mb-2 px-0.5">
         <div className="flex items-center gap-2 min-w-0">
           <span

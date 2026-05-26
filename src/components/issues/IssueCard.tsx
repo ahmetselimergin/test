@@ -1,6 +1,8 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import type { Issue, Project } from '@/lib/supabase/types'
 import { TypeIcon } from './TypeIcon'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -17,15 +19,23 @@ export function IssueCard({ issue, project, isDragging }: IssueCardProps) {
   const { setSelectedIssue } = useIssueStore()
   const priority = priorityConfig[issue.priority]
   const type = typeConfig[issue.type]
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: issue.id })
+
+  const sortableStyle = !isDragging
+    ? { transform: CSS.Transform.toString(transform), transition }
+    : undefined
 
   return (
     <motion.article
-      layout
+      ref={setNodeRef}
+      style={sortableStyle}
+      {...(!isDragging ? attributes : {})}
+      {...(!isDragging ? listeners : {})}
       initial={{ opacity: 0, y: 4 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ duration: 0.12 }}
-      onClick={() => setSelectedIssue(issue)}
+      onDoubleClick={() => !isDragging && setSelectedIssue(issue)}
       className={cn(
         'group relative bg-card border border-subtle rounded-lg cursor-pointer',
         'hover:border-strong transition-all select-none',
