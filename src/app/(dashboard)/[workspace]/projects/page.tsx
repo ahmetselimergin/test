@@ -1,11 +1,9 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Kanban, ArrowRight } from 'lucide-react'
+import { Kanban, ListTodo, Map, Timer, ArrowUpRight } from 'lucide-react'
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog'
 import { PageHeader } from '@/components/layout/PageHeader'
-import { Card, CardContent } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 
 export default async function ProjectsPage({
   params,
@@ -25,61 +23,133 @@ export default async function ProjectsPage({
 
   const { data: projects } = await supabase
     .from('projects')
-    .select('*')
+    .select('*, issues(count)')
     .eq('workspace_id', workspace.id)
     .order('created_at', { ascending: false })
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-8">
       <PageHeader
-        title="Projects"
-        description={`All delivery workstreams in ${workspace.name}`}
+        title="Projeler"
+        description={`${workspace.name} workspace'indeki tüm projeler`}
         actions={<CreateProjectDialog workspaceId={workspace.id} />}
       />
 
       {!projects?.length ? (
-        <Card className="border-dashed">
-          <CardContent className="py-16 text-center">
-            <p className="text-muted mb-4">No projects yet. Create one to open a board.</p>
-            <CreateProjectDialog workspaceId={workspace.id} />
-          </CardContent>
-        </Card>
+        <div className="flex flex-col items-center justify-center py-24 border border-dashed border-subtle rounded-2xl text-center">
+          <div className="size-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-4">
+            <Kanban size={24} className="text-accent" />
+          </div>
+          <p className="text-[15px] font-semibold text-foreground mb-1">Henüz proje yok</p>
+          <p className="text-sm text-muted mb-5">İlk projeyi oluşturarak başla</p>
+          <CreateProjectDialog workspaceId={workspace.id} />
+        </div>
       ) : (
-        <div className="grid gap-3">
-          {projects.map((project) => (
-            <Link key={project.id} href={`/${slug}/${project.id}/board`}>
-              <Card className="hover:border-strong hover:shadow-sm transition-all group">
-                <CardContent className="flex items-center gap-4 p-4">
-                  <div
-                    className="size-11 rounded-lg flex items-center justify-center text-sm font-bold text-white shrink-0"
-                    style={{ backgroundColor: project.color }}
-                  >
-                    {project.key}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-semibold group-hover:text-accent transition-colors">
-                      {project.name}
-                    </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <Badge variant="secondary" className="font-mono text-[10px]">
-                        {project.key}
-                      </Badge>
-                      <span className="text-xs text-muted capitalize">
-                        {project.methodology}
-                      </span>
-                    </div>
-                  </div>
-                  <Kanban size={18} className="text-muted group-hover:text-accent shrink-0" />
-                  <ArrowRight
-                    size={16}
-                    className="text-muted opacity-0 group-hover:opacity-100 transition-opacity shrink-0"
-                  />
-                </CardContent>
-              </Card>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+          {projects.map((project) => {
+            const issueCount = (project.issues as { count: number }[])?.[0]?.count ?? 0
+            return (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                slug={slug}
+                issueCount={issueCount}
+              />
+            )
+          })}
+
+          {/* Yeni proje kartı */}
+          <div className="rounded-2xl border border-dashed border-subtle hover:border-accent/40 hover:bg-subtle/40 transition-all flex flex-col items-center justify-center gap-2 min-h-[220px] cursor-pointer group">
+            <CreateProjectDialog workspaceId={workspace.id} />
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ProjectCard({
+  project,
+  slug,
+  issueCount,
+}: {
+  project: { id: string; name: string; key: string; color: string; methodology: string }
+  slug: string
+  issueCount: number
+}) {
+  const views = [
+    { href: 'board', icon: Kanban, label: 'Board' },
+    { href: 'backlog', icon: ListTodo, label: 'Backlog' },
+    { href: 'sprint', icon: Timer, label: 'Sprint' },
+    { href: 'roadmap', icon: Map, label: 'Roadmap' },
+  ]
+
+  const methodologyLabel: Record<string, string> = {
+    kanban: 'Kanban',
+    scrum: 'Scrum',
+    both: 'Kanban + Scrum',
+  }
+
+  return (
+    <div className="group rounded-2xl border border-subtle bg-card overflow-hidden hover:border-strong hover:shadow-lg transition-all">
+      {/* Colored header */}
+      <Link href={`/${slug}/${project.id}/board`} className="block">
+        <div
+          className="relative h-28 flex items-end p-4"
+          style={{ backgroundColor: project.color }}
+        >
+          {/* Subtle pattern overlay */}
+          <div className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
+              backgroundSize: '30px 30px',
+            }}
+          />
+          <div className="relative flex items-center justify-between w-full">
+            <div className="size-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold text-lg border border-white/30">
+              {project.key.slice(0, 2)}
+            </div>
+            <ArrowUpRight size={16} className="text-white/60 opacity-0 group-hover:opacity-100 transition-opacity" />
+          </div>
+        </div>
+      </Link>
+
+      {/* Content */}
+      <div className="p-4">
+        <Link href={`/${slug}/${project.id}/board`}>
+          <h3 className="font-semibold text-[14px] text-foreground group-hover:text-accent transition-colors truncate mb-0.5">
+            {project.name}
+          </h3>
+        </Link>
+        <div className="flex items-center gap-2 mb-3">
+          <span className="font-mono text-[10px] text-muted bg-subtle px-1.5 py-0.5 rounded">
+            {project.key}
+          </span>
+          <span className="text-[11px] text-muted">
+            {methodologyLabel[project.methodology] ?? project.methodology}
+          </span>
+          {issueCount > 0 && (
+            <>
+              <span className="text-muted/40">·</span>
+              <span className="text-[11px] text-muted">{issueCount} issue</span>
+            </>
+          )}
+        </div>
+
+        {/* Quick links */}
+        <div className="flex gap-1">
+          {views.map(({ href, icon: Icon, label }) => (
+            <Link
+              key={href}
+              href={`/${slug}/${project.id}/${href}`}
+              title={label}
+              className="flex-1 flex items-center justify-center h-8 rounded-lg text-muted hover:text-accent hover:bg-accent/8 transition-colors"
+            >
+              <Icon size={14} />
             </Link>
           ))}
         </div>
-      )}
+      </div>
     </div>
   )
 }

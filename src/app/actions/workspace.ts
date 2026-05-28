@@ -139,6 +139,7 @@ export async function createProjectAction(formData: FormData) {
   const name = formData.get('name') as string
   const key = (formData.get('key') as string).toUpperCase()
   const methodology = formData.get('methodology') as string
+  const color = (formData.get('color') as string) || '#6366f1'
 
   const { data: project, error } = await supabase
     .from('projects')
@@ -147,7 +148,7 @@ export async function createProjectAction(formData: FormData) {
       name,
       key,
       methodology,
-      color: '#6366f1',
+      color,
     })
     .select()
     .single()
