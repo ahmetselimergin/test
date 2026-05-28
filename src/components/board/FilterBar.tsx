@@ -20,7 +20,7 @@ export function isFilterActive(f: BoardFilters): boolean {
 }
 
 export function matchesFilters(issue: Issue, f: BoardFilters): boolean {
-  if (f.assignees.length > 0 && !f.assignees.includes(issue.assignee_id ?? '')) return false
+  if (f.assignees.length > 0 && (issue.assignee_id === null || !f.assignees.includes(issue.assignee_id))) return false
   if (f.priorities.length > 0 && !f.priorities.includes(issue.priority)) return false
   if (f.types.length > 0 && !f.types.includes(issue.type)) return false
   if (f.labels.length > 0 && !f.labels.some(l => issue.labels.includes(l))) return false
