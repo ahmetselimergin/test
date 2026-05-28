@@ -36,28 +36,38 @@ export async function updateProfile(
   return { success: true }
 }
 
-export async function updateWorkspaceSettings(formData: FormData) {
+export async function updateWorkspaceSettings(
+  _prevState: { error?: string; success?: boolean } | null,
+  formData: FormData,
+) {
   const supabase = await createClient()
   const workspaceId = formData.get('workspace_id') as string
   const name = (formData.get('name') as string)?.trim()
+  const newSlug = (formData.get('slug') as string)?.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-')
+
   if (!name) return { error: 'Workspace adı gerekli' }
+  if (!newSlug) return { error: 'Slug gerekli' }
+
+  // Slug başkası tarafından kullanılıyor mu kontrol et
+  const { data: existing } = await supabase
+    .from('workspaces')
+    .select('id')
+    .eq('slug', newSlug)
+    .neq('id', workspaceId)
+    .maybeSingle()
+
+  if (existing) return { error: 'Bu slug zaten kullanımda' }
 
   const { error } = await supabase
     .from('workspaces')
-    .update({ name })
+    .update({ name, slug: newSlug })
     .eq('id', workspaceId)
 
   if (error) return { error: error.message }
 
-  const { data: workspace } = await supabase
-    .from('workspaces')
-    .select('slug')
-    .eq('id', workspaceId)
-    .single()
-
-  revalidatePath(`/${workspace?.slug}`)
-  revalidatePath(`/${workspace?.slug}/settings`)
-  return { success: true }
+  revalidatePath(`/${newSlug}`)
+  revalidatePath(`/${newSlug}/settings`)
+  redirect(`/${newSlug}/settings`)
 }
 
 export async function inviteTeamMember(formData: FormData) {

@@ -76,7 +76,7 @@ export function Sidebar() {
     <aside className="w-[var(--sidebar-w)] h-screen border-r border-subtle bg-subtle/30 flex flex-col shrink-0">
       <div className="h-[var(--header-h)] flex items-center gap-2 px-3 border-b border-subtle">
         <Link
-          href={slug ? `/${slug}/projects` : '/'}
+          href={slug ? `/${slug}` : '/'}
           className="flex items-center gap-2 min-w-0"
         >
           <div className="size-7 rounded-lg bg-accent flex items-center justify-center shadow-sm shrink-0">
