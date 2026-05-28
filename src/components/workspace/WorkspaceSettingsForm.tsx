@@ -1,6 +1,6 @@
 'use client'
 
-import { useActionState, useEffect, useRef } from 'react'
+import { useActionState, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { updateWorkspaceSettings } from '@/app/actions/workspace'
@@ -15,6 +15,7 @@ interface Props {
 
 export function WorkspaceSettingsForm({ workspaceId, name }: Props) {
   const [state, action, pending] = useActionState(updateWorkspaceSettings, null)
+  const [nameValue, setNameValue] = useState(name)
   const toastId = useRef<string | number | null>(null)
 
   useEffect(() => {
@@ -39,7 +40,8 @@ export function WorkspaceSettingsForm({ workspaceId, name }: Props) {
           id="name"
           name="name"
           required
-          defaultValue={name}
+          value={nameValue}
+          onChange={(e) => setNameValue(e.target.value)}
           disabled={pending}
           className="h-10"
         />
