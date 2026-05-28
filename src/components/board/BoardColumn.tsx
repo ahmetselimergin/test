@@ -1,9 +1,11 @@
 'use client'
 
 import { useState } from 'react'
-import { useDroppable } from '@dnd-kit/core'
+import { useSortable } from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
-import { Plus, MoreHorizontal } from 'lucide-react'
+import { Plus, MoreHorizontal, Trash2, GripVertical } from 'lucide-react'
+import { toast } from 'sonner'
 import type { BoardColumn as BoardColumnType, Issue, Project, MemberSummary } from '@/lib/supabase/types'
 import { IssueCard } from '@/components/issues/IssueCard'
 import { CreateIssueDialog } from '@/components/board/CreateIssueDialog'
@@ -12,8 +14,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
+import { useProjectStore } from '@/lib/stores/project.store'
+import { useIssueStore } from '@/lib/stores/issue.store'
+import { deleteBoardColumn, renameBoardColumn } from '@/app/actions/board'
 import { cn } from '@/lib/utils'
 
 interface BoardColumnProps {
@@ -32,24 +38,83 @@ export function BoardColumn({
   members,
 }: BoardColumnProps) {
   const [createOpen, setCreateOpen] = useState(false)
-  // Droppable covers the ENTIRE column (header + card area) so the user
-  // can drag over any part of the column, not just the card container.
-  const { setNodeRef, isOver } = useDroppable({ id: column.id })
+  const [deleting, setDeleting] = useState(false)
+  const [name, setName] = useState(column.name)
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+    isOver,
+  } = useSortable({ id: column.id, data: { type: 'column' } })
+  const removeColumn = useProjectStore((s) => s.removeColumn)
+  const { issues: allIssues, setIssues } = useIssueStore()
   const sorted = [...issues].sort((a, b) => a.order - b.order)
-  const isOverLimit =
-    column.wip_limit !== null && issues.length >= column.wip_limit
+  const isOverLimit = column.wip_limit !== null && issues.length >= column.wip_limit
+
+  async function handleDelete() {
+    if (issues.length > 0) {
+      const confirmed = window.confirm(
+        `"${column.name}" kolonunda ${issues.length} issue var. Kolon silinirse bu issue'lar da silinir. Devam edilsin mi?`
+      )
+      if (!confirmed) return
+    }
+    setDeleting(true)
+    const result = await deleteBoardColumn(column.id, workspaceSlug, project.id)
+    if (result.error) {
+      toast.error(result.error)
+      setDeleting(false)
+      return
+    }
+    removeColumn(column.id)
+    setIssues(allIssues.filter((i) => i.board_column_id !== column.id))
+    toast.success(`"${column.name}" silindi`)
+  }
+
+  async function handleRename() {
+    const trimmed = name.trim()
+    if (!trimmed || trimmed === column.name) { setName(column.name); return }
+    useProjectStore.getState().updateColumn(column.id, { name: trimmed })
+    const result = await renameBoardColumn(column.id, trimmed)
+    if (result.error) {
+      toast.error(result.error)
+      setName(column.name)
+      useProjectStore.getState().updateColumn(column.id, { name: column.name })
+    }
+  }
 
   return (
-    <div ref={setNodeRef} className="flex-shrink-0 w-[272px] flex flex-col h-full">
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn('flex-shrink-0 w-[272px] flex flex-col h-full', isDragging && 'opacity-50')}
+    >
       <div className="flex items-center justify-between gap-2 mb-3 px-0.5">
         <div className="flex items-center gap-2 min-w-0">
+          <button
+            {...attributes}
+            {...listeners}
+            className="shrink-0 text-muted hover:text-foreground cursor-grab active:cursor-grabbing"
+            aria-label="Drag to reorder"
+          >
+            <GripVertical size={14} />
+          </button>
           <span
             className="size-2 rounded-full shrink-0"
             style={{ backgroundColor: column.color }}
           />
-          <h3 className="text-[12px] font-semibold text-foreground truncate tracking-tight">
-            {column.name}
-          </h3>
+          <input
+            value={name}
+            onChange={e => setName(e.target.value)}
+            onBlur={handleRename}
+            onKeyDown={e => {
+              if (e.key === 'Enter') e.currentTarget.blur()
+              if (e.key === 'Escape') { setName(column.name); e.currentTarget.blur() }
+            }}
+            className="bg-transparent text-[12px] font-semibold outline-none focus:ring-1 focus:ring-accent/40 rounded px-1 -mx-1 w-full truncate tracking-tight text-foreground"
+          />
           <span
             className={cn(
               'text-[11px] font-semibold px-1.5 py-0 rounded-md tabular-nums',
@@ -82,6 +147,15 @@ export function BoardColumn({
                 Issue ekle
               </DropdownMenuItem>
               <DropdownMenuItem disabled>Kolonu düzenle</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={handleDelete}
+                disabled={deleting}
+                className="text-rose-400 focus:text-rose-400"
+              >
+                <Trash2 size={13} />
+                {deleting ? 'Siliniyor...' : 'Kolonu sil'}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
