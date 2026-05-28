@@ -33,24 +33,21 @@ export default async function WorkspaceDashboard({
 
   const projectList = projects ?? []
   const firstProjectId = projectList[0]?.id ?? null
+  const projectIds = projectList.map(p => p.id)
 
-  // Per-project issue counts (two queries each, in parallel)
-  const issueCounts = await Promise.all(
-    projectList.map(async (project) => {
-      const [{ count: total }, { count: done }] = await Promise.all([
-        supabase
-          .from('issues')
-          .select('*', { count: 'exact', head: true })
-          .eq('project_id', project.id),
-        supabase
-          .from('issues')
-          .select('*', { count: 'exact', head: true })
-          .eq('project_id', project.id)
-          .eq('status', 'done'),
+  // Per-project issue counts — 2 aggregate queries instead of 2N
+  const [{ data: allIssues }, { data: doneIssues }] = projectIds.length > 0
+    ? await Promise.all([
+        supabase.from('issues').select('project_id').in('project_id', projectIds),
+        supabase.from('issues').select('project_id').in('project_id', projectIds).eq('status', 'done'),
       ])
-      return { projectId: project.id, total: total ?? 0, done: done ?? 0 }
-    })
-  )
+    : [{ data: [] as { project_id: string }[] }, { data: [] as { project_id: string }[] }]
+
+  const issueCounts = projectList.map(project => ({
+    projectId: project.id,
+    total: allIssues?.filter(i => i.project_id === project.id).length ?? 0,
+    done: doneIssues?.filter(i => i.project_id === project.id).length ?? 0,
+  }))
 
   // Quick stats
   const startOfToday = new Date()
@@ -74,6 +71,7 @@ export default async function WorkspaceDashboard({
     supabase
       .from('issues')
       .select('*', { count: 'exact', head: true })
+      .in('project_id', projectIds)
       .eq('priority', 'critical')
       .eq('type', 'bug')
       .neq('status', 'done'),
@@ -88,15 +86,20 @@ export default async function WorkspaceDashboard({
     .order('created_at', { ascending: false })
     .limit(20)
 
-  const activityItems: ActivityItem[] = ((rawActivity ?? []) as any[]).map((row) => ({
-    id: row.id,
-    action: row.action,
-    old_value: row.old_value,
-    new_value: row.new_value,
-    created_at: row.created_at,
-    issue: Array.isArray(row.issue) ? row.issue[0] ?? null : row.issue,
-    actor: Array.isArray(row.actor) ? row.actor[0] ?? null : row.actor,
-  }))
+  const activityItems: ActivityItem[] = ((rawActivity ?? []) as any[])
+    .filter((row) => {
+      const issue = Array.isArray(row.issue) ? row.issue[0] : row.issue
+      return issue && projectIds.includes(issue.project_id)
+    })
+    .map((row) => ({
+      id: row.id,
+      action: row.action,
+      old_value: row.old_value,
+      new_value: row.new_value,
+      created_at: row.created_at,
+      issue: Array.isArray(row.issue) ? row.issue[0] ?? null : row.issue,
+      actor: Array.isArray(row.actor) ? row.actor[0] ?? null : row.actor,
+    }))
 
   const userName = profile?.full_name ?? profile?.email ?? 'Kullanıcı'
 
