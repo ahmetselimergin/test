@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { updateWorkspaceSettings } from '@/app/actions/workspace'
+import { useWorkspaceStore } from '@/lib/stores/workspace.store'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -36,6 +37,13 @@ export function WorkspaceSettingsForm({ workspaceId, name, color }: Props) {
       if (state?.error) toast.error(state.error)
       if (state?.success) {
         toast.success('Kaydedildi')
+        // Store'u anında güncelle (sidebar + accent rengi hemen değişsin)
+        const store = useWorkspaceStore.getState()
+        if (store.currentWorkspace) {
+          const updated = { ...store.currentWorkspace, name: nameValue, color: selectedColor }
+          store.setCurrentWorkspace(updated)
+          store.setWorkspaces(store.workspaces.map((w) => w.id === updated.id ? updated : w))
+        }
         router.refresh()
       }
     }

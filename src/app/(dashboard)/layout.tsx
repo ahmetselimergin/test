@@ -3,6 +3,7 @@ import { AppHeader } from '@/components/layout/AppHeader'
 import { TooltipProvider } from '@/components/ui/tooltip'
 import { DataLoader } from '@/components/layout/DataLoader'
 import { IssueDetailPanel } from '@/components/issues/IssueDetailPanel'
+import { WorkspaceColorProvider } from '@/components/layout/WorkspaceColorProvider'
 
 export default function DashboardLayout({
   children,
@@ -12,6 +13,7 @@ export default function DashboardLayout({
   return (
     <TooltipProvider>
       <DataLoader>
+        <WorkspaceColorProvider />
         <div className="flex h-screen overflow-hidden bg-background">
           <Sidebar />
           <div className="flex-1 flex flex-col overflow-hidden min-w-0">
