@@ -6,22 +6,15 @@ import { CSS } from '@dnd-kit/utilities'
 import { MessageSquare, Paperclip } from 'lucide-react'
 import type { Issue, Project } from '@/lib/supabase/types'
 import { TypeIcon } from './TypeIcon'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
-import { formatIssueId, cn, priorityConfig } from '@/lib/utils'
+import { formatIssueId, cn } from '@/lib/utils'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import { useProjectStore } from '@/lib/stores/project.store'
+import { IssueCardQuickActions } from './IssueCardQuickActions'
 
 interface IssueCardProps {
   issue: Issue
   project: Project
   overlay?: boolean
-}
-
-const PRIORITY_DOT: Record<string, string> = {
-  critical: 'bg-rose-500',
-  high:     'bg-orange-500',
-  medium:   'bg-amber-400',
-  low:      'bg-slate-400',
 }
 
 const LABEL_PALETTES = [
@@ -47,7 +40,6 @@ function stripHtml(html: string) {
 export function IssueCard({ issue, project, overlay }: IssueCardProps) {
   const { setSelectedIssue } = useIssueStore()
   const members = useProjectStore((s) => s.members)
-  const assignee = members.find((m) => m.id === issue.assignee_id)
 
   const {
     attributes,
@@ -124,7 +116,7 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
 
         {/* Footer */}
         <div className="px-4 py-2.5 flex items-center justify-between gap-2">
-          {/* Left: type icon + key + priority */}
+          {/* Left: type icon + key */}
           <div className="flex items-center gap-2 min-w-0">
             <div className="flex items-center gap-1.5">
               <TypeIcon type={issue.type} size={12} className="text-muted shrink-0" />
@@ -132,32 +124,16 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
                 {formatIssueId(project.key, issue.issue_number)}
               </span>
             </div>
-            <span
-              title={priorityConfig[issue.priority].label}
-              className={cn('size-[6px] rounded-full shrink-0', PRIORITY_DOT[issue.priority])}
-            />
           </div>
 
-          {/* Right: estimate + assignee */}
+          {/* Right: estimate + quick actions */}
           <div className="flex items-center gap-2 shrink-0">
             {issue.estimate !== null && (
               <span className="text-[10.5px] text-muted bg-[rgb(var(--bg-subtle))] border border-[rgb(var(--border))] rounded-md px-1.5 py-0.5 font-medium tabular-nums">
                 {issue.estimate}pt
               </span>
             )}
-            {assignee ? (
-              <Avatar className="size-6 border-2 border-[rgb(var(--bg-card))] ring-1 ring-[rgb(var(--border))] shrink-0">
-                {assignee.avatar_url ? (
-                  <img src={assignee.avatar_url} alt={assignee.full_name ?? ''} className="size-full object-cover rounded-full" />
-                ) : (
-                  <AvatarFallback className="text-[9px] bg-accent/20 text-accent font-bold">
-                    {(assignee.full_name ?? assignee.email ?? '?').slice(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-            ) : (
-              <span className="size-6 rounded-full border border-dashed border-[rgb(var(--border))] shrink-0" />
-            )}
+            <IssueCardQuickActions issue={issue} members={members} />
           </div>
         </div>
       </motion.article>
