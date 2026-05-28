@@ -1,8 +1,8 @@
 'use client'
 
-import { useActionState } from 'react'
-import { useEffect } from 'react'
+import { useActionState, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
+import { Loader2 } from 'lucide-react'
 import { updateWorkspaceSettings } from '@/app/actions/workspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,10 +16,19 @@ interface Props {
 
 export function WorkspaceSettingsForm({ workspaceId, name, slug }: Props) {
   const [state, action, pending] = useActionState(updateWorkspaceSettings, null)
+  const toastId = useRef<string | number | null>(null)
 
   useEffect(() => {
-    if (state?.error) toast.error(state.error)
-  }, [state])
+    if (pending) {
+      toastId.current = toast.loading('Kaydediliyor...')
+    } else {
+      if (toastId.current) {
+        toast.dismiss(toastId.current)
+        toastId.current = null
+      }
+      if (state?.error) toast.error(state.error)
+    }
+  }, [pending, state])
 
   return (
     <form action={action} className="space-y-4">
@@ -32,6 +41,7 @@ export function WorkspaceSettingsForm({ workspaceId, name, slug }: Props) {
           name="name"
           required
           defaultValue={name}
+          disabled={pending}
           className="h-10"
         />
       </div>
@@ -45,6 +55,7 @@ export function WorkspaceSettingsForm({ workspaceId, name, slug }: Props) {
             name="slug"
             required
             defaultValue={slug}
+            disabled={pending}
             className="h-10 font-mono text-sm"
             pattern="[a-z0-9-]+"
             title="Sadece küçük harf, rakam ve tire kullanılabilir"
@@ -53,8 +64,15 @@ export function WorkspaceSettingsForm({ workspaceId, name, slug }: Props) {
         <p className="text-[11px] text-muted">Değiştirirsen URL'in değişir.</p>
       </div>
 
-      <Button type="submit" disabled={pending} className="bg-accent text-white">
-        {pending ? 'Kaydediliyor...' : 'Kaydet'}
+      <Button type="submit" disabled={pending} className="bg-accent text-white min-w-24">
+        {pending ? (
+          <span className="flex items-center gap-2">
+            <Loader2 size={14} className="animate-spin" />
+            Kaydediliyor
+          </span>
+        ) : (
+          'Kaydet'
+        )}
       </Button>
     </form>
   )
