@@ -32,3 +32,14 @@ export const typeConfig: Record<IssueType, { label: string; color: string; icon:
 export function formatIssueId(projectKey: string, issueNumber: number) {
   return `${projectKey}-${issueNumber}`
 }
+
+export function timeAgo(dateString: string): string {
+  const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000)
+  if (seconds < 60) return 'az önce'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes} dakika önce`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours} saat önce`
+  const days = Math.floor(hours / 24)
+  return `${days} gün önce`
+}
