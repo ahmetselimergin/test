@@ -46,17 +46,21 @@ export async function updateWorkspaceSettings(
 
   if (!name) return { error: 'Workspace adı gerekli' }
 
-  const { error, data: workspace } = await supabase
+  const { error } = await supabase
     .from('workspaces')
     .update({ name })
     .eq('id', workspaceId)
-    .select('slug')
-    .single()
 
   if (error) return { error: error.message }
 
-  revalidatePath(`/${workspace.slug}`)
-  revalidatePath(`/${workspace.slug}/settings`)
+  const { data: workspace } = await supabase
+    .from('workspaces')
+    .select('slug')
+    .eq('id', workspaceId)
+    .single()
+
+  revalidatePath(`/${workspace?.slug}`)
+  revalidatePath(`/${workspace?.slug}/settings`)
   return { success: true }
 }
 
