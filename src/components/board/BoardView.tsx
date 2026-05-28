@@ -1,6 +1,6 @@
 'use client'
 
-import { useLayoutEffect } from 'react'
+import { useState, useLayoutEffect } from 'react'
 import { KanbanBoard } from '@/components/board/KanbanBoard'
 import { BoardToolbar } from '@/components/board/BoardToolbar'
 import { useProjectStore } from '@/lib/stores/project.store'
@@ -17,6 +17,9 @@ interface Props {
 }
 
 export function BoardView({ project, workspaceSlug, columns, issues, members }: Props) {
+  const [filterBarOpen, setFilterBarOpen] = useState(false)
+  const [activeFilterCount, setActiveFilterCount] = useState(0)
+
   useLayoutEffect(() => {
     useProjectStore.getState().hydrateProjectView({
       project,
@@ -56,7 +59,13 @@ export function BoardView({ project, workspaceSlug, columns, issues, members }: 
 
   return (
     <div className="h-full flex flex-col">
-      <BoardToolbar project={project} issueCount={issues.length} />
+      <BoardToolbar
+        project={project}
+        issueCount={issues.length}
+        filterBarOpen={filterBarOpen}
+        onFilterToggle={() => setFilterBarOpen(!filterBarOpen)}
+        activeFilterCount={activeFilterCount}
+      />
       <div className="flex-1 overflow-hidden grid-board-bg">
         <KanbanBoard
           project={project}
