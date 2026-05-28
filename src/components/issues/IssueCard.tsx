@@ -3,6 +3,7 @@
 import { motion } from 'framer-motion'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import { MessageSquare, Paperclip } from 'lucide-react'
 import type { Issue, Project } from '@/lib/supabase/types'
 import { TypeIcon } from './TypeIcon'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
@@ -17,25 +18,30 @@ interface IssueCardProps {
 }
 
 const PRIORITY_DOT: Record<string, string> = {
-  critical: 'bg-rose-400',
-  high:     'bg-orange-400',
+  critical: 'bg-rose-500',
+  high:     'bg-orange-500',
   medium:   'bg-amber-400',
   low:      'bg-slate-400',
 }
 
 const LABEL_PALETTES = [
-  { bg: 'bg-blue-500/20',   text: 'text-blue-300',   border: 'border-blue-500/30' },
-  { bg: 'bg-purple-500/20', text: 'text-purple-300',  border: 'border-purple-500/30' },
-  { bg: 'bg-emerald-500/20',text: 'text-emerald-300', border: 'border-emerald-500/30' },
-  { bg: 'bg-orange-500/20', text: 'text-orange-300',  border: 'border-orange-500/30' },
-  { bg: 'bg-pink-500/20',   text: 'text-pink-300',    border: 'border-pink-500/30' },
-  { bg: 'bg-cyan-500/20',   text: 'text-cyan-300',    border: 'border-cyan-500/30' },
-  { bg: 'bg-yellow-500/20', text: 'text-yellow-300',  border: 'border-yellow-500/30' },
+  { bg: 'bg-rose-500/15',    text: 'text-rose-300',    border: 'border-rose-500/20' },
+  { bg: 'bg-blue-500/15',    text: 'text-blue-300',    border: 'border-blue-500/20' },
+  { bg: 'bg-violet-500/15',  text: 'text-violet-300',  border: 'border-violet-500/20' },
+  { bg: 'bg-amber-500/15',   text: 'text-amber-300',   border: 'border-amber-500/20' },
+  { bg: 'bg-emerald-500/15', text: 'text-emerald-300', border: 'border-emerald-500/20' },
+  { bg: 'bg-cyan-500/15',    text: 'text-cyan-300',    border: 'border-cyan-500/20' },
+  { bg: 'bg-orange-500/15',  text: 'text-orange-300',  border: 'border-orange-500/20' },
+  { bg: 'bg-pink-500/15',    text: 'text-pink-300',    border: 'border-pink-500/20' },
 ]
 
 function labelPalette(label: string) {
   const hash = label.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0)
   return LABEL_PALETTES[hash % LABEL_PALETTES.length]
+}
+
+function stripHtml(html: string) {
+  return html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()
 }
 
 export function IssueCard({ issue, project, overlay }: IssueCardProps) {
@@ -52,6 +58,8 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
     isDragging,
   } = useSortable({ id: issue.id, disabled: !!overlay })
 
+  const plainDescription = issue.description ? stripHtml(issue.description) : ''
+
   return (
     <div
       ref={overlay ? undefined : setNodeRef}
@@ -60,30 +68,34 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
       className="touch-none"
     >
       <motion.article
-        initial={{ opacity: 0, y: 4 }}
+        initial={{ opacity: 0, y: 6 }}
         animate={{ opacity: isDragging ? 0 : 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.97 }}
-        transition={{ duration: 0.12 }}
+        exit={{ opacity: 0, scale: 0.96 }}
+        transition={{ duration: 0.15 }}
         onDoubleClick={() => !overlay && setSelectedIssue(issue)}
         className={cn(
-          'group bg-card border border-subtle rounded-md select-none',
-          'hover:border-strong hover:shadow-sm transition-all duration-150',
+          'group flex flex-col gap-0 rounded-xl border select-none',
+          'bg-[rgb(var(--bg-card))] border-[rgb(var(--border))]',
+          'shadow-[0_1px_4px_rgba(0,0,0,0.12),0_4px_12px_rgba(0,0,0,0.08)]',
+          'hover:shadow-[0_2px_8px_rgba(0,0,0,0.18),0_6px_20px_rgba(0,0,0,0.12)]',
+          'hover:border-[rgb(var(--border-strong))] transition-all duration-200',
           overlay
-            ? 'rotate-[1deg] shadow-lg ring-1 ring-accent/30 cursor-grabbing opacity-95'
+            ? 'rotate-[1.5deg] cursor-grabbing opacity-95'
             : 'cursor-grab active:cursor-grabbing',
         )}
       >
-        <div className="px-3 pt-3 pb-2.5">
+        {/* Body */}
+        <div className="px-4 pt-4 pb-3 flex flex-col gap-2.5">
           {/* Labels */}
           {issue.labels.length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-2">
+            <div className="flex flex-wrap gap-1.5">
               {issue.labels.slice(0, 3).map((label) => {
                 const p = labelPalette(label)
                 return (
                   <span
                     key={label}
                     className={cn(
-                      'text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded border',
+                      'inline-flex items-center px-2 py-0.5 rounded-md text-[10.5px] font-semibold border',
                       p.bg, p.text, p.border
                     )}
                   >
@@ -95,36 +107,56 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
           )}
 
           {/* Title */}
-          <p className="text-[13px] font-medium leading-snug text-foreground group-hover:text-accent transition-colors line-clamp-3">
+          <p className="text-[13.5px] font-semibold leading-snug text-foreground group-hover:text-accent transition-colors line-clamp-2 tracking-[-0.01em]">
             {issue.title}
           </p>
+
+          {/* Description */}
+          {plainDescription && (
+            <p className="text-[12px] leading-relaxed text-muted line-clamp-2 opacity-80">
+              {plainDescription}
+            </p>
+          )}
         </div>
 
+        {/* Divider */}
+        <div className="h-px bg-[rgb(var(--border))] mx-4" />
+
         {/* Footer */}
-        <div className="px-3 pb-2.5 flex items-center justify-between gap-2">
-          <div className="flex items-center gap-1.5 min-w-0">
-            <TypeIcon type={issue.type} size={12} className="shrink-0 text-muted" />
-            <span className="text-[11px] text-muted font-mono tracking-tight truncate">
-              {formatIssueId(project.key, issue.issue_number)}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
+        <div className="px-4 py-2.5 flex items-center justify-between gap-2">
+          {/* Left: type icon + key + priority */}
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="flex items-center gap-1.5">
+              <TypeIcon type={issue.type} size={12} className="text-muted shrink-0" />
+              <span className="text-[11px] text-muted font-mono tracking-tight">
+                {formatIssueId(project.key, issue.issue_number)}
+              </span>
+            </div>
             <span
               title={priorityConfig[issue.priority].label}
-              className={cn('size-[7px] rounded-full shrink-0', PRIORITY_DOT[issue.priority])}
+              className={cn('size-[6px] rounded-full shrink-0', PRIORITY_DOT[issue.priority])}
             />
+          </div>
+
+          {/* Right: estimate + assignee */}
+          <div className="flex items-center gap-2 shrink-0">
+            {issue.estimate !== null && (
+              <span className="text-[10.5px] text-muted bg-[rgb(var(--bg-subtle))] border border-[rgb(var(--border))] rounded-md px-1.5 py-0.5 font-medium tabular-nums">
+                {issue.estimate}pt
+              </span>
+            )}
             {assignee ? (
-              <Avatar className="size-5 border border-subtle shrink-0">
+              <Avatar className="size-6 border-2 border-[rgb(var(--bg-card))] ring-1 ring-[rgb(var(--border))] shrink-0">
                 {assignee.avatar_url ? (
                   <img src={assignee.avatar_url} alt={assignee.full_name ?? ''} className="size-full object-cover rounded-full" />
                 ) : (
-                  <AvatarFallback className="text-[9px] bg-accent/20 text-accent font-semibold">
+                  <AvatarFallback className="text-[9px] bg-accent/20 text-accent font-bold">
                     {(assignee.full_name ?? assignee.email ?? '?').slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 )}
               </Avatar>
             ) : (
-              <span className="size-5 rounded-full border border-dashed border-subtle shrink-0" />
+              <span className="size-6 rounded-full border border-dashed border-[rgb(var(--border))] shrink-0" />
             )}
           </div>
         </div>

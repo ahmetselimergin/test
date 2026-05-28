@@ -41,25 +41,25 @@ export function BoardColumn({
 
   return (
     <div ref={setNodeRef} className="flex-shrink-0 w-[272px] flex flex-col h-full">
-      <div className="flex items-center justify-between gap-2 mb-2 px-0.5">
+      <div className="flex items-center justify-between gap-2 mb-3 px-0.5">
         <div className="flex items-center gap-2 min-w-0">
           <span
-            className="size-1.5 rounded-full shrink-0"
+            className="size-2 rounded-full shrink-0"
             style={{ backgroundColor: column.color }}
           />
-          <h3 className="text-[11px] font-semibold uppercase tracking-widest text-foreground truncate">
+          <h3 className="text-[12px] font-semibold text-foreground truncate tracking-tight">
             {column.name}
           </h3>
           <span
             className={cn(
-              'text-[11px] font-mono px-1 py-0 rounded tabular-nums',
+              'text-[11px] font-semibold px-1.5 py-0 rounded-md tabular-nums',
               isOverLimit
                 ? 'bg-rose-500/15 text-rose-400'
-                : 'bg-subtle text-muted'
+                : 'bg-[rgb(var(--bg-subtle))] text-muted'
             )}
           >
             {issues.length}
-            {column.wip_limit != null && ` / ${column.wip_limit}`}
+            {column.wip_limit != null && `/${column.wip_limit}`}
           </span>
         </div>
         <div className="flex items-center gap-0.5">
@@ -67,21 +67,21 @@ export function BoardColumn({
             type="button"
             variant="ghost"
             size="icon"
-            className="size-6 text-muted"
+            className="size-6 text-muted hover:text-foreground"
             onClick={() => setCreateOpen(true)}
             aria-label="Add issue"
           >
-            <Plus size={13} />
+            <Plus size={14} />
           </Button>
           <DropdownMenu>
             <DropdownMenuTrigger className="inline-flex size-6 items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-foreground">
-              <MoreHorizontal size={13} />
+              <MoreHorizontal size={14} />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
               <DropdownMenuItem onClick={() => setCreateOpen(true)}>
-                Add issue
+                Issue ekle
               </DropdownMenuItem>
-              <DropdownMenuItem disabled>Edit column</DropdownMenuItem>
+              <DropdownMenuItem disabled>Kolonu düzenle</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -98,10 +98,10 @@ export function BoardColumn({
 
       <div
         className={cn(
-          'flex-1 rounded-lg border p-1.5 flex flex-col gap-1.5 min-h-[120px] overflow-y-auto transition-colors',
+          'flex-1 rounded-xl border p-2 flex flex-col gap-2 min-h-[120px] overflow-y-auto transition-all duration-200',
           isOver
             ? 'border-accent/50 bg-accent/5'
-            : 'border-subtle bg-card/40'
+            : 'border-subtle bg-[rgb(var(--bg-subtle)/0.4)]'
         )}
       >
         <SortableContext
