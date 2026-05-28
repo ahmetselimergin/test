@@ -54,7 +54,7 @@ function StatCard({ count, label, emoji, bgColor, borderColor, textColor, href, 
     >
       <Link
         href={href}
-        className="flex items-center gap-3.5 px-4 py-4 rounded-xl border transition-all hover:brightness-110 block"
+        className="flex items-center gap-3.5 px-4 py-4 rounded-xl border transition-all hover:brightness-110"
         style={{ background: bgColor, borderColor }}
       >
         <div
