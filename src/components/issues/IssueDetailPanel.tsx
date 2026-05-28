@@ -1,13 +1,13 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Trash2, Link2, Check, ChevronDown } from 'lucide-react'
+import { X, Trash2, Link2, Check, ChevronDown, Pencil } from 'lucide-react'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { TypeIcon } from './TypeIcon'
 import { IssueEditor } from './IssueEditor'
 import { MemberPicker } from './MemberPicker'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -64,7 +64,24 @@ function IssueDetailContent({
   members: MemberSummary[]
 }) {
   const { updateIssue, removeIssue } = useIssueStore()
-  const assignee = members.find((m) => m.id === issue.assignee_id)
+
+  // Inline title editing
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [titleDraft, setTitleDraft] = useState(issue.title)
+
+  // Label editing
+  const [labelInput, setLabelInput] = useState('')
+  const [showLabelInput, setShowLabelInput] = useState(false)
+
+  // Estimate editing
+  const [editingEstimate, setEditingEstimate] = useState(false)
+  const [estimateDraft, setEstimateDraft] = useState(String(issue.estimate ?? ''))
+
+  // Clear stale data when panel opens a new issue
+  useEffect(() => {
+    useIssueStore.getState().setComments([])
+    useIssueStore.getState().setActivityLogs([])
+  }, [])
 
   async function handleDelete() {
     const supabase = createClient()
@@ -105,6 +122,41 @@ function IssueDetailContent({
     }
   }
 
+  async function handleTitleSave() {
+    const trimmed = titleDraft.trim()
+    if (!trimmed || trimmed === issue.title) { setTitleDraft(issue.title); setEditingTitle(false); return }
+    updateIssue(issue.id, { title: trimmed })
+    setEditingTitle(false)
+    const supabase = createClient()
+    await supabase.from('issues').update({ title: trimmed }).eq('id', issue.id)
+  }
+
+  async function addLabel(label: string) {
+    const trimmed = label.trim()
+    if (!trimmed || issue.labels.includes(trimmed)) return
+    const updated = [...issue.labels, trimmed]
+    updateIssue(issue.id, { labels: updated })
+    const supabase = createClient()
+    await supabase.from('issues').update({ labels: updated }).eq('id', issue.id)
+  }
+
+  async function removeLabel(label: string) {
+    const updated = issue.labels.filter((l) => l !== label)
+    updateIssue(issue.id, { labels: updated })
+    const supabase = createClient()
+    await supabase.from('issues').update({ labels: updated }).eq('id', issue.id)
+  }
+
+  async function handleEstimateSave() {
+    setEditingEstimate(false)
+    const parsed = estimateDraft.trim() === '' ? null : parseInt(estimateDraft, 10)
+    const value = isNaN(parsed as number) ? null : parsed
+    if (value === issue.estimate) return
+    updateIssue(issue.id, { estimate: value })
+    const supabase = createClient()
+    await supabase.from('issues').update({ estimate: value }).eq('id', issue.id)
+  }
+
   const statuses = Object.keys(statusConfig) as IssueStatus[]
   const priorities = Object.keys(priorityConfig) as Priority[]
   const types = Object.keys(typeConfig) as IssueType[]
@@ -142,9 +194,33 @@ function IssueDetailContent({
         {/* ── Main content ── */}
         <div className="flex-1 flex flex-col overflow-y-auto min-w-0 px-5 py-4 gap-4">
           {/* Title */}
-          <h2 className="text-[17px] font-semibold leading-snug tracking-tight text-foreground">
-            {issue.title}
-          </h2>
+          {editingTitle ? (
+            <textarea
+              autoFocus
+              value={titleDraft}
+              onChange={(e) => setTitleDraft(e.target.value)}
+              onBlur={handleTitleSave}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); e.currentTarget.blur() }
+                if (e.key === 'Escape') { setTitleDraft(issue.title); setEditingTitle(false) }
+              }}
+              rows={2}
+              className="w-full text-[17px] font-semibold leading-snug tracking-tight bg-subtle border border-accent/30 rounded-lg px-2 py-1 outline-none resize-none text-foreground"
+            />
+          ) : (
+            <div className="flex items-start gap-2 group/title">
+              <h2 className="text-[17px] font-semibold leading-snug tracking-tight text-foreground flex-1">
+                {issue.title}
+              </h2>
+              <button
+                type="button"
+                onClick={() => { setTitleDraft(issue.title); setEditingTitle(true) }}
+                className="opacity-0 group-hover/title:opacity-100 transition-opacity text-muted hover:text-foreground shrink-0 mt-0.5"
+              >
+                <Pencil size={13} />
+              </button>
+            </div>
+          )}
 
           {/* Status + Priority chips */}
           <div className="flex items-center gap-2 flex-wrap">
@@ -201,49 +277,52 @@ function IssueDetailContent({
           </div>
 
           {/* Labels */}
-          {issue.labels.length > 0 && (
-            <div>
-              <p className="text-[11px] font-medium text-muted uppercase tracking-wider mb-2">Etiketler</p>
-              <div className="flex flex-wrap gap-1.5">
-                {issue.labels.map((label) => (
-                  <span key={label} className="text-[11px] bg-subtle border border-subtle rounded px-2 py-0.5 text-foreground">
-                    {label}
-                  </span>
-                ))}
-              </div>
+          <div>
+            <p className="text-[11px] font-medium text-muted uppercase tracking-wider mb-2">Etiketler</p>
+            <div className="flex flex-wrap gap-1.5 items-center">
+              {issue.labels.map((label) => (
+                <span key={label} className="flex items-center gap-1 text-[11px] bg-subtle border border-subtle rounded px-2 py-0.5">
+                  {label}
+                  <button
+                    type="button"
+                    onClick={() => removeLabel(label)}
+                    className="text-muted hover:text-foreground"
+                  >
+                    <X size={9} />
+                  </button>
+                </span>
+              ))}
+              {showLabelInput ? (
+                <input
+                  autoFocus
+                  value={labelInput}
+                  onChange={(e) => setLabelInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') { addLabel(labelInput); setLabelInput(''); setShowLabelInput(false) }
+                    if (e.key === 'Escape') { setLabelInput(''); setShowLabelInput(false) }
+                  }}
+                  onBlur={() => { setLabelInput(''); setShowLabelInput(false) }}
+                  placeholder="Etiket ekle..."
+                  className="text-[11px] bg-subtle border border-accent/30 rounded px-2 py-0.5 outline-none w-28"
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setShowLabelInput(true)}
+                  className="text-[11px] text-muted hover:text-foreground border border-dashed border-subtle rounded px-2 py-0.5"
+                >
+                  + Ekle
+                </button>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* ── Right sidebar ── */}
         <div className="w-[240px] shrink-0 border-l border-subtle px-4 py-2 overflow-y-auto flex flex-col gap-0">
 
           <PropRow label="Atanan">
-            {assignee ? (
-              <div className="flex items-center gap-1.5">
-                <Avatar className="size-5 border border-subtle shrink-0">
-                  {assignee.avatar_url ? (
-                    <img src={assignee.avatar_url} alt={assignee.full_name ?? ''} className="size-full object-cover rounded-full" />
-                  ) : (
-                    <AvatarFallback className="text-[9px] bg-accent/20 text-accent font-semibold">
-                      {(assignee.full_name ?? assignee.email ?? '?').slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-                <span className="text-[12px] text-foreground truncate">{assignee.full_name ?? assignee.email}</span>
-              </div>
-            ) : (
-              <MemberPicker members={members} value={issue.assignee_id} onChange={handleAssigneeChange} />
-            )}
-            {assignee && (
-              <button
-                type="button"
-                onClick={() => handleAssigneeChange(null)}
-                className="text-[10px] text-muted hover:text-foreground mt-0.5 block"
-              >
-                Kaldır
-              </button>
-            )}
+            <MemberPicker members={members} value={issue.assignee_id} onChange={handleAssigneeChange} />
           </PropRow>
 
           <PropRow label="Tür">
@@ -265,11 +344,31 @@ function IssueDetailContent({
             </DropdownMenu>
           </PropRow>
 
-          {issue.estimate !== null && (
-            <PropRow label="Tahmin">
-              <span className="text-[12px] text-foreground font-medium tabular-nums">{issue.estimate} pts</span>
-            </PropRow>
-          )}
+          <PropRow label="Tahmin">
+            {editingEstimate ? (
+              <input
+                autoFocus
+                type="number"
+                min={0}
+                value={estimateDraft}
+                onChange={(e) => setEstimateDraft(e.target.value)}
+                onBlur={handleEstimateSave}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') e.currentTarget.blur()
+                  if (e.key === 'Escape') { setEstimateDraft(String(issue.estimate ?? '')); setEditingEstimate(false) }
+                }}
+                className="w-16 text-[12px] bg-subtle border border-accent/30 rounded px-1.5 py-0.5 outline-none tabular-nums"
+              />
+            ) : (
+              <button
+                type="button"
+                onClick={() => { setEstimateDraft(String(issue.estimate ?? '')); setEditingEstimate(true) }}
+                className="text-[12px] text-foreground font-medium tabular-nums hover:text-accent transition-colors"
+              >
+                {issue.estimate !== null ? `${issue.estimate} pts` : '—'}
+              </button>
+            )}
+          </PropRow>
 
           <PropRow label="Oluşturulma">
             <span className="text-[11px] text-muted">
