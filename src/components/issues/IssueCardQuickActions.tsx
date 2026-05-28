@@ -25,14 +25,14 @@ export function IssueCardQuickActions({ issue, members }: IssueCardQuickActionsP
   const supabase = createClient()
   const assignee = members.find((m) => m.id === issue.assignee_id)
 
-  function handlePrioritySelect(selected: Priority) {
+  async function handlePrioritySelect(selected: Priority) {
     useIssueStore.getState().updateIssue(issue.id, { priority: selected })
-    supabase.from('issues').update({ priority: selected }).eq('id', issue.id)
+    await supabase.from('issues').update({ priority: selected }).eq('id', issue.id)
   }
 
-  function handleAssigneeSelect(selectedId: string | null) {
+  async function handleAssigneeSelect(selectedId: string | null) {
     useIssueStore.getState().updateIssue(issue.id, { assignee_id: selectedId })
-    supabase.from('issues').update({ assignee_id: selectedId }).eq('id', issue.id)
+    await supabase.from('issues').update({ assignee_id: selectedId }).eq('id', issue.id)
   }
 
   return (
