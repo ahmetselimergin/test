@@ -152,10 +152,14 @@ export async function reorderBoardColumns(
   columns: Array<{ id: string; order: number }>
 ) {
   const supabase = await createClient()
-  await Promise.all(
-    columns.map(({ id, order }) =>
-      supabase.from('board_columns').update({ order }).eq('id', id)
+  try {
+    await Promise.all(
+      columns.map(({ id, order }) =>
+        supabase.from('board_columns').update({ order }).eq('id', id)
+      )
     )
-  )
-  return { success: true }
+    return { success: true }
+  } catch (e) {
+    return { error: e instanceof Error ? e.message : 'Reorder failed' }
+  }
 }
