@@ -1,11 +1,13 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { createProject } from '@/app/actions/auth'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
+import Link from 'next/link'
+import { DashboardHero } from '@/components/dashboard/DashboardHero'
+import { ProjectCard } from '@/components/dashboard/ProjectCard'
+import { ActivityFeed } from '@/components/dashboard/ActivityFeed'
+import type { ActivityItem } from '@/components/dashboard/ActivityFeed'
+import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog'
 
-export default async function WorkspacePage({
+export default async function WorkspaceDashboard({
   params,
 }: {
   params: Promise<{ workspace: string }>
@@ -13,89 +15,150 @@ export default async function WorkspacePage({
   const { workspace: slug } = await params
   const supabase = await createClient()
 
-  const { data: workspace } = await supabase
-    .from('workspaces')
-    .select('*')
-    .eq('slug', slug)
-    .single()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const [{ data: workspace }, { data: profile }] = await Promise.all([
+    supabase.from('workspaces').select('*').eq('slug', slug).single(),
+    supabase.from('profiles').select('full_name, email').eq('id', user.id).single(),
+  ])
 
   if (!workspace) redirect('/')
 
   const { data: projects } = await supabase
     .from('projects')
-    .select('id')
+    .select('*')
     .eq('workspace_id', workspace.id)
-    .limit(1)
+    .order('created_at', { ascending: true })
 
-  if (projects?.length) {
-    redirect(`/${slug}/${projects[0].id}/board`)
-  }
+  const projectList = projects ?? []
+  const firstProjectId = projectList[0]?.id ?? null
+
+  // Per-project issue counts (two queries each, in parallel)
+  const issueCounts = await Promise.all(
+    projectList.map(async (project) => {
+      const [{ count: total }, { count: done }] = await Promise.all([
+        supabase
+          .from('issues')
+          .select('*', { count: 'exact', head: true })
+          .eq('project_id', project.id),
+        supabase
+          .from('issues')
+          .select('*', { count: 'exact', head: true })
+          .eq('project_id', project.id)
+          .eq('status', 'done'),
+      ])
+      return { projectId: project.id, total: total ?? 0, done: done ?? 0 }
+    })
+  )
+
+  // Quick stats
+  const startOfToday = new Date()
+  startOfToday.setHours(0, 0, 0, 0)
+
+  const [
+    { count: assignedCount },
+    { count: doneTodayCount },
+    { count: criticalBugCount },
+  ] = await Promise.all([
+    supabase
+      .from('issues')
+      .select('*', { count: 'exact', head: true })
+      .eq('assignee_id', user.id)
+      .neq('status', 'done'),
+    supabase
+      .from('issues')
+      .select('*', { count: 'exact', head: true })
+      .eq('status', 'done')
+      .gte('updated_at', startOfToday.toISOString()),
+    supabase
+      .from('issues')
+      .select('*', { count: 'exact', head: true })
+      .eq('priority', 'critical')
+      .eq('type', 'bug')
+      .neq('status', 'done'),
+  ])
+
+  // Activity feed — last 24 hours
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+  const { data: rawActivity } = await supabase
+    .from('activity_logs')
+    .select('*, issue:issues(title, project_id), actor:profiles(full_name, avatar_url)')
+    .gte('created_at', since)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  const activityItems: ActivityItem[] = ((rawActivity ?? []) as any[]).map((row) => ({
+    id: row.id,
+    action: row.action,
+    old_value: row.old_value,
+    new_value: row.new_value,
+    created_at: row.created_at,
+    issue: Array.isArray(row.issue) ? row.issue[0] ?? null : row.issue,
+    actor: Array.isArray(row.actor) ? row.actor[0] ?? null : row.actor,
+  }))
+
+  const userName = profile?.full_name ?? profile?.email ?? 'Kullanıcı'
+
+  const heroHref = (path: string) =>
+    firstProjectId ? `/${slug}/${firstProjectId}${path}` : '#'
 
   return (
-    <div className="flex items-center justify-center h-full">
-      <div className="w-full max-w-md p-8 bg-card border border-subtle rounded-2xl glass">
-        <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-xl bg-indigo-500/20 border border-indigo-500/30 flex items-center justify-center mx-auto mb-4">
-            <span className="text-xl font-bold text-indigo-400">
-              {workspace.name[0]}
-            </span>
+    <div className="h-full flex flex-col overflow-hidden">
+      <DashboardHero
+        userName={userName}
+        assignedCount={assignedCount ?? 0}
+        doneTodayCount={doneTodayCount ?? 0}
+        criticalBugCount={criticalBugCount ?? 0}
+        assignedHref={heroHref('/backlog?assignee=me')}
+        doneTodayHref={heroHref('/backlog?status=done&since=today')}
+        criticalBugHref={heroHref('/backlog?priority=critical&type=bug')}
+      />
+
+      <div className="flex flex-1 min-h-0">
+        {/* Projects list */}
+        <div className="flex-[3] overflow-y-auto p-6 border-r border-subtle">
+          <div className="flex items-center justify-between mb-4">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-accent">
+              Projeler
+            </p>
+            <Link href={`/${slug}/projects`} className="text-[11px] text-accent hover:underline">
+              Tümünü gör →
+            </Link>
           </div>
-          <h2 className="text-xl font-semibold mb-1">İlk Projeyi Oluştur</h2>
-          <p className="text-sm text-muted">
-            {workspace.name} workspace&apos;inde ilk projeyi oluştur
-          </p>
+
+          {projectList.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-subtle rounded-xl">
+              <p className="text-muted mb-4 text-sm">
+                Henüz proje yok. İlk projeyi oluştur.
+              </p>
+              <CreateProjectDialog workspaceId={workspace.id} />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2.5">
+              {projectList.map((project) => {
+                const counts = issueCounts.find((c) => c.projectId === project.id)
+                return (
+                  <ProjectCard
+                    key={project.id}
+                    project={project}
+                    totalIssues={counts?.total ?? 0}
+                    doneIssues={counts?.done ?? 0}
+                    workspaceSlug={slug}
+                  />
+                )
+              })}
+            </div>
+          )}
         </div>
 
-        <form action={createProject as unknown as (formData: FormData) => void} className="space-y-4">
-          <input type="hidden" name="workspace_id" value={workspace.id} />
-
-          <div className="space-y-1.5">
-            <Label htmlFor="name">Proje Adı</Label>
-            <Input
-              id="name"
-              name="name"
-              required
-              placeholder="Ör: FlowTrack Web App"
-              className="bg-white/5 border-white/10"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="key">Proje Kodu</Label>
-            <Input
-              id="key"
-              name="key"
-              required
-              placeholder="Ör: FT"
-              maxLength={5}
-              className="bg-white/5 border-white/10 uppercase"
-            />
-            <p className="text-xs text-muted">
-              Issue ID&apos;lerde kullanılır (FT-1, FT-2...)
-            </p>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label htmlFor="methodology">Metodoloji</Label>
-            <select
-              id="methodology"
-              name="methodology"
-              defaultValue="both"
-              className="w-full h-10 rounded-lg border border-white/10 bg-white/5 px-3 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-            >
-              <option value="both">Kanban + Scrum</option>
-              <option value="kanban">Sadece Kanban</option>
-              <option value="scrum">Sadece Scrum</option>
-            </select>
-          </div>
-
-          <Button
-            type="submit"
-            className="w-full bg-indigo-600 hover:bg-indigo-500"
-          >
-            Proje Oluştur
-          </Button>
-        </form>
+        {/* Activity feed */}
+        <div className="flex-[2] overflow-y-auto p-6">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-accent mb-4">
+            Son 24 Saat
+          </p>
+          <ActivityFeed items={activityItems} />
+        </div>
       </div>
     </div>
   )
