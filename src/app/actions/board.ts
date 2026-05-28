@@ -38,6 +38,22 @@ export async function createBoardColumn(formData: FormData) {
   return { success: true, column }
 }
 
+export async function deleteBoardColumn(columnId: string, workspaceSlug: string, projectId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Giriş gerekli' }
+
+  const { error } = await supabase
+    .from('board_columns')
+    .delete()
+    .eq('id', columnId)
+
+  if (error) return { error: error.message }
+
+  revalidatePath(`/${workspaceSlug}/${projectId}/board`)
+  return { success: true }
+}
+
 export async function createIssue(formData: FormData) {
   const supabase = await createClient()
   const {
@@ -109,6 +125,14 @@ export async function createIssue(formData: FormData) {
     .single()
 
   if (error) return { error: error.message }
+
+  // Log issue_created — trigger only fires on UPDATE, so we insert manually here
+  await supabase.from('activity_logs').insert({
+    issue_id: issue.id,
+    actor_id: user.id,
+    action: 'issue_created',
+    new_value: title,
+  })
 
   revalidatePath(`/${workspaceSlug}/${projectId}/board`)
   return { success: true, issue }
