@@ -8,34 +8,56 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 
+const PRESET_COLORS = [
+  '#6366f1', '#8b5cf6', '#ec4899', '#ef4444',
+  '#f97316', '#eab308', '#22c55e', '#14b8a6',
+  '#3b82f6', '#06b6d4', '#64748b', '#1e293b',
+]
+
 interface Props {
   workspaceId: string
   name: string
+  color: string
 }
 
-export function WorkspaceSettingsForm({ workspaceId, name }: Props) {
+export function WorkspaceSettingsForm({ workspaceId, name, color }: Props) {
   const [state, action, pending] = useActionState(updateWorkspaceSettings, null)
   const [nameValue, setNameValue] = useState(name)
+  const [selectedColor, setSelectedColor] = useState(color)
   const toastId = useRef<string | number | null>(null)
 
   useEffect(() => {
     if (pending) {
       toastId.current = toast.loading('Kaydediliyor...')
     } else {
-      if (toastId.current) {
-        toast.dismiss(toastId.current)
-        toastId.current = null
-      }
+      if (toastId.current) { toast.dismiss(toastId.current); toastId.current = null }
       if (state?.error) toast.error(state.error)
+      if (state?.success) toast.success('Kaydedildi')
     }
   }, [pending, state])
 
   return (
-    <form action={action} className="space-y-4">
+    <form action={action} className="space-y-5">
       <input type="hidden" name="workspace_id" value={workspaceId} />
+      <input type="hidden" name="color" value={selectedColor} />
 
-      <div className="space-y-2">
-        <Label htmlFor="name">Workspace adı</Label>
+      {/* Preview */}
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-subtle/60 border border-subtle">
+        <div
+          className="size-10 rounded-xl flex items-center justify-center text-white font-bold text-[15px] shrink-0 transition-colors"
+          style={{ backgroundColor: selectedColor }}
+        >
+          {nameValue.slice(0, 2).toUpperCase() || 'WS'}
+        </div>
+        <div>
+          <p className="text-[13px] font-semibold text-foreground">{nameValue || 'Workspace adı'}</p>
+          <p className="text-[11px] text-muted">Workspace önizlemesi</p>
+        </div>
+      </div>
+
+      {/* Name */}
+      <div className="space-y-1.5">
+        <Label htmlFor="name" className="text-[12px]">Workspace adı</Label>
         <Input
           id="name"
           name="name"
@@ -43,20 +65,33 @@ export function WorkspaceSettingsForm({ workspaceId, name }: Props) {
           value={nameValue}
           onChange={(e) => setNameValue(e.target.value)}
           disabled={pending}
-          className="h-10"
+          className="h-9"
         />
       </div>
 
+      {/* Color picker */}
+      <div className="space-y-2">
+        <Label className="text-[12px]">Renk</Label>
+        <div className="flex flex-wrap gap-2">
+          {PRESET_COLORS.map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setSelectedColor(c)}
+              className="size-7 rounded-lg transition-all hover:scale-110"
+              style={{ backgroundColor: c, outline: selectedColor === c ? `2px solid ${c}` : 'none', outlineOffset: '2px' }}
+            />
+          ))}
+        </div>
+      </div>
 
-      <Button type="submit" disabled={pending} className="bg-accent text-white min-w-24">
+      <Button type="submit" disabled={pending} className="bg-accent text-white min-w-24 h-9">
         {pending ? (
           <span className="flex items-center gap-2">
-            <Loader2 size={14} className="animate-spin" />
+            <Loader2 size={13} className="animate-spin" />
             Kaydediliyor
           </span>
-        ) : (
-          'Kaydet'
-        )}
+        ) : 'Kaydet'}
       </Button>
     </form>
   )

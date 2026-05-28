@@ -43,12 +43,13 @@ export async function updateWorkspaceSettings(
   const supabase = await createClient()
   const workspaceId = formData.get('workspace_id') as string
   const name = (formData.get('name') as string)?.trim()
+  const color = (formData.get('color') as string)?.trim() || '#6366f1'
 
   if (!name) return { error: 'Workspace adı gerekli' }
 
   const { error } = await supabase
     .from('workspaces')
-    .update({ name })
+    .update({ name, color })
     .eq('id', workspaceId)
 
   if (error) return { error: error.message }
@@ -168,6 +169,26 @@ export async function createProjectAction(formData: FormData) {
 
   revalidatePath(`/${workspace?.slug}/projects`)
   redirect(`/${workspace?.slug}/${project.id}/board`)
+}
+
+export async function deleteWorkspace(
+  _prevState: { error?: string; success?: boolean } | null,
+  formData: FormData,
+) {
+  const supabase = await createClient()
+  const workspaceId = formData.get('workspace_id') as string
+  const confirmation = (formData.get('confirmation') as string)?.trim()
+
+  if (confirmation !== 'SİL') return { error: 'Onay metni hatalı' }
+
+  const { error } = await supabase
+    .from('workspaces')
+    .delete()
+    .eq('id', workspaceId)
+
+  if (error) return { error: error.message }
+
+  redirect('/')
 }
 
 export async function getWorkspaceMembers(workspaceSlug: string): Promise<MemberSummary[]> {

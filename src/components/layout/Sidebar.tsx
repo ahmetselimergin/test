@@ -79,8 +79,11 @@ export function Sidebar() {
           href={slug ? `/${slug}` : '/'}
           className="flex items-center gap-2 min-w-0"
         >
-          <div className="size-7 rounded-lg bg-accent flex items-center justify-center shadow-sm shrink-0">
-            <FolderKanban size={14} className="text-white" />
+          <div
+            className="size-7 rounded-lg flex items-center justify-center shadow-sm shrink-0 text-white text-[11px] font-bold"
+            style={{ backgroundColor: workspace?.color ?? '#6366f1' }}
+          >
+            {workspace?.name ? workspace.name.slice(0, 2).toUpperCase() : <FolderKanban size={14} className="text-white" />}
           </div>
           <div className="min-w-0">
             <p className="text-[13px] font-semibold truncate leading-tight">
