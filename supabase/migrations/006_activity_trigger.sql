@@ -5,6 +5,10 @@ create policy "activity_logs_insert"
   on activity_logs for insert
   with check (actor_id = auth.uid());
 
+-- Idempotent cleanup before (re-)creation
+drop trigger if exists issues_activity_logger on issues;
+drop function if exists log_issue_activity();
+
 -- Function: fires after any issue UPDATE, logs status/priority changes
 create or replace function log_issue_activity()
 returns trigger as $$
