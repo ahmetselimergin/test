@@ -7,6 +7,7 @@ import { useIssueStore } from '@/lib/stores/issue.store'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { TypeIcon } from './TypeIcon'
 import { IssueEditor } from './IssueEditor'
+import { IssueDetailTabs } from './IssueDetailTabs'
 import { MemberPicker } from './MemberPicker'
 import { Button } from '@/components/ui/button'
 import {
@@ -92,15 +93,37 @@ function IssueDetailContent({
   }
 
   async function handleStatusChange(status: IssueStatus) {
+    const oldStatus = issue.status
     updateIssue(issue.id, { status })
     const supabase = createClient()
     await supabase.from('issues').update({ status }).eq('id', issue.id)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user && oldStatus !== status) {
+      await supabase.from('activity_logs').insert({
+        issue_id: issue.id,
+        actor_id: user.id,
+        action: 'status_changed',
+        old_value: oldStatus,
+        new_value: status,
+      })
+    }
   }
 
   async function handlePriorityChange(priority: Priority) {
+    const oldPriority = issue.priority
     updateIssue(issue.id, { priority })
     const supabase = createClient()
     await supabase.from('issues').update({ priority }).eq('id', issue.id)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user && oldPriority !== priority) {
+      await supabase.from('activity_logs').insert({
+        issue_id: issue.id,
+        actor_id: user.id,
+        action: 'priority_changed',
+        old_value: oldPriority,
+        new_value: priority,
+      })
+    }
   }
 
   async function handleTypeChange(type: IssueType) {
@@ -110,9 +133,20 @@ function IssueDetailContent({
   }
 
   async function handleAssigneeChange(id: string | null) {
+    const oldAssigneeId = issue.assignee_id
     updateIssue(issue.id, { assignee_id: id })
     const supabase = createClient()
     await supabase.from('issues').update({ assignee_id: id }).eq('id', issue.id)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user && oldAssigneeId !== id) {
+      await supabase.from('activity_logs').insert({
+        issue_id: issue.id,
+        actor_id: user.id,
+        action: 'assignee_changed',
+        old_value: oldAssigneeId ?? null,
+        new_value: id ?? null,
+      })
+    }
   }
 
   function copyKey() {
@@ -125,10 +159,21 @@ function IssueDetailContent({
   async function handleTitleSave() {
     const trimmed = titleDraft.trim()
     if (!trimmed || trimmed === issue.title) { setTitleDraft(issue.title); setEditingTitle(false); return }
+    const oldTitle = issue.title
     updateIssue(issue.id, { title: trimmed })
     setEditingTitle(false)
     const supabase = createClient()
     await supabase.from('issues').update({ title: trimmed }).eq('id', issue.id)
+    const { data: { user } } = await supabase.auth.getUser()
+    if (user) {
+      await supabase.from('activity_logs').insert({
+        issue_id: issue.id,
+        actor_id: user.id,
+        action: 'title_changed',
+        old_value: oldTitle,
+        new_value: trimmed,
+      })
+    }
   }
 
   async function addLabel(label: string) {
@@ -316,6 +361,8 @@ function IssueDetailContent({
               )}
             </div>
           </div>
+
+          <IssueDetailTabs issueId={issue.id} />
         </div>
 
         {/* ── Right sidebar ── */}
