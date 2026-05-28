@@ -19,6 +19,9 @@
     --header-h: 44px;
     --radius-lg: 10px;
     --shadow-panel: 0 8px 30px rgba(9, 9, 11, 0.08);
+    /* shadcn/base-ui compat */
+    --popover: 255 255 255;
+    --popover-foreground: 9 9 11;
   }
 
   .dark {
@@ -35,6 +38,9 @@
     --accent-hover: 129 140 248;
     --accent-muted: 30 27 75;
     --shadow-panel: 0 16px 48px rgba(0, 0, 0, 0.5);
+    /* shadcn/base-ui compat */
+    --popover: 28 28 36;
+    --popover-foreground: 248 248 250;
   }
 
   * {
