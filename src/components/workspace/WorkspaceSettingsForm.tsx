@@ -11,10 +11,9 @@ import { Label } from '@/components/ui/label'
 interface Props {
   workspaceId: string
   name: string
-  slug: string
 }
 
-export function WorkspaceSettingsForm({ workspaceId, name, slug }: Props) {
+export function WorkspaceSettingsForm({ workspaceId, name }: Props) {
   const [state, action, pending] = useActionState(updateWorkspaceSettings, null)
   const toastId = useRef<string | number | null>(null)
 
@@ -46,23 +45,6 @@ export function WorkspaceSettingsForm({ workspaceId, name, slug }: Props) {
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="slug">URL slug</Label>
-        <div className="flex items-center gap-2">
-          <span className="text-[13px] text-muted shrink-0">localhost:3000/</span>
-          <Input
-            id="slug"
-            name="slug"
-            required
-            defaultValue={slug}
-            disabled={pending}
-            className="h-10 font-mono text-sm"
-            pattern="[a-z0-9-]+"
-            title="Sadece küçük harf, rakam ve tire kullanılabilir"
-          />
-        </div>
-        <p className="text-[11px] text-muted">Değiştirirsen URL'in değişir.</p>
-      </div>
 
       <Button type="submit" disabled={pending} className="bg-accent text-white min-w-24">
         {pending ? (

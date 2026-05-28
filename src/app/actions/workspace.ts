@@ -43,31 +43,21 @@ export async function updateWorkspaceSettings(
   const supabase = await createClient()
   const workspaceId = formData.get('workspace_id') as string
   const name = (formData.get('name') as string)?.trim()
-  const newSlug = (formData.get('slug') as string)?.trim().toLowerCase().replace(/[^a-z0-9-]/g, '-')
 
   if (!name) return { error: 'Workspace adı gerekli' }
-  if (!newSlug) return { error: 'Slug gerekli' }
 
-  // Slug başkası tarafından kullanılıyor mu kontrol et
-  const { data: existing } = await supabase
+  const { error, data: workspace } = await supabase
     .from('workspaces')
-    .select('id')
-    .eq('slug', newSlug)
-    .neq('id', workspaceId)
-    .maybeSingle()
-
-  if (existing) return { error: 'Bu slug zaten kullanımda' }
-
-  const { error } = await supabase
-    .from('workspaces')
-    .update({ name, slug: newSlug })
+    .update({ name })
     .eq('id', workspaceId)
+    .select('slug')
+    .single()
 
   if (error) return { error: error.message }
 
-  revalidatePath(`/${newSlug}`)
-  revalidatePath(`/${newSlug}/settings`)
-  redirect(`/${newSlug}/settings`)
+  revalidatePath(`/${workspace.slug}`)
+  revalidatePath(`/${workspace.slug}/settings`)
+  return { success: true }
 }
 
 export async function inviteTeamMember(formData: FormData) {

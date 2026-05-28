@@ -37,7 +37,6 @@ export default async function WorkspaceSettingsPage({
           <WorkspaceSettingsForm
             workspaceId={workspace.id}
             name={workspace.name}
-            slug={workspace.slug}
           />
         </CardContent>
       </Card>
