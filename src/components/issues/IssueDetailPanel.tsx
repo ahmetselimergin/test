@@ -150,17 +150,14 @@ function IssueDetailContent({
           <div className="flex items-center gap-2 flex-wrap">
             {/* Status dropdown */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className={cn(
-                    'flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-semibold uppercase tracking-wider outline-none transition-colors',
-                    STATUS_COLORS[issue.status]
-                  )}
-                >
-                  {statusConfig[issue.status].label}
-                  <ChevronDown size={10} />
-                </button>
+              <DropdownMenuTrigger
+                className={cn(
+                  'flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-semibold uppercase tracking-wider outline-none transition-colors cursor-pointer',
+                  STATUS_COLORS[issue.status]
+                )}
+              >
+                {statusConfig[issue.status].label}
+                <ChevronDown size={10} />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-40">
                 {statuses.map((s) => (
@@ -176,17 +173,14 @@ function IssueDetailContent({
 
             {/* Priority badge */}
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button
-                  type="button"
-                  className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-subtle bg-transparent text-[11px] font-medium outline-none hover:bg-subtle transition-colors"
-                >
-                  <span className={cn('size-[6px] rounded-full shrink-0', PRIORITY_DOT[issue.priority])} />
-                  <span className={cn(PRIORITY_COLORS[issue.priority])}>
-                    {priorityConfig[issue.priority].label}
-                  </span>
-                  <ChevronDown size={10} className="text-muted" />
-                </button>
+              <DropdownMenuTrigger
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-subtle bg-transparent text-[11px] font-medium outline-none hover:bg-subtle transition-colors cursor-pointer"
+              >
+                <span className={cn('size-[6px] rounded-full shrink-0', PRIORITY_DOT[issue.priority])} />
+                <span className={cn(PRIORITY_COLORS[issue.priority])}>
+                  {priorityConfig[issue.priority].label}
+                </span>
+                <ChevronDown size={10} className="text-muted" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-36">
                 {priorities.map((p) => (
@@ -254,12 +248,10 @@ function IssueDetailContent({
 
           <PropRow label="Tür">
             <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button type="button" className="flex items-center gap-1.5 outline-none hover:opacity-75 transition-opacity">
-                  <TypeIcon type={issue.type} size={12} />
-                  <span className="text-[12px] text-foreground">{typeConfig[issue.type].label}</span>
-                  <ChevronDown size={9} className="text-muted" />
-                </button>
+              <DropdownMenuTrigger className="flex items-center gap-1.5 outline-none hover:opacity-75 transition-opacity cursor-pointer">
+                <TypeIcon type={issue.type} size={12} />
+                <span className="text-[12px] text-foreground">{typeConfig[issue.type].label}</span>
+                <ChevronDown size={9} className="text-muted" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-36">
                 {types.map((t) => (
