@@ -20,6 +20,9 @@ import { BoardColumn as BoardColumnComponent } from './BoardColumn'
 import { AddColumnButton } from './AddColumnButton'
 import { IssueCard } from '@/components/issues/IssueCard'
 import type { BoardColumn, Issue, Project, MemberSummary } from '@/lib/supabase/types'
+import type { BoardFilters } from '@/components/board/FilterBar'
+import { matchesFilters } from '@/components/board/FilterBar'
+import { reorderBoardColumns } from '@/app/actions/board'
 
 interface KanbanBoardProps {
   project: Project
@@ -27,6 +30,7 @@ interface KanbanBoardProps {
   columns?: BoardColumn[]
   issues?: Issue[]
   members?: MemberSummary[]
+  filters?: BoardFilters
 }
 
 export function KanbanBoard({
@@ -35,12 +39,14 @@ export function KanbanBoard({
   columns: columnsProp,
   issues: issuesProp,
   members = [],
+  filters,
 }: KanbanBoardProps) {
   // Always render from store — props are only used for initial hydration in BoardView.
   // Using issuesProp/columnsProp here would ignore optimistic store updates from drag.
   const columns = useProjectStore((s) => s.columns)
   const issues = useIssueStore((s) => s.issues)
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null)
+  const [activeColumn, setActiveColumn] = useState<BoardColumn | null>(null)
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -48,6 +54,11 @@ export function KanbanBoard({
 
   const handleDragStart = useCallback(
     ({ active }: DragStartEvent) => {
+      if (active.data.current?.type === 'column') {
+        const col = useProjectStore.getState().columns.find(c => c.id === active.id)
+        if (col) setActiveColumn(col)
+        return
+      }
       const issue = issues.find((i) => i.id === active.id)
       if (issue) setActiveIssue(issue)
     },
@@ -57,6 +68,7 @@ export function KanbanBoard({
   // Read fresh state from store to avoid stale-closure bugs during rapid drag events.
   const handleDragOver = useCallback(
     ({ active, over }: DragOverEvent) => {
+      if (active.data.current?.type === 'column') return // column reorder happens in dragEnd
       if (!over || active.id === over.id) return
 
       const { issues: freshIssues, setIssues } = useIssueStore.getState()
@@ -108,7 +120,20 @@ export function KanbanBoard({
     [columns]
   )
 
-  const handleDragEnd = useCallback(async ({ active }: DragEndEvent) => {
+  const handleDragEnd = useCallback(async ({ active, over }: DragEndEvent) => {
+    if (active.data.current?.type === 'column') {
+      setActiveColumn(null)
+      if (!over || active.id === over.id) return
+      const { columns: freshCols, setColumns } = useProjectStore.getState()
+      const oldIdx = freshCols.findIndex(c => c.id === active.id)
+      const newIdx = freshCols.findIndex(c => c.id === over.id)
+      if (oldIdx !== -1 && newIdx !== -1 && oldIdx !== newIdx) {
+        const reordered = arrayMove(freshCols, oldIdx, newIdx).map((c, i) => ({ ...c, order: i }))
+        setColumns(reordered)
+        await reorderBoardColumns(reordered.map(c => ({ id: c.id, order: c.order })))
+      }
+      return
+    }
     setActiveIssue(null)
     const { issues: freshIssues } = useIssueStore.getState()
     const moved = freshIssues.find((i) => i.id === active.id)
@@ -135,16 +160,21 @@ export function KanbanBoard({
           strategy={horizontalListSortingStrategy}
         >
           <AnimatePresence>
-            {columns.map((column) => (
-              <BoardColumnComponent
-                key={column.id}
-                column={column}
-                issues={issues.filter((i) => i.board_column_id === column.id)}
-                project={project}
-                workspaceSlug={workspaceSlug}
-                members={members}
-              />
-            ))}
+            {columns.map((column) => {
+              const columnIssues = issues
+                .filter(i => i.board_column_id === column.id)
+                .filter(i => !filters || matchesFilters(i, filters))
+              return (
+                <BoardColumnComponent
+                  key={column.id}
+                  column={column}
+                  issues={columnIssues}
+                  project={project}
+                  workspaceSlug={workspaceSlug}
+                  members={members}
+                />
+              )
+            })}
           </AnimatePresence>
         </SortableContext>
         <AddColumnButton project={project} workspaceSlug={workspaceSlug} />
@@ -153,6 +183,14 @@ export function KanbanBoard({
       <DragOverlay dropAnimation={null}>
         {activeIssue && (
           <IssueCard issue={activeIssue} project={project} overlay />
+        )}
+        {activeColumn && (
+          <div className="flex-shrink-0 w-[272px] rounded-xl border border-accent/50 bg-card/80 opacity-95 rotate-[2deg] shadow-2xl px-4 py-3 cursor-grabbing">
+            <div className="flex items-center gap-2">
+              <span className="size-2 rounded-full shrink-0" style={{ backgroundColor: activeColumn.color }} />
+              <span className="text-[12px] font-semibold text-foreground">{activeColumn.name}</span>
+            </div>
+          </div>
         )}
       </DragOverlay>
     </DndContext>
