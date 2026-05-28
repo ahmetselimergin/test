@@ -176,7 +176,15 @@ export function IssueCommentThread({ issueId }: IssueCommentThreadProps) {
             Gönder
           </Button>
         </div>
-        <div className="px-3 py-2">
+        <div
+          className="px-3 py-2"
+          onKeyDown={(e) => {
+            if (e.ctrlKey && e.key === 'Enter') {
+              e.preventDefault()
+              handleSubmit()
+            }
+          }}
+        >
           <EditorContent editor={writeEditor} />
         </div>
       </div>
