@@ -104,10 +104,5 @@
   .issue-priority-low {
     border-left: 3px solid rgb(148 163 184);
   }
-  .grid-board-bg {
-    background-image:
-      linear-gradient(rgb(var(--border) / 0.4) 1px, transparent 1px),
-      linear-gradient(90deg, rgb(var(--border) / 0.4) 1px, transparent 1px);
-    background-size: 24px 24px;
-  }
+  .grid-board-bg {}
 }
