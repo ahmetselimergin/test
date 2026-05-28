@@ -1,8 +1,11 @@
 'use client'
 
-import { useState, useLayoutEffect } from 'react'
+import { useState, useLayoutEffect, useMemo } from 'react'
+import { AnimatePresence, motion } from 'framer-motion'
 import { KanbanBoard } from '@/components/board/KanbanBoard'
 import { BoardToolbar } from '@/components/board/BoardToolbar'
+import { FilterBar } from '@/components/board/FilterBar'
+import type { BoardFilters } from '@/components/board/FilterBar'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import type { BoardColumn, Issue, Project, MemberSummary } from '@/lib/supabase/types'
@@ -18,7 +21,14 @@ interface Props {
 
 export function BoardView({ project, workspaceSlug, columns, issues, members }: Props) {
   const [filterBarOpen, setFilterBarOpen] = useState(false)
-  const [activeFilterCount, setActiveFilterCount] = useState(0)
+  const [filters, setFilters] = useState<BoardFilters>({ assignees: [], priorities: [], types: [], labels: [] })
+  const activeFilterCount = filters.assignees.length + filters.priorities.length + filters.types.length + filters.labels.length
+
+  const liveIssues = useIssueStore((s) => s.issues)
+  const allLabels = useMemo(
+    () => [...new Set(liveIssues.flatMap(i => i.labels))],
+    [liveIssues]
+  )
 
   useLayoutEffect(() => {
     useProjectStore.getState().hydrateProjectView({
@@ -66,6 +76,25 @@ export function BoardView({ project, workspaceSlug, columns, issues, members }: 
         onFilterToggle={() => setFilterBarOpen(!filterBarOpen)}
         activeFilterCount={activeFilterCount}
       />
+      <AnimatePresence>
+        {filterBarOpen && (
+          <motion.div
+            key="filter-bar"
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2, ease: [0.16, 1, 0.3, 1] }}
+            style={{ overflow: 'hidden' }}
+          >
+            <FilterBar
+              filters={filters}
+              onChange={setFilters}
+              members={members}
+              allLabels={allLabels}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
       <div className="flex-1 overflow-hidden grid-board-bg">
         <KanbanBoard
           project={project}
@@ -73,6 +102,7 @@ export function BoardView({ project, workspaceSlug, columns, issues, members }: 
           columns={columns}
           issues={issues}
           members={members}
+          filters={filters}
         />
       </div>
     </div>
