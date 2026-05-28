@@ -32,13 +32,15 @@ export function BoardColumn({
   members,
 }: BoardColumnProps) {
   const [createOpen, setCreateOpen] = useState(false)
+  // Droppable covers the ENTIRE column (header + card area) so the user
+  // can drag over any part of the column, not just the card container.
   const { setNodeRef, isOver } = useDroppable({ id: column.id })
   const sorted = [...issues].sort((a, b) => a.order - b.order)
   const isOverLimit =
     column.wip_limit !== null && issues.length >= column.wip_limit
 
   return (
-    <div className="flex-shrink-0 w-[272px] flex flex-col h-full">
+    <div ref={setNodeRef} className="flex-shrink-0 w-[272px] flex flex-col h-full">
       <div className="flex items-center justify-between gap-2 mb-2 px-0.5">
         <div className="flex items-center gap-2 min-w-0">
           <span
@@ -95,11 +97,10 @@ export function BoardColumn({
       />
 
       <div
-        ref={setNodeRef}
         className={cn(
           'flex-1 rounded-lg border p-1.5 flex flex-col gap-1.5 min-h-[120px] overflow-y-auto transition-colors',
           isOver
-            ? 'border-accent/50 bg-accent-muted/30'
+            ? 'border-accent/50 bg-accent/5'
             : 'border-subtle bg-card/40'
         )}
       >

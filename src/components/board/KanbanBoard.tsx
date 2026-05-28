@@ -8,9 +8,7 @@ import {
   useSensor,
   useSensors,
   DragOverlay,
-  pointerWithin,
-  rectIntersection,
-  type CollisionDetection,
+  closestCenter,
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, horizontalListSortingStrategy } from '@dnd-kit/sortable'
 import { useState, useCallback } from 'react'
@@ -22,16 +20,6 @@ import { BoardColumn as BoardColumnComponent } from './BoardColumn'
 import { AddColumnButton } from './AddColumnButton'
 import { IssueCard } from '@/components/issues/IssueCard'
 import type { BoardColumn, Issue, Project, MemberSummary } from '@/lib/supabase/types'
-
-// Pointer-first collision: cursor position wins, rect intersection as fallback.
-// This is critical for DragOverlay setups where the original element stays in
-// place (opacity 0) — without it, closestCenter uses the hidden original's rect,
-// making left-ward cross-column drags undetectable.
-const collisionDetection: CollisionDetection = (args) => {
-  const pointer = pointerWithin(args)
-  if (pointer.length > 0) return pointer
-  return rectIntersection(args)
-}
 
 interface KanbanBoardProps {
   project: Project
@@ -136,7 +124,7 @@ export function KanbanBoard({
     <DndContext
       id="kanban-board"
       sensors={sensors}
-      collisionDetection={collisionDetection}
+      collisionDetection={closestCenter}
       onDragStart={handleDragStart}
       onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
