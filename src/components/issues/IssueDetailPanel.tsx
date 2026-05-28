@@ -43,11 +43,11 @@ const PRIORITY_DOT: Record<Priority, string> = {
 
 function PropRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-3 py-2 border-b border-subtle/50 last:border-0">
-      <span className="text-[11px] font-medium text-muted uppercase tracking-wider w-20 shrink-0 pt-0.5">
+    <div className="py-3 border-b border-subtle/40 last:border-0 flex flex-col gap-1.5">
+      <span className="text-[10px] font-semibold text-muted uppercase tracking-widest">
         {label}
       </span>
-      <div className="flex-1 min-w-0">{children}</div>
+      <div>{children}</div>
     </div>
   )
 }
@@ -216,7 +216,7 @@ function IssueDetailContent({
         </div>
 
         {/* ── Right sidebar ── */}
-        <div className="w-[200px] shrink-0 border-l border-subtle px-4 py-4 overflow-y-auto flex flex-col gap-0">
+        <div className="w-[240px] shrink-0 border-l border-subtle px-4 py-2 overflow-y-auto flex flex-col gap-0">
 
           <PropRow label="Atanan">
             {assignee ? (
