@@ -137,3 +137,25 @@ export async function createIssue(formData: FormData) {
   revalidatePath(`/${workspaceSlug}/${projectId}/board`)
   return { success: true, issue }
 }
+
+export async function renameBoardColumn(columnId: string, name: string) {
+  const supabase = await createClient()
+  const { error } = await supabase
+    .from('board_columns')
+    .update({ name })
+    .eq('id', columnId)
+  if (error) return { error: error.message }
+  return { success: true }
+}
+
+export async function reorderBoardColumns(
+  columns: Array<{ id: string; order: number }>
+) {
+  const supabase = await createClient()
+  await Promise.all(
+    columns.map(({ id, order }) =>
+      supabase.from('board_columns').update({ order }).eq('id', id)
+    )
+  )
+  return { success: true }
+}
