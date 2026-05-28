@@ -36,10 +36,10 @@ export function KanbanBoard({
   issues: issuesProp,
   members = [],
 }: KanbanBoardProps) {
-  const storeColumns = useProjectStore((s) => s.columns)
-  const storeIssues = useIssueStore((s) => s.issues)
-  const columns = columnsProp ?? storeColumns
-  const issues = issuesProp ?? storeIssues
+  // Always render from store — props are only used for initial hydration in BoardView.
+  // Using issuesProp/columnsProp here would ignore optimistic store updates from drag.
+  const columns = useProjectStore((s) => s.columns)
+  const issues = useIssueStore((s) => s.issues)
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null)
 
   const sensors = useSensors(
