@@ -1,7 +1,36 @@
 {
   "permissions": {
     "allow": [
-      "Bash(npx create-next-app@latest *)"
+      "Bash(npx create-next-app@latest *)",
+      "Bash(mkdir -p /Users/ahmetselim/Desktop/test/docs/superpowers/specs)",
+      "Bash(npm test *)",
+      "Bash(git push *)",
+      "Bash(gh pr create --title 'style: Figma Dark Core design overhaul' --body ' *)",
+      "Bash(grep -E \"\\\\.sql$\")",
+      "Bash(git -C /Users/ahmetselim/Desktop/test add src/lib/supabase/types.ts src/app/actions/workspace.ts)",
+      "Bash(git -C /Users/ahmetselim/Desktop/test commit -m ' *)",
+      "Bash(node -e \"const r = 'abc'; const v = r ? parseInt\\(r, 10\\) : null; console.log\\(v, isNaN\\(v\\)\\)\")",
+      "Bash(npx next *)",
+      "Bash(git -C /Users/ahmetselim/Desktop/test log --oneline -8)",
+      "Bash(bash /Users/ahmetselim/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/brainstorming/scripts/start-server.sh --project-dir /Users/ahmetselim/Desktop/test)",
+      "Bash(git -C /Users/ahmetselim/Desktop/test add docs/superpowers/specs/2026-05-28-dashboard-design.md .gitignore)",
+      "Bash(git -C /Users/ahmetselim/Desktop/test add docs/superpowers/plans/2026-05-28-dashboard.md)",
+      "Bash(git -C /Users/ahmetselim/Desktop/test rev-parse HEAD)",
+      "Bash(supabase db *)",
+      "Bash(grep -E \"\\\\.\\(md|ts|tsx\\)$\")",
+      "Bash(git -C /Users/ahmetselim/Desktop/test add supabase/migrations/006_activity_trigger.sql)",
+      "Bash(git -C /Users/ahmetselim/Desktop/test commit -m \"fix: add DROP IF EXISTS guards to migration 006 for idempotency\")",
+      "Bash(git -C /Users/ahmetselim/Desktop/test add src/components/dashboard/DashboardHero.tsx)",
+      "Bash(git -C /Users/ahmetselim/Desktop/test commit -m \"fix: remove conflicting block class from StatCard Link\")",
+      "Bash(sleep 5 && cat /tmp/dev.log)",
+      "Read(//private/tmp/**)",
+      "mcp__plugin_playwright_playwright__browser_navigate",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot",
+      "Bash(node -e \"const t = require\\('/Users/ahmetselim/Desktop/test/node_modules/@base-ui/react/popover'\\); console.log\\(Object.keys\\(t\\)\\)\")",
+      "Bash(xargs cat)"
+    ],
+    "additionalDirectories": [
+      "/Users/ahmetselim/Desktop/test/docs/superpowers/specs"
     ]
   }
 }

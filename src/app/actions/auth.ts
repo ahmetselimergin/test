@@ -9,6 +9,18 @@ export async function signIn(formData: FormData) {
     password: formData.get('password') as string,
   })
   if (error) return { error: error.message }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (user) {
+    await supabase.from('profiles').upsert({
+      id: user.id,
+      email: user.email ?? null,
+      full_name: (user.user_metadata?.full_name as string) || null,
+    })
+  }
+
   redirect('/')
 }
 
@@ -22,6 +34,18 @@ export async function signUp(formData: FormData) {
     },
   })
   if (error) return { error: error.message }
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (user) {
+    await supabase.from('profiles').upsert({
+      id: user.id,
+      email: user.email ?? null,
+      full_name: (formData.get('name') as string) || null,
+    })
+  }
+
   redirect('/')
 }
 
@@ -51,6 +75,12 @@ export async function createWorkspace(formData: FormData) {
     workspace_id: workspace.id,
     user_id: user.id,
     role: 'owner',
+  })
+
+  await supabase.from('profiles').upsert({
+    id: user.id,
+    email: user.email ?? null,
+    full_name: (user.user_metadata?.full_name as string) || null,
   })
 
   redirect(`/${workspace.slug}`)

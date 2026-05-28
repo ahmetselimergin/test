@@ -1,0 +1,33 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e6]:
+      - generic [ref=e7]:
+        - img [ref=e9]
+        - generic [ref=e11]:
+          - generic [ref=e12]: FlowTrack
+          - generic [ref=e13]: Beta
+      - generic [ref=e14]:
+        - heading "Ship work the way Jira should feel." [level=2] [ref=e15]
+        - paragraph [ref=e16]: Kanban boards, sprints, backlogs, and roadmaps — built for teams who want speed without the clutter.
+      - paragraph [ref=e17]: Trusted by product & engineering teams
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - heading "Sign in" [level=1] [ref=e22]
+        - paragraph [ref=e23]: Enter your credentials to continue
+      - generic [ref=e24]:
+        - generic [ref=e25]:
+          - generic [ref=e26]: Email
+          - textbox "Email" [ref=e27]:
+            - /placeholder: you@company.com
+        - generic [ref=e28]:
+          - generic [ref=e29]: Password
+          - textbox "Password" [ref=e30]:
+            - /placeholder: ••••••••
+        - button "Sign in" [ref=e31]
+      - paragraph [ref=e32]:
+        - text: No account?
+        - link "Create one" [ref=e33] [cursor=pointer]:
+          - /url: /register
+  - region "Notifications alt+T"
+  - button "Open Next.js Dev Tools" [ref=e39] [cursor=pointer]:
+    - img [ref=e40]

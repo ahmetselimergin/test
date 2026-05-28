@@ -11,8 +11,8 @@ const iconMap = {
   'corner-down-right': CornerDownRight,
 }
 
-export function TypeIcon({ type, size = 14 }: { type: IssueType; size?: number }) {
+export function TypeIcon({ type, size = 14, className }: { type: IssueType; size?: number; className?: string }) {
   const config = typeConfig[type]
   const Icon = iconMap[config.icon as keyof typeof iconMap]
-  return <Icon size={size} className={cn(config.color)} />
+  return <Icon size={size} className={cn(config.color, className)} />
 }

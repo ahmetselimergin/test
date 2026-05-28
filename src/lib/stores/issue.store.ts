@@ -21,7 +21,8 @@ export const useIssueStore = create<IssueState>((set) => ({
   selectedIssue: null,
   comments: [],
   activityLogs: [],
-  setIssues: (issues) => set({ issues }),
+  setIssues: (issues) =>
+    set((state) => (state.issues === issues ? state : { issues })),
   setSelectedIssue: (selectedIssue) => set({ selectedIssue }),
   setComments: (comments) => set({ comments }),
   setActivityLogs: (activityLogs) => set({ activityLogs }),
