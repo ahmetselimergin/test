@@ -140,7 +140,7 @@ export async function createProjectAction(formData: FormData) {
   const key = (formData.get('key') as string).toUpperCase()
   const methodology = formData.get('methodology') as string
   const color = (formData.get('color') as string) || '#6366f1'
-  const icon = (formData.get('icon') as string)?.trim() || null
+  const logo_url = (formData.get('logo_url') as string)?.trim() || null
 
   const { data: project, error } = await supabase
     .from('projects')
@@ -150,7 +150,7 @@ export async function createProjectAction(formData: FormData) {
       key,
       methodology,
       color,
-      icon,
+      logo_url,
     })
     .select()
     .single()
@@ -182,13 +182,13 @@ export async function updateProjectSettings(
   const projectId = formData.get('project_id') as string
   const name = (formData.get('name') as string)?.trim()
   const color = (formData.get('color') as string) || '#6366f1'
-  const icon = (formData.get('icon') as string)?.trim() || null
+  const logo_url = (formData.get('logo_url') as string)?.trim() || null
 
   if (!name) return { error: 'Proje adı gerekli' }
 
   const { error } = await supabase
     .from('projects')
-    .update({ name, color, icon })
+    .update({ name, color, logo_url })
     .eq('id', projectId)
 
   if (error) return { error: error.message }

@@ -3,7 +3,8 @@
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Settings2, Loader2 } from 'lucide-react'
+import { Settings2, Loader2, Upload, X } from 'lucide-react'
+import { createClient } from '@/lib/supabase/client'
 import { updateProjectSettings } from '@/app/actions/workspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -13,7 +14,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from '@/components/ui/dialog'
 
 const PRESET_COLORS = [
@@ -22,15 +22,13 @@ const PRESET_COLORS = [
   '#3b82f6', '#06b6d4', '#64748b', '#1e293b',
 ]
 
-const PRESET_ICONS = ['🚀', '⚡', '🔥', '💡', '🎯', '🛠️', '📱', '🌐', '🔐', '💎', '🎨', '📊']
-
 interface Props {
   project: {
     id: string
     name: string
     key: string
     color: string
-    icon: string | null
+    logo_url: string | null
   }
 }
 
@@ -40,14 +38,16 @@ export function EditProjectDialog({ project }: Props) {
   const [state, action, pending] = useActionState(updateProjectSettings, null)
   const [name, setName] = useState(project.name)
   const [color, setColor] = useState(project.color)
-  const [icon, setIcon] = useState(project.icon ?? '')
+  const [logoUrl, setLogoUrl] = useState(project.logo_url ?? '')
+  const [uploading, setUploading] = useState(false)
+  const fileRef = useRef<HTMLInputElement>(null)
   const toastId = useRef<string | number | null>(null)
 
   useEffect(() => {
     if (!open) return
     setName(project.name)
     setColor(project.color)
-    setIcon(project.icon ?? '')
+    setLogoUrl(project.logo_url ?? '')
   }, [open, project])
 
   useEffect(() => {
@@ -64,10 +64,31 @@ export function EditProjectDialog({ project }: Props) {
     }
   }, [pending, state, router])
 
-  const preview = icon || project.key.slice(0, 2)
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploading(true)
+    try {
+      const supabase = createClient()
+      const ext = file.name.split('.').pop()
+      const path = `${project.id}.${ext}`
+      const { error } = await supabase.storage
+        .from('project-logos')
+        .upload(path, file, { upsert: true })
+      if (error) throw error
+      const { data } = supabase.storage.from('project-logos').getPublicUrl(path)
+      setLogoUrl(data.publicUrl)
+    } catch {
+      toast.error('Logo yüklenemedi')
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  const preview = logoUrl ? null : project.key.slice(0, 2)
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <>
       <button
         type="button"
         onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true) }}
@@ -76,92 +97,118 @@ export function EditProjectDialog({ project }: Props) {
       >
         <Settings2 size={13} />
       </button>
-      <DialogContent className="max-w-md bg-card border-subtle">
-        <DialogHeader>
-          <DialogTitle>Projeyi Düzenle</DialogTitle>
-        </DialogHeader>
 
-        <form action={action} className="space-y-4">
-          <input type="hidden" name="project_id" value={project.id} />
-          <input type="hidden" name="color" value={color} />
-          <input type="hidden" name="icon" value={icon} />
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md bg-card border-subtle">
+          <DialogHeader>
+            <DialogTitle>Projeyi Düzenle</DialogTitle>
+          </DialogHeader>
 
-          {/* Preview */}
-          <div className="flex items-center gap-3 p-3 rounded-xl border border-subtle bg-subtle/40">
-            <div
-              className="size-12 rounded-xl flex items-center justify-center text-white font-bold text-lg shrink-0 transition-colors"
-              style={{ backgroundColor: color }}
-            >
-              {preview}
-            </div>
-            <div>
-              <p className="text-[14px] font-semibold text-foreground">{name || 'Proje adı'}</p>
-              <p className="text-[11px] text-muted font-mono">{project.key}</p>
-            </div>
-          </div>
+          <form action={action} className="space-y-4">
+            <input type="hidden" name="project_id" value={project.id} />
+            <input type="hidden" name="color" value={color} />
+            <input type="hidden" name="logo_url" value={logoUrl} />
 
-          {/* Name */}
-          <div className="space-y-1.5">
-            <Label htmlFor="edit-name" className="text-[12px]">Proje Adı</Label>
-            <Input
-              id="edit-name"
-              name="name"
-              required
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              disabled={pending}
-              className="h-9"
-            />
-          </div>
-
-          {/* Emoji icon */}
-          <div className="space-y-2">
-            <Label className="text-[12px]">İkon (emoji)</Label>
-            <div className="flex flex-wrap gap-1.5">
-              {PRESET_ICONS.map((em) => (
-                <button
-                  key={em}
-                  type="button"
-                  onClick={() => setIcon(icon === em ? '' : em)}
-                  className={`size-9 rounded-lg text-lg flex items-center justify-center transition-all border ${
-                    icon === em
-                      ? 'border-accent bg-accent/10'
-                      : 'border-subtle hover:border-foreground/20 hover:bg-subtle/60'
-                  }`}
+            {/* Preview + Logo Upload */}
+            <div className="flex items-center gap-4 p-3 rounded-xl border border-subtle bg-subtle/40">
+              <div className="relative group/logo shrink-0">
+                <div
+                  className="size-14 rounded-xl flex items-center justify-center text-white font-bold text-xl overflow-hidden"
+                  style={{ backgroundColor: logoUrl ? 'transparent' : color }}
                 >
-                  {em}
-                </button>
-              ))}
-            </div>
-            <p className="text-[11px] text-muted">Seçilmezse proje kodu gösterilir</p>
-          </div>
-
-          {/* Color */}
-          <div className="space-y-2">
-            <Label className="text-[12px]">Renk</Label>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_COLORS.map((c) => (
+                  {logoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={logoUrl} alt="logo" className="size-full object-cover rounded-xl" />
+                  ) : (
+                    <span style={{ backgroundColor: color }} className="size-full flex items-center justify-center rounded-xl">
+                      {preview}
+                    </span>
+                  )}
+                </div>
                 <button
-                  key={c}
                   type="button"
-                  onClick={() => setColor(c)}
-                  className="size-7 rounded-lg transition-all hover:scale-110"
-                  style={{ backgroundColor: c, outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: '2px' }}
-                />
-              ))}
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading || pending}
+                  className="absolute inset-0 rounded-xl bg-black/50 opacity-0 group-hover/logo:opacity-100 transition-opacity flex items-center justify-center"
+                >
+                  {uploading
+                    ? <Loader2 size={16} className="text-white animate-spin" />
+                    : <Upload size={16} className="text-white" />
+                  }
+                </button>
+                {logoUrl && (
+                  <button
+                    type="button"
+                    onClick={() => setLogoUrl('')}
+                    className="absolute -top-1.5 -right-1.5 size-5 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition-colors z-10"
+                  >
+                    <X size={10} />
+                  </button>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[14px] font-semibold text-foreground truncate">{name || 'Proje adı'}</p>
+                <p className="text-[11px] text-muted font-mono">{project.key}</p>
+                <button
+                  type="button"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading || pending}
+                  className="mt-1.5 text-[11px] text-accent hover:underline flex items-center gap-1"
+                >
+                  <Upload size={10} />
+                  {logoUrl ? 'Logoyu değiştir' : 'Logo yükle'}
+                </button>
+              </div>
             </div>
-          </div>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
 
-          <Button type="submit" disabled={pending} className="w-full bg-accent text-white h-9">
-            {pending ? (
-              <span className="flex items-center gap-2">
-                <Loader2 size={13} className="animate-spin" />
-                Kaydediliyor
-              </span>
-            ) : 'Kaydet'}
-          </Button>
-        </form>
-      </DialogContent>
-    </Dialog>
+            {/* Name */}
+            <div className="space-y-1.5">
+              <Label htmlFor="edit-name" className="text-[12px]">Proje Adı</Label>
+              <Input
+                id="edit-name"
+                name="name"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                disabled={pending}
+                className="h-9"
+              />
+            </div>
+
+            {/* Color */}
+            <div className="space-y-2">
+              <Label className="text-[12px]">Arka plan rengi</Label>
+              <div className="flex flex-wrap gap-2">
+                {PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    className="size-7 rounded-lg transition-all hover:scale-110"
+                    style={{ backgroundColor: c, outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: '2px' }}
+                  />
+                ))}
+              </div>
+            </div>
+
+            <Button type="submit" disabled={pending || uploading} className="w-full bg-accent text-white h-9">
+              {pending ? (
+                <span className="flex items-center gap-2">
+                  <Loader2 size={13} className="animate-spin" />
+                  Kaydediliyor
+                </span>
+              ) : 'Kaydet'}
+            </Button>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
   )
 }

@@ -74,7 +74,7 @@ function ProjectCard({
   slug,
   issueCount,
 }: {
-  project: { id: string; name: string; key: string; color: string; methodology: string; icon: string | null }
+  project: { id: string; name: string; key: string; color: string; methodology: string; icon: string | null; logo_url: string | null }
   slug: string
   issueCount: number
 }) {
@@ -92,6 +92,7 @@ function ProjectCard({
   }
 
   const displayIcon = project.icon || project.key.slice(0, 2)
+  const hasLogo = !!project.logo_url
 
   return (
     <div className="group rounded-2xl border border-subtle bg-card overflow-hidden hover:border-strong hover:shadow-lg transition-all">
@@ -111,16 +112,21 @@ function ProjectCard({
 
         {/* Edit button — top right */}
         <div className="relative z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-          <EditProjectDialog project={project} />
+          <EditProjectDialog project={{ id: project.id, name: project.name, key: project.key, color: project.color, logo_url: project.logo_url }} />
         </div>
 
-        {/* Icon — bottom left */}
+        {/* Logo / icon — bottom left */}
         <Link
           href={`/${slug}/${project.id}/board`}
-          className="absolute bottom-3 left-4 size-13 flex"
+          className="absolute bottom-3 left-4"
         >
-          <div className="size-12 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white font-bold text-xl">
-            {displayIcon}
+          <div className="size-12 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white font-bold text-xl overflow-hidden">
+            {hasLogo ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={project.logo_url!} alt={project.name} className="size-full object-cover" />
+            ) : (
+              displayIcon
+            )}
           </div>
         </Link>
 

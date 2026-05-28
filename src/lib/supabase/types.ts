@@ -22,7 +22,8 @@ export interface Project {
   key: string
   methodology: Methodology
   color: string
-  icon: string
+  icon: string | null
+  logo_url: string | null
   created_at: string
 }
 
