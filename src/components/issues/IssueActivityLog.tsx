@@ -48,7 +48,8 @@ export function IssueActivityLog({ issueId }: IssueActivityLogProps) {
       .select('*, actor:profiles(full_name, avatar_url)')
       .eq('issue_id', issueId)
       .order('created_at', { ascending: false })
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        if (error) { console.error('Failed to load activity logs:', error); return }
         if (data) useIssueStore.getState().setActivityLogs(data as ActivityLogWithActor[])
       })
   }, [issueId])
