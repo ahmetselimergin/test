@@ -42,6 +42,7 @@ export function IssueActivityLog({ issueId }: IssueActivityLogProps) {
   const activityLogs = useIssueStore((s) => s.activityLogs)
 
   useEffect(() => {
+    let cancelled = false
     const supabase = createClient()
     supabase
       .from('activity_logs')
@@ -49,9 +50,11 @@ export function IssueActivityLog({ issueId }: IssueActivityLogProps) {
       .eq('issue_id', issueId)
       .order('created_at', { ascending: false })
       .then(({ data, error }) => {
+        if (cancelled) return
         if (error) { console.error('Failed to load activity logs:', error); return }
         if (data) useIssueStore.getState().setActivityLogs(data as ActivityLogWithActor[])
       })
+    return () => { cancelled = true }
   }, [issueId])
 
   if (activityLogs.length === 0) {

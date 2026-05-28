@@ -74,6 +74,7 @@ export function IssueCommentThread({ issueId }: IssueCommentThreadProps) {
   const comments = useIssueStore((s) => s.comments)
 
   useEffect(() => {
+    let cancelled = false
     const supabase = createClient()
     supabase
       .from('comments')
@@ -81,9 +82,11 @@ export function IssueCommentThread({ issueId }: IssueCommentThreadProps) {
       .eq('issue_id', issueId)
       .order('created_at', { ascending: true })
       .then(({ data, error }) => {
+        if (cancelled) return
         if (error) { console.error('Failed to load comments:', error); return }
         if (data) useIssueStore.getState().setComments(data as CommentWithAuthor[])
       })
+    return () => { cancelled = true }
   }, [issueId])
 
   const writeEditor = useEditor({

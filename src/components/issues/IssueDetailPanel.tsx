@@ -106,6 +106,10 @@ function IssueDetailContent({
         old_value: oldStatus,
         new_value: status,
       })
+      useIssueStore.getState().setActivityLogs([
+        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: user.id, action: 'status_changed', old_value: oldStatus, new_value: status, created_at: new Date().toISOString() },
+        ...useIssueStore.getState().activityLogs,
+      ])
     }
   }
 
@@ -123,6 +127,10 @@ function IssueDetailContent({
         old_value: oldPriority,
         new_value: priority,
       })
+      useIssueStore.getState().setActivityLogs([
+        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: user.id, action: 'priority_changed', old_value: oldPriority, new_value: priority, created_at: new Date().toISOString() },
+        ...useIssueStore.getState().activityLogs,
+      ])
     }
   }
 
@@ -146,6 +154,10 @@ function IssueDetailContent({
         old_value: oldAssigneeId ?? null,
         new_value: id ?? null,
       })
+      useIssueStore.getState().setActivityLogs([
+        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: user.id, action: 'assignee_changed', old_value: oldAssigneeId ?? null, new_value: id ?? null, created_at: new Date().toISOString() },
+        ...useIssueStore.getState().activityLogs,
+      ])
     }
   }
 
@@ -173,6 +185,10 @@ function IssueDetailContent({
         old_value: oldTitle,
         new_value: trimmed,
       })
+      useIssueStore.getState().setActivityLogs([
+        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: user.id, action: 'title_changed', old_value: oldTitle, new_value: trimmed, created_at: new Date().toISOString() },
+        ...useIssueStore.getState().activityLogs,
+      ])
     }
   }
 
