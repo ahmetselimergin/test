@@ -140,6 +140,7 @@ export async function createProjectAction(formData: FormData) {
   const key = (formData.get('key') as string).toUpperCase()
   const methodology = formData.get('methodology') as string
   const color = (formData.get('color') as string) || '#6366f1'
+  const icon = (formData.get('icon') as string)?.trim() || null
 
   const { data: project, error } = await supabase
     .from('projects')
@@ -149,6 +150,7 @@ export async function createProjectAction(formData: FormData) {
       key,
       methodology,
       color,
+      icon,
     })
     .select()
     .single()
@@ -170,6 +172,39 @@ export async function createProjectAction(formData: FormData) {
 
   revalidatePath(`/${workspace?.slug}/projects`)
   redirect(`/${workspace?.slug}/${project.id}/board`)
+}
+
+export async function updateProjectSettings(
+  _prevState: { error?: string; success?: boolean } | null,
+  formData: FormData,
+) {
+  const supabase = await createClient()
+  const projectId = formData.get('project_id') as string
+  const name = (formData.get('name') as string)?.trim()
+  const color = (formData.get('color') as string) || '#6366f1'
+  const icon = (formData.get('icon') as string)?.trim() || null
+
+  if (!name) return { error: 'Proje adı gerekli' }
+
+  const { error } = await supabase
+    .from('projects')
+    .update({ name, color, icon })
+    .eq('id', projectId)
+
+  if (error) return { error: error.message }
+
+  const { data: project } = await supabase
+    .from('projects')
+    .select('workspace_id, workspaces(slug)')
+    .eq('id', projectId)
+    .single()
+
+  const slug = (project?.workspaces as unknown as { slug: string } | null)?.slug
+  if (slug) {
+    revalidatePath(`/${slug}/projects`)
+    revalidatePath(`/${slug}/${projectId}/board`)
+  }
+  return { success: true }
 }
 
 export async function deleteWorkspace(

@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
-import { Plus } from 'lucide-react'
-import { createProjectAction } from '@/app/actions/workspace'
+import { useActionState, useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
+import { Settings2, Loader2 } from 'lucide-react'
+import { updateProjectSettings } from '@/app/actions/workspace'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -23,35 +25,64 @@ const PRESET_COLORS = [
 const PRESET_ICONS = ['🚀', '⚡', '🔥', '💡', '🎯', '🛠️', '📱', '🌐', '🔐', '💎', '🎨', '📊']
 
 interface Props {
-  workspaceId: string
+  project: {
+    id: string
+    name: string
+    key: string
+    color: string
+    icon: string | null
+  }
 }
 
-export function CreateProjectDialog({ workspaceId }: Props) {
-  const [color, setColor] = useState('#6366f1')
-  const [icon, setIcon] = useState('')
-  const [name, setName] = useState('')
-  const [key, setKey] = useState('')
+export function EditProjectDialog({ project }: Props) {
+  const router = useRouter()
+  const [open, setOpen] = useState(false)
+  const [state, action, pending] = useActionState(updateProjectSettings, null)
+  const [name, setName] = useState(project.name)
+  const [color, setColor] = useState(project.color)
+  const [icon, setIcon] = useState(project.icon ?? '')
+  const toastId = useRef<string | number | null>(null)
 
-  const autoKey = (n: string) =>
-    n.split(' ').map((w) => w[0]).join('').slice(0, 4).toUpperCase()
+  useEffect(() => {
+    if (!open) return
+    setName(project.name)
+    setColor(project.color)
+    setIcon(project.icon ?? '')
+  }, [open, project])
 
-  const preview = icon || key || autoKey(name) || '?'
+  useEffect(() => {
+    if (pending) {
+      toastId.current = toast.loading('Kaydediliyor...')
+    } else {
+      if (toastId.current) { toast.dismiss(toastId.current); toastId.current = null }
+      if (state?.error) toast.error(state.error)
+      if (state?.success) {
+        toast.success('Proje güncellendi')
+        setOpen(false)
+        router.refresh()
+      }
+    }
+  }, [pending, state, router])
+
+  const preview = icon || project.key.slice(0, 2)
 
   return (
-    <Dialog>
-      <DialogTrigger className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-accent text-sm font-medium text-white hover:opacity-90 transition-opacity">
-        <Plus size={16} />
-        Yeni Proje
-      </DialogTrigger>
+    <Dialog open={open} onOpenChange={setOpen}>
+      <button
+        type="button"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen(true) }}
+        className="size-7 rounded-lg flex items-center justify-center text-white/70 hover:text-white hover:bg-white/15 transition-colors"
+        title="Düzenle"
+      >
+        <Settings2 size={13} />
+      </button>
       <DialogContent className="max-w-md bg-card border-subtle">
         <DialogHeader>
-          <DialogTitle>Proje Oluştur</DialogTitle>
+          <DialogTitle>Projeyi Düzenle</DialogTitle>
         </DialogHeader>
-        <form
-          action={createProjectAction as unknown as (formData: FormData) => void}
-          className="space-y-4"
-        >
-          <input type="hidden" name="workspace_id" value={workspaceId} />
+
+        <form action={action} className="space-y-4">
+          <input type="hidden" name="project_id" value={project.id} />
           <input type="hidden" name="color" value={color} />
           <input type="hidden" name="icon" value={icon} />
 
@@ -65,55 +96,27 @@ export function CreateProjectDialog({ workspaceId }: Props) {
             </div>
             <div>
               <p className="text-[14px] font-semibold text-foreground">{name || 'Proje adı'}</p>
-              <p className="text-[11px] text-muted">{key || autoKey(name) || 'Önizleme'}</p>
+              <p className="text-[11px] text-muted font-mono">{project.key}</p>
             </div>
           </div>
 
+          {/* Name */}
           <div className="space-y-1.5">
-            <Label htmlFor="name" className="text-[12px]">Proje Adı</Label>
+            <Label htmlFor="edit-name" className="text-[12px]">Proje Adı</Label>
             <Input
-              id="name"
+              id="edit-name"
               name="name"
               required
               value={name}
-              onChange={(e) => {
-                setName(e.target.value)
-                if (!key) setKey(autoKey(e.target.value))
-              }}
-              placeholder="Ör: Mobile App"
+              onChange={(e) => setName(e.target.value)}
+              disabled={pending}
               className="h-9"
             />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="key" className="text-[12px]">Proje Kodu</Label>
-            <Input
-              id="key"
-              name="key"
-              required
-              maxLength={5}
-              value={key}
-              onChange={(e) => setKey(e.target.value.toUpperCase())}
-              placeholder="MA"
-              className="h-9 uppercase"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="methodology" className="text-[12px]">Metodoloji</Label>
-            <select
-              id="methodology"
-              name="methodology"
-              defaultValue="both"
-              className="w-full h-9 rounded-lg border border-subtle bg-card px-3 text-sm text-foreground"
-            >
-              <option value="both">Kanban + Scrum</option>
-              <option value="kanban">Kanban</option>
-              <option value="scrum">Scrum</option>
-            </select>
           </div>
 
           {/* Emoji icon */}
           <div className="space-y-2">
-            <Label className="text-[12px]">İkon (isteğe bağlı)</Label>
+            <Label className="text-[12px]">İkon (emoji)</Label>
             <div className="flex flex-wrap gap-1.5">
               {PRESET_ICONS.map((em) => (
                 <button
@@ -130,6 +133,7 @@ export function CreateProjectDialog({ workspaceId }: Props) {
                 </button>
               ))}
             </div>
+            <p className="text-[11px] text-muted">Seçilmezse proje kodu gösterilir</p>
           </div>
 
           {/* Color */}
@@ -148,8 +152,13 @@ export function CreateProjectDialog({ workspaceId }: Props) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full bg-accent text-white h-9">
-            Oluştur
+          <Button type="submit" disabled={pending} className="w-full bg-accent text-white h-9">
+            {pending ? (
+              <span className="flex items-center gap-2">
+                <Loader2 size={13} className="animate-spin" />
+                Kaydediliyor
+              </span>
+            ) : 'Kaydet'}
           </Button>
         </form>
       </DialogContent>

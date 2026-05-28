@@ -3,6 +3,7 @@ import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { Kanban, ListTodo, Map, Timer, ArrowUpRight } from 'lucide-react'
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog'
+import { EditProjectDialog } from '@/components/projects/EditProjectDialog'
 import { PageHeader } from '@/components/layout/PageHeader'
 
 export default async function ProjectsPage({
@@ -58,8 +59,8 @@ export default async function ProjectsPage({
             )
           })}
 
-          {/* Yeni proje kartı */}
-          <div className="rounded-2xl border border-dashed border-subtle hover:border-accent/40 hover:bg-subtle/40 transition-all flex flex-col items-center justify-center gap-2 min-h-[220px] cursor-pointer group">
+          {/* Yeni proje yer tutucu */}
+          <div className="rounded-2xl border border-dashed border-subtle hover:border-accent/40 hover:bg-subtle/40 transition-all flex items-center justify-center min-h-[220px]">
             <CreateProjectDialog workspaceId={workspace.id} />
           </div>
         </div>
@@ -73,7 +74,7 @@ function ProjectCard({
   slug,
   issueCount,
 }: {
-  project: { id: string; name: string; key: string; color: string; methodology: string }
+  project: { id: string; name: string; key: string; color: string; methodology: string; icon: string | null }
   slug: string
   issueCount: number
 }) {
@@ -90,29 +91,44 @@ function ProjectCard({
     both: 'Kanban + Scrum',
   }
 
+  const displayIcon = project.icon || project.key.slice(0, 2)
+
   return (
     <div className="group rounded-2xl border border-subtle bg-card overflow-hidden hover:border-strong hover:shadow-lg transition-all">
       {/* Colored header */}
-      <Link href={`/${slug}/${project.id}/board`} className="block">
+      <div
+        className="relative h-28 flex items-start justify-end p-3"
+        style={{ backgroundColor: project.color }}
+      >
+        {/* Dot pattern overlay */}
         <div
-          className="relative h-28 flex items-end p-4"
-          style={{ backgroundColor: project.color }}
-        >
-          {/* Subtle pattern overlay */}
-          <div className="absolute inset-0 opacity-20"
-            style={{
-              backgroundImage: `radial-gradient(circle at 20% 80%, white 1px, transparent 1px), radial-gradient(circle at 80% 20%, white 1px, transparent 1px)`,
-              backgroundSize: '30px 30px',
-            }}
-          />
-          <div className="relative flex items-center justify-between w-full">
-            <div className="size-12 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center text-white font-bold text-lg border border-white/30">
-              {project.key.slice(0, 2)}
-            </div>
-            <ArrowUpRight size={16} className="text-white/60 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
+          className="absolute inset-0 opacity-15 pointer-events-none"
+          style={{
+            backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`,
+            backgroundSize: '20px 20px',
+          }}
+        />
+
+        {/* Edit button — top right */}
+        <div className="relative z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+          <EditProjectDialog project={project} />
         </div>
-      </Link>
+
+        {/* Icon — bottom left */}
+        <Link
+          href={`/${slug}/${project.id}/board`}
+          className="absolute bottom-3 left-4 size-13 flex"
+        >
+          <div className="size-12 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white font-bold text-xl">
+            {displayIcon}
+          </div>
+        </Link>
+
+        {/* Arrow */}
+        <Link href={`/${slug}/${project.id}/board`} className="absolute bottom-3 right-3">
+          <ArrowUpRight size={15} className="text-white/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+        </Link>
+      </div>
 
       {/* Content */}
       <div className="p-4">
