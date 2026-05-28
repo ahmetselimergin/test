@@ -24,7 +24,7 @@ export default async function WorkspaceSettingsPage({
   if (!workspace) redirect('/')
 
   return (
-    <div className="p-8 max-w-lg mx-auto space-y-6">
+    <div className="p-8 max-w-2xl mx-auto space-y-6">
       <PageHeader
         title="Ayarlar"
         description="Workspace yapılandırması ve tercihler"

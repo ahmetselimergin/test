@@ -1,6 +1,7 @@
 'use client'
 
 import { useActionState, useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Loader2 } from 'lucide-react'
 import { updateWorkspaceSettings } from '@/app/actions/workspace'
@@ -21,6 +22,7 @@ interface Props {
 }
 
 export function WorkspaceSettingsForm({ workspaceId, name, color }: Props) {
+  const router = useRouter()
   const [state, action, pending] = useActionState(updateWorkspaceSettings, null)
   const [nameValue, setNameValue] = useState(name)
   const [selectedColor, setSelectedColor] = useState(color)
@@ -32,9 +34,12 @@ export function WorkspaceSettingsForm({ workspaceId, name, color }: Props) {
     } else {
       if (toastId.current) { toast.dismiss(toastId.current); toastId.current = null }
       if (state?.error) toast.error(state.error)
-      if (state?.success) toast.success('Kaydedildi')
+      if (state?.success) {
+        toast.success('Kaydedildi')
+        router.refresh()
+      }
     }
-  }, [pending, state])
+  }, [pending, state, router])
 
   return (
     <form action={action} className="space-y-5">
