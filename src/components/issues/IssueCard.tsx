@@ -3,7 +3,6 @@
 import { motion } from 'framer-motion'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { MessageSquare, Paperclip } from 'lucide-react'
 import type { Issue, Project } from '@/lib/supabase/types'
 import { TypeIcon } from './TypeIcon'
 import { formatIssueId, cn } from '@/lib/utils'
