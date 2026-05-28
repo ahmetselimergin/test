@@ -26,8 +26,8 @@ export function BoardView({ project, workspaceSlug, columns, issues, members }: 
 
   const liveIssues = useIssueStore((s) => s.issues)
   const allLabels = useMemo(
-    () => [...new Set(liveIssues.flatMap(i => i.labels))],
-    [liveIssues]
+    () => [...new Set((liveIssues.length > 0 ? liveIssues : issues).flatMap(i => i.labels))],
+    [liveIssues, issues]
   )
 
   useLayoutEffect(() => {

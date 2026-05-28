@@ -43,6 +43,7 @@ export function IssueCardQuickActions({ issue, members }: IssueCardQuickActionsP
           render={<span />}
           nativeButton={false}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
           className={cn(
             'size-[6px] rounded-full shrink-0 cursor-pointer transition-all hover:ring-2 hover:ring-current/30 hover:scale-125',
             PRIORITY_DOT[issue.priority],
@@ -75,6 +76,7 @@ export function IssueCardQuickActions({ issue, members }: IssueCardQuickActionsP
           render={<span />}
           nativeButton={false}
           onClick={(e: React.MouseEvent) => e.stopPropagation()}
+          onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
           className="shrink-0 cursor-pointer"
         >
           {assignee ? (
