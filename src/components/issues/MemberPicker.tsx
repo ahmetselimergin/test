@@ -108,7 +108,7 @@ export function MemberPicker({ members, value, onChange }: Props) {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="İsim veya rol ara..."
-                className="flex-1 text-[12px] bg-transparent outline-none text-foreground placeholder:text-muted/50"
+                className="flex-1 text-[12px] bg-transparent outline-none text-foreground placeholder:text-muted-foreground/50"
               />
             </div>
 

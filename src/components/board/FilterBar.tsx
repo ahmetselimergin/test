@@ -92,7 +92,7 @@ export function FilterBar({ filters, onChange, members, allLabels }: Props) {
               {filters.assignees.includes(m.id) && <span className="ml-auto">✓</span>}
             </button>
           ))}
-          {members.length === 0 && <p className="px-2.5 py-2 text-[12px] text-muted">Üye yok</p>}
+          {members.length === 0 && <p className="px-2.5 py-2 text-[12px] text-muted-foreground">Üye yok</p>}
         </PopoverContent>
       </Popover>
 
@@ -201,7 +201,7 @@ export function FilterBar({ filters, onChange, members, allLabels }: Props) {
         {isFilterActive(filters) && (
           <motion.button key="clear" initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.12 }}
             onClick={() => onChange(EMPTY)}
-            className="ml-auto text-[11px] text-muted hover:text-foreground transition-colors shrink-0 px-2">
+            className="ml-auto text-[11px] text-muted-foreground hover:text-foreground transition-colors shrink-0 px-2">
             Tümünü temizle
           </motion.button>
         )}

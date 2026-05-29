@@ -27,8 +27,8 @@ export function ThemeSettings() {
           className={cn(
             'flex-1 flex flex-col items-center gap-2 p-3 rounded-xl border transition-all text-[12px] font-medium',
             mounted && theme === value
-              ? 'border-accent bg-accent/8 text-accent'
-              : 'border-subtle text-muted hover:text-foreground hover:border-foreground/20 hover:bg-subtle/60'
+              ? 'border-primary bg-primary/8 text-primary'
+              : 'border-border text-muted-foreground hover:text-foreground hover:border-foreground/20 hover:bg-muted/60'
           )}
         >
           <Icon size={16} />

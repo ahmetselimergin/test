@@ -100,7 +100,7 @@ export function DashboardHero({
       transition={{ duration: 0.4 }}
       className="relative overflow-hidden border-b border-border px-8 py-7 shrink-0"
       style={{
-        background: 'linear-gradient(135deg, #1e1b4b 0%, #0f0e1a 60%, rgb(var(--bg)) 100%)',
+        background: 'linear-gradient(135deg, #1e1b4b 0%, #0f0e1a 60%, var(--color-background) 100%)',
       }}
     >
       {/* Ambient glow orbs */}

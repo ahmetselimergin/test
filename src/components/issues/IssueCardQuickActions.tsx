@@ -59,7 +59,7 @@ export function IssueCardQuickActions({ issue, members }: IssueCardQuickActionsP
                 'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] transition-colors',
                 issue.priority === p
                   ? 'bg-accent/10 text-accent'
-                  : 'hover:bg-subtle text-foreground',
+                  : 'hover:bg-muted text-foreground',
               )}
             >
               <span className={cn('size-2 rounded-full shrink-0', PRIORITY_DOT[p])} />
@@ -80,7 +80,7 @@ export function IssueCardQuickActions({ issue, members }: IssueCardQuickActionsP
           className="shrink-0 cursor-pointer"
         >
           {assignee ? (
-            <Avatar className="size-6 border-2 border-[rgb(var(--bg-card))] ring-1 ring-[rgb(var(--border))] transition-all hover:ring-2 hover:ring-accent/40">
+            <Avatar className="size-6 border-2 border-card ring-1 ring-border transition-all hover:ring-2 hover:ring-primary/40">
               {assignee.avatar_url ? (
                 <img
                   src={assignee.avatar_url}
@@ -94,7 +94,7 @@ export function IssueCardQuickActions({ issue, members }: IssueCardQuickActionsP
               )}
             </Avatar>
           ) : (
-            <span className="size-6 rounded-full border border-dashed border-[rgb(var(--border))] block transition-all hover:ring-2 hover:ring-accent/40" />
+            <span className="size-6 rounded-full border border-dashed border-border block transition-all hover:ring-2 hover:ring-primary/40" />
           )}
         </PopoverTrigger>
         <PopoverContent className="w-52 p-1" side="top" align="end">
@@ -106,7 +106,7 @@ export function IssueCardQuickActions({ issue, members }: IssueCardQuickActionsP
                 'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] transition-colors',
                 issue.assignee_id === m.id
                   ? 'bg-accent/10 text-accent'
-                  : 'hover:bg-subtle text-foreground',
+                  : 'hover:bg-muted text-foreground',
               )}
             >
               <Avatar className="size-5 shrink-0">
@@ -127,12 +127,12 @@ export function IssueCardQuickActions({ issue, members }: IssueCardQuickActionsP
             </button>
           ))}
           {members.length === 0 && (
-            <p className="px-2.5 py-2 text-[12px] text-muted">Üye yok</p>
+            <p className="px-2.5 py-2 text-[12px] text-muted-foreground">Üye yok</p>
           )}
-          <div className="border-t border-subtle mt-1 pt-1">
+          <div className="border-t border-border mt-1 pt-1">
             <button
               onClick={() => handleAssigneeSelect(null)}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] text-muted hover:bg-subtle hover:text-foreground transition-colors"
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
             >
               Atama kaldır
             </button>

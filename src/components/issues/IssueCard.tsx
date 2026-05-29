@@ -117,8 +117,8 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
           {/* Left: type icon + key */}
           <div className="flex items-center gap-2 min-w-0">
             <div className="flex items-center gap-1.5">
-              <TypeIcon type={issue.type} size={12} className="text-muted shrink-0" />
-              <span className="text-[11px] text-muted font-mono tracking-tight">
+              <TypeIcon type={issue.type} size={12} className="text-muted-foreground shrink-0" />
+              <span className="text-[11px] text-muted-foreground font-mono tracking-tight">
                 {formatIssueId(project.key, issue.issue_number)}
               </span>
             </div>

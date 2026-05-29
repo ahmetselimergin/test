@@ -20,7 +20,7 @@ export default async function DashboardPage() {
       <div className="flex items-center justify-center h-full p-6">
         <Card className="w-full max-w-md shadow-panel">
           <CardHeader className="text-center">
-            <div className="size-12 rounded-xl bg-accent-muted flex items-center justify-center mx-auto mb-2">
+            <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
               <span className="text-2xl">🚀</span>
             </div>
             <CardTitle>Create your workspace</CardTitle>

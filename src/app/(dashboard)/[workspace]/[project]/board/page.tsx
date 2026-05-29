@@ -24,7 +24,7 @@ export default async function BoardPage({
 
   if (!project) {
     return (
-      <div className="flex items-center justify-center h-full text-muted">
+      <div className="flex items-center justify-center h-full text-muted-foreground">
         Proje bulunamadı
       </div>
     )
