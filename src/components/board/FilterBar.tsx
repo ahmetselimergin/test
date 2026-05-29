@@ -177,7 +177,7 @@ export function FilterBar({ filters, onChange, members, allLabels }: Props) {
         })}
         {filters.priorities.map(p => (
           <motion.span key={`p-${p}`} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.12 }}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 border border-accent/20 text-accent text-[11px] font-medium shrink-0">
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[11px] font-medium shrink-0">
             <span className={cn('size-[6px] rounded-full', PRIORITY_DOT[p])} />
             {priorityConfig[p].label}
             <button onClick={() => onChange({ ...filters, priorities: filters.priorities.filter(x => x !== p) })} className="hover:opacity-60 transition-opacity"><X size={10} /></button>
@@ -185,7 +185,7 @@ export function FilterBar({ filters, onChange, members, allLabels }: Props) {
         ))}
         {filters.types.map(t => (
           <motion.span key={`t-${t}`} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.12 }}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 border border-accent/20 text-accent text-[11px] font-medium shrink-0">
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[11px] font-medium shrink-0">
             <TypeIcon type={t} size={11} />
             {typeConfig[t].label}
             <button onClick={() => onChange({ ...filters, types: filters.types.filter(x => x !== t) })} className="hover:opacity-60 transition-opacity"><X size={10} /></button>
@@ -193,7 +193,7 @@ export function FilterBar({ filters, onChange, members, allLabels }: Props) {
         ))}
         {filters.labels.map(l => (
           <motion.span key={`l-${l}`} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.12 }}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 border border-accent/20 text-accent text-[11px] font-medium shrink-0">
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[11px] font-medium shrink-0">
             {l}
             <button onClick={() => onChange({ ...filters, labels: filters.labels.filter(x => x !== l) })} className="hover:opacity-60 transition-opacity"><X size={10} /></button>
           </motion.span>
