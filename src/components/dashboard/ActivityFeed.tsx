@@ -57,7 +57,7 @@ function itemLabel(item: ActivityItem): string {
 export function ActivityFeed({ items }: ActivityFeedProps) {
   if (items.length === 0) {
     return (
-      <p className="text-sm text-muted py-4">
+      <p className="text-sm text-muted-foreground py-4">
         Henüz aktivite yok. Issue&apos;ları taşıyınca burada görünür.
       </p>
     )
@@ -70,14 +70,14 @@ export function ActivityFeed({ items }: ActivityFeedProps) {
           <div className="flex flex-col items-center pt-0.5 shrink-0">
             <span className={`size-2 rounded-full border-2 shrink-0 ${dotColor(item.action, item.new_value)}`} />
             {i < items.length - 1 && (
-              <span className="w-px flex-1 bg-[rgb(var(--border))] mt-1" />
+              <span className="w-px flex-1 bg-border mt-1" />
             )}
           </div>
           <div className="pb-3.5 min-w-0">
             <p className="text-[12.5px] text-foreground/80 font-medium leading-snug">
               {itemLabel(item)}
             </p>
-            <p className="text-[11px] text-muted mt-0.5">
+            <p className="text-[11px] text-muted-foreground mt-0.5">
               {timeAgo(item.created_at)}
               {item.actor?.full_name ? ` · ${item.actor.full_name}` : ''}
             </p>

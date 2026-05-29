@@ -64,11 +64,11 @@ export function CreateProjectDialog({ workspaceId }: Props) {
 
   return (
     <Dialog>
-      <DialogTrigger className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-accent text-sm font-medium text-white hover:opacity-90 transition-opacity">
+      <DialogTrigger className="inline-flex items-center gap-2 h-9 px-4 rounded-lg bg-primary text-sm font-medium text-white hover:opacity-90 transition-opacity">
         <Plus size={16} />
         Yeni Proje
       </DialogTrigger>
-      <DialogContent className="max-w-md bg-card border-subtle">
+      <DialogContent className="max-w-md bg-card border-border">
         <DialogHeader>
           <DialogTitle>Proje Oluştur</DialogTitle>
         </DialogHeader>
@@ -181,7 +181,7 @@ export function CreateProjectDialog({ workspaceId }: Props) {
               id="methodology"
               name="methodology"
               defaultValue="both"
-              className="w-full h-9 rounded-lg border border-subtle bg-card px-3 text-sm text-foreground"
+              className="w-full h-9 rounded-lg border border-border bg-card px-3 text-sm text-foreground"
             >
               <option value="both">Kanban + Scrum</option>
               <option value="kanban">Kanban</option>
@@ -211,7 +211,7 @@ export function CreateProjectDialog({ workspaceId }: Props) {
             </div>
           </div>
 
-          <Button type="submit" disabled={uploading} className="w-full bg-accent text-white h-9">
+          <Button type="submit" disabled={uploading} className="w-full bg-primary text-white h-9">
             Oluştur
           </Button>
         </form>

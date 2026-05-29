@@ -39,12 +39,12 @@ export default async function ProjectsPage({
       />
 
       {!projects?.length ? (
-        <div className="flex flex-col items-center justify-center py-24 border border-dashed border-subtle rounded-2xl text-center">
-          <div className="size-14 rounded-2xl bg-accent/10 flex items-center justify-center mb-4">
-            <Kanban size={24} className="text-accent" />
+        <div className="flex flex-col items-center justify-center py-24 border border-dashed border-border rounded-2xl text-center">
+          <div className="size-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
+            <Kanban size={24} className="text-primary" />
           </div>
           <p className="text-[15px] font-semibold text-foreground mb-1">Henüz proje yok</p>
-          <p className="text-sm text-muted mb-5">İlk projeyi oluşturarak başla</p>
+          <p className="text-sm text-muted-foreground mb-5">İlk projeyi oluşturarak başla</p>
           <CreateProjectDialog workspaceId={workspace.id} />
         </div>
       ) : (
@@ -62,7 +62,7 @@ export default async function ProjectsPage({
           })}
 
           {/* Yeni proje yer tutucu */}
-          <div className="rounded-2xl border border-dashed border-subtle hover:border-accent/40 hover:bg-subtle/40 transition-all flex items-center justify-center min-h-[220px]">
+          <div className="rounded-2xl border border-dashed border-border hover:border-primary/40 hover:bg-muted/40 transition-all flex items-center justify-center min-h-[220px]">
             <CreateProjectDialog workspaceId={workspace.id} />
           </div>
         </div>
@@ -91,7 +91,7 @@ function ProjectCard({
   const pat = getPattern(project.pattern)
 
   return (
-    <div className="group rounded-2xl border border-subtle bg-card overflow-hidden hover:border-strong hover:shadow-lg transition-all">
+    <div className="group rounded-2xl border border-border bg-card overflow-hidden hover:border-foreground/20 hover:shadow-lg transition-all">
       {/* Colored header */}
       <div
         className="relative h-28 flex items-start justify-end p-3"
@@ -139,21 +139,21 @@ function ProjectCard({
       {/* Content */}
       <div className="p-4">
         <Link href={`/${slug}/${project.id}/board`}>
-          <h3 className="font-semibold text-[14px] text-foreground group-hover:text-accent transition-colors truncate mb-0.5">
+          <h3 className="font-semibold text-[14px] text-foreground group-hover:text-primary transition-colors truncate mb-0.5">
             {project.name}
           </h3>
         </Link>
         <div className="flex items-center gap-2 mb-3">
-          <span className="font-mono text-[10px] text-muted bg-subtle px-1.5 py-0.5 rounded">
+          <span className="font-mono text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
             {project.key}
           </span>
-          <span className="text-[11px] text-muted">
+          <span className="text-[11px] text-muted-foreground">
             {methodologyLabel[project.methodology] ?? project.methodology}
           </span>
           {issueCount > 0 && (
             <>
-              <span className="text-muted/40">·</span>
-              <span className="text-[11px] text-muted">{issueCount} issue</span>
+              <span className="text-muted-foreground/40">·</span>
+              <span className="text-[11px] text-muted-foreground">{issueCount} issue</span>
             </>
           )}
         </div>

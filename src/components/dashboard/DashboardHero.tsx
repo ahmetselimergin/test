@@ -70,7 +70,7 @@ function StatCard({ count, label, emoji, bgColor, borderColor, textColor, href, 
           >
             {displayed}
           </div>
-          <div className="text-[11px] text-muted mt-1 font-medium">{label}</div>
+          <div className="text-[11px] text-muted-foreground mt-1 font-medium">{label}</div>
         </div>
       </Link>
     </motion.div>
@@ -98,7 +98,7 @@ export function DashboardHero({
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="relative overflow-hidden border-b border-subtle px-8 py-7 shrink-0"
+      className="relative overflow-hidden border-b border-border px-8 py-7 shrink-0"
       style={{
         background: 'linear-gradient(135deg, #1e1b4b 0%, #0f0e1a 60%, rgb(var(--bg)) 100%)',
       }}
@@ -119,7 +119,7 @@ export function DashboardHero({
       <h1 className="text-[22px] font-bold tracking-tight mb-1 relative" style={{ color: '#f0f0f8' }}>
         Hoşgeldin, {firstName} 👋
       </h1>
-      <p className="text-[13px] text-muted mb-6 relative">
+      <p className="text-[13px] text-muted-foreground mb-6 relative">
         Workspace&apos;indeki son durumu buradan takip edebilirsin
       </p>
 

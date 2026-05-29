@@ -120,19 +120,19 @@ export default async function WorkspaceDashboard({
 
       <div className="flex flex-1 min-h-0">
         {/* Projects list */}
-        <div className="flex-[3] overflow-y-auto p-6 border-r border-subtle">
+        <div className="flex-[3] overflow-y-auto p-6 border-r border-border">
           <div className="flex items-center justify-between mb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-accent">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-primary">
               Projeler
             </p>
-            <Link href={`/${slug}/projects`} className="text-[11px] text-accent hover:underline">
+            <Link href={`/${slug}/projects`} className="text-[11px] text-primary hover:underline">
               Tümünü gör →
             </Link>
           </div>
 
           {projectList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-subtle rounded-xl">
-              <p className="text-muted mb-4 text-sm">
+            <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-border rounded-xl">
+              <p className="text-muted-foreground mb-4 text-sm">
                 Henüz proje yok. İlk projeyi oluştur.
               </p>
               <CreateProjectDialog workspaceId={workspace.id} />
@@ -157,7 +157,7 @@ export default async function WorkspaceDashboard({
 
         {/* Activity feed */}
         <div className="flex-[2] overflow-y-auto p-6">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-accent mb-4">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
             Son 24 Saat
           </p>
           <ActivityFeed items={activityItems} />

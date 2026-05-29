@@ -28,7 +28,7 @@ export function ProjectCardActions({ slug, projectId }: Props) {
           <TooltipTrigger className="flex-1">
             <Link
               href={`/${slug}/${projectId}/${href}`}
-              className="flex items-center justify-center h-8 w-full rounded-lg text-muted hover:text-accent hover:bg-accent/8 transition-colors"
+              className="flex items-center justify-center h-8 w-full rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/8 transition-colors"
             >
               <Icon size={14} />
             </Link>

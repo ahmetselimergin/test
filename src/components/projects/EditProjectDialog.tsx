@@ -117,7 +117,7 @@ export function EditProjectDialog({ project }: Props) {
       </button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md bg-card border-subtle">
+        <DialogContent className="max-w-md bg-card border-border">
           <DialogHeader>
             <DialogTitle>Projeyi Düzenle</DialogTitle>
           </DialogHeader>
@@ -129,7 +129,7 @@ export function EditProjectDialog({ project }: Props) {
             <input type="hidden" name="logo_url" value={logoUrl} />
 
             {/* Preview + Logo Upload */}
-            <div className="flex items-center gap-4 p-3 rounded-xl border border-subtle bg-subtle/40">
+            <div className="flex items-center gap-4 p-3 rounded-xl border border-border bg-muted/40">
               <div className="relative group/logo shrink-0">
                 <div
                   className="size-14 rounded-xl flex items-center justify-center text-white font-bold text-xl overflow-hidden"
@@ -167,12 +167,12 @@ export function EditProjectDialog({ project }: Props) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-[14px] font-semibold text-foreground truncate">{name || 'Proje adı'}</p>
-                <p className="text-[11px] text-muted font-mono">{project.key}</p>
+                <p className="text-[11px] text-muted-foreground font-mono">{project.key}</p>
                 <button
                   type="button"
                   onClick={() => fileRef.current?.click()}
                   disabled={uploading || pending}
-                  className="mt-1.5 text-[11px] text-accent hover:underline flex items-center gap-1"
+                  className="mt-1.5 text-[11px] text-primary hover:underline flex items-center gap-1"
                 >
                   <Upload size={10} />
                   {logoUrl ? 'Logoyu değiştir' : 'Logo yükle'}
@@ -223,7 +223,7 @@ export function EditProjectDialog({ project }: Props) {
               </div>
             </div>
 
-            <Button type="submit" disabled={pending || uploading} className="w-full bg-accent text-white h-9">
+            <Button type="submit" disabled={pending || uploading} className="w-full bg-primary text-white h-9">
               {pending ? (
                 <span className="flex items-center gap-2">
                   <Loader2 size={13} className="animate-spin" />
@@ -234,12 +234,12 @@ export function EditProjectDialog({ project }: Props) {
           </form>
 
           {/* Danger zone */}
-          <div className="border-t border-subtle pt-4 mt-2">
+          <div className="border-t border-border pt-4 mt-2">
             {!confirmDelete ? (
               <button
                 type="button"
                 onClick={() => setConfirmDelete(true)}
-                className="flex items-center gap-2 text-[12px] text-muted hover:text-rose-400 transition-colors"
+                className="flex items-center gap-2 text-[12px] text-muted-foreground hover:text-rose-400 transition-colors"
               >
                 <Trash2 size={13} />
                 Projeyi sil
@@ -248,7 +248,7 @@ export function EditProjectDialog({ project }: Props) {
               <div className="space-y-3">
                 <div className="flex items-start gap-2 p-2.5 rounded-lg bg-rose-500/8 border border-rose-500/20">
                   <AlertTriangle size={13} className="text-rose-400 mt-0.5 shrink-0" />
-                  <p className="text-[11px] text-muted">
+                  <p className="text-[11px] text-muted-foreground">
                     Tüm issue&apos;lar silinecek. Onaylamak için{' '}
                     <span className="font-mono font-semibold text-foreground">{project.key}</span>{' '}
                     yazın.
@@ -273,7 +273,7 @@ export function EditProjectDialog({ project }: Props) {
                   <button
                     type="button"
                     onClick={() => { setConfirmDelete(false); setDeleteInput('') }}
-                    className="h-8 px-3 text-[12px] text-muted hover:text-foreground"
+                    className="h-8 px-3 text-[12px] text-muted-foreground hover:text-foreground"
                   >
                     İptal
                   </button>
