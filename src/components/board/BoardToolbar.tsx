@@ -3,6 +3,7 @@
 import { Filter, SlidersHorizontal, LayoutList } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Separator } from '@/components/ui/separator'
 import type { Project } from '@/lib/supabase/types'
 
 interface BoardToolbarProps {
@@ -15,7 +16,7 @@ interface BoardToolbarProps {
 
 export function BoardToolbar({ project, issueCount, filterBarOpen, onFilterToggle, activeFilterCount }: BoardToolbarProps) {
   return (
-    <div className="flex items-center justify-between gap-4 px-6 py-3 border-b border-subtle bg-card/50">
+    <div className="flex items-center justify-between gap-4 px-6 py-3 border-b border-border bg-card/50">
       <div className="flex items-center gap-3 min-w-0">
         <div
           className="size-9 rounded-lg flex items-center justify-center text-xs font-bold text-white shrink-0"
@@ -24,8 +25,8 @@ export function BoardToolbar({ project, issueCount, filterBarOpen, onFilterToggl
           {project.key}
         </div>
         <div className="min-w-0">
-          <h1 className="text-base font-semibold truncate">{project.name}</h1>
-          <p className="text-xs text-muted">
+          <h1 className="text-base font-semibold truncate text-foreground">{project.name}</h1>
+          <p className="text-xs text-muted-foreground">
             Kanban board · <span className="font-mono">{issueCount}</span> issues
           </p>
         </div>
@@ -34,6 +35,7 @@ export function BoardToolbar({ project, issueCount, filterBarOpen, onFilterToggl
         <Badge variant="secondary" className="font-mono text-[11px] hidden sm:inline-flex">
           {project.key}
         </Badge>
+        <Separator orientation="vertical" className="h-5 hidden sm:block" />
         <Button
           variant={filterBarOpen ? 'secondary' : 'outline'}
           size="sm"
@@ -43,9 +45,9 @@ export function BoardToolbar({ project, issueCount, filterBarOpen, onFilterToggl
           <Filter size={14} />
           Filter
           {activeFilterCount > 0 && (
-            <span className="ml-1 size-4 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center">
+            <Badge variant="default" className="ml-1 h-4 min-w-4 px-1 text-[10px] rounded-full">
               {activeFilterCount}
-            </span>
+            </Badge>
           )}
         </Button>
         <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs hidden sm:inline-flex">

@@ -66,10 +66,9 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
         onDoubleClick={() => !overlay && setSelectedIssue(issue)}
         className={cn(
           'group flex flex-col gap-0 rounded-xl border select-none',
-          'bg-[rgb(var(--bg-card))] border-[rgb(var(--border))]',
-          'shadow-[0_1px_4px_rgba(0,0,0,0.12),0_4px_12px_rgba(0,0,0,0.08)]',
-          'hover:shadow-[0_2px_8px_rgba(0,0,0,0.18),0_6px_20px_rgba(0,0,0,0.12)]',
-          'hover:border-[rgb(var(--border-strong))] transition-all duration-200',
+          'bg-card border-border',
+          'shadow-sm',
+          'hover:shadow-md hover:border-foreground/20 transition-all duration-200',
           overlay
             ? 'rotate-[1.5deg] cursor-grabbing opacity-95'
             : 'cursor-grab active:cursor-grabbing',
@@ -98,20 +97,20 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
           )}
 
           {/* Title */}
-          <p className="text-[13.5px] font-semibold leading-snug text-foreground group-hover:text-accent transition-colors line-clamp-2 tracking-[-0.01em]">
+          <p className="text-[13.5px] font-semibold leading-snug text-foreground group-hover:text-primary transition-colors line-clamp-2 tracking-[-0.01em]">
             {issue.title}
           </p>
 
           {/* Description */}
           {plainDescription && (
-            <p className="text-[12px] leading-relaxed text-muted line-clamp-2 opacity-80">
+            <p className="text-[12px] leading-relaxed text-muted-foreground line-clamp-2 opacity-80">
               {plainDescription}
             </p>
           )}
         </div>
 
         {/* Divider */}
-        <div className="h-px bg-[rgb(var(--border))] mx-4" />
+        <div className="h-px bg-border mx-4" />
 
         {/* Footer */}
         <div className="px-4 py-2.5 flex items-center justify-between gap-2">
@@ -128,7 +127,7 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
           {/* Right: estimate + quick actions */}
           <div className="flex items-center gap-2 shrink-0">
             {issue.estimate !== null && (
-              <span className="text-[10.5px] text-muted bg-[rgb(var(--bg-subtle))] border border-[rgb(var(--border))] rounded-md px-1.5 py-0.5 font-medium tabular-nums">
+              <span className="text-[10.5px] text-muted-foreground bg-muted border border-border rounded-md px-1.5 py-0.5 font-medium tabular-nums">
                 {issue.estimate}pt
               </span>
             )}

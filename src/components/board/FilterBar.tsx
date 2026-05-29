@@ -53,25 +53,25 @@ const EMPTY: BoardFilters = { assignees: [], priorities: [], types: [], labels: 
 const chip = (active: boolean) => cn(
   'flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-[12px] font-medium transition-all shrink-0',
   active
-    ? 'border-accent/40 bg-accent/10 text-accent'
-    : 'border-subtle text-muted hover:border-strong hover:text-foreground'
+    ? 'border-primary/40 bg-primary/10 text-primary'
+    : 'border-border text-muted-foreground hover:border-foreground/20 hover:text-foreground'
 )
 
 const row = (active: boolean) => cn(
   'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] transition-colors',
-  active ? 'bg-accent/10 text-accent' : 'hover:bg-subtle text-foreground'
+  active ? 'bg-primary/10 text-primary' : 'hover:bg-muted text-foreground'
 )
 
 export function FilterBar({ filters, onChange, members, allLabels }: Props) {
   return (
-    <div className="flex items-center gap-2 px-6 py-2.5 border-b border-subtle bg-card/30 overflow-x-auto shrink-0">
+    <div className="flex items-center gap-2 px-6 py-2.5 border-b border-border bg-card/30 overflow-x-auto shrink-0">
 
       {/* Assignee */}
       <Popover>
         <PopoverTrigger className={chip(filters.assignees.length > 0)}>
             Atanan
             {filters.assignees.length > 0 && (
-              <span className="size-4 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center">
+              <span className="size-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
                 {filters.assignees.length}
               </span>
             )}
@@ -83,7 +83,7 @@ export function FilterBar({ filters, onChange, members, allLabels }: Props) {
               <Avatar className="size-5 shrink-0">
                 {m.avatar_url
                   ? <img src={m.avatar_url} alt={m.full_name ?? ''} className="size-full object-cover rounded-full" />
-                  : <AvatarFallback className="text-[8px] bg-accent/20 text-accent font-bold">
+                  : <AvatarFallback className="text-[8px] bg-primary/20 text-primary font-bold">
                       {(m.full_name ?? m.email ?? '?').slice(0, 2).toUpperCase()}
                     </AvatarFallback>
                 }
@@ -101,7 +101,7 @@ export function FilterBar({ filters, onChange, members, allLabels }: Props) {
         <PopoverTrigger className={chip(filters.priorities.length > 0)}>
             Öncelik
             {filters.priorities.length > 0 && (
-              <span className="size-4 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center">
+              <span className="size-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
                 {filters.priorities.length}
               </span>
             )}
@@ -123,7 +123,7 @@ export function FilterBar({ filters, onChange, members, allLabels }: Props) {
         <PopoverTrigger className={chip(filters.types.length > 0)}>
             Tür
             {filters.types.length > 0 && (
-              <span className="size-4 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center">
+              <span className="size-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
                 {filters.types.length}
               </span>
             )}
@@ -146,7 +146,7 @@ export function FilterBar({ filters, onChange, members, allLabels }: Props) {
           <PopoverTrigger className={chip(filters.labels.length > 0)}>
               Etiket
               {filters.labels.length > 0 && (
-                <span className="size-4 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center">
+                <span className="size-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center">
                   {filters.labels.length}
                 </span>
               )}
@@ -169,7 +169,7 @@ export function FilterBar({ filters, onChange, members, allLabels }: Props) {
           const m = members.find(x => x.id === id)
           return (
             <motion.span key={`a-${id}`} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.12 }}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-accent/10 border border-accent/20 text-accent text-[11px] font-medium shrink-0">
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-primary/10 border border-primary/20 text-primary text-[11px] font-medium shrink-0">
               {m?.full_name ?? m?.email ?? id}
               <button onClick={() => onChange({ ...filters, assignees: filters.assignees.filter(a => a !== id) })} className="hover:opacity-60 transition-opacity"><X size={10} /></button>
             </motion.span>
