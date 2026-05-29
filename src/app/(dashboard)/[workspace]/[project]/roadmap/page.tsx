@@ -28,7 +28,7 @@ export default async function RoadmapPage({
 
   if (!project) {
     return (
-      <div className="flex items-center justify-center h-full text-muted">
+      <div className="flex items-center justify-center h-full text-muted-foreground">
         Proje bulunamadı
       </div>
     )

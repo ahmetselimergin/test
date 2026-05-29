@@ -22,11 +22,11 @@ export function SprintView() {
       )}
 
       <div className="space-y-4">
-        <h2 className="text-sm font-medium text-muted uppercase tracking-wide">
+        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
           Sprint&apos;ler
         </h2>
         {sprints.length === 0 && (
-          <p className="text-sm text-muted">Henüz sprint yok.</p>
+          <p className="text-sm text-muted-foreground">Henüz sprint yok.</p>
         )}
         {sprints.map((sprint) => (
           <SprintCard

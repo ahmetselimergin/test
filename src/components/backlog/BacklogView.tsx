@@ -62,7 +62,7 @@ export function BacklogView({ project }: { project: Project }) {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Backlog</h1>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-muted">Grupla:</span>
+          <span className="text-sm text-muted-foreground">Grupla:</span>
           <div className="flex gap-1">
             {(Object.keys(groupByLabels) as GroupBy[]).map((key) => (
               <button
@@ -71,7 +71,7 @@ export function BacklogView({ project }: { project: Project }) {
                 className={`px-3 py-1 rounded-md text-xs transition-colors ${
                   groupBy === key
                     ? 'bg-indigo-500/15 text-indigo-400 font-medium'
-                    : 'text-muted hover:bg-white/5'
+                    : 'text-muted-foreground hover:bg-white/5'
                 }`}
               >
                 {groupByLabels[key]}

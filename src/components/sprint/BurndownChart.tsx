@@ -32,7 +32,7 @@ export function BurndownChart({ sprint, issues }: BurndownChartProps) {
   }))
 
   return (
-    <div className="bg-card border border-subtle rounded-xl p-5">
+    <div className="bg-card border border-border rounded-xl p-5">
       <h3 className="text-sm font-medium mb-4">Burndown Chart</h3>
       <ResponsiveContainer width="100%" height={200}>
         <LineChart data={data} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
