@@ -5,6 +5,7 @@ import { Kanban, ListTodo, Map, Timer, ArrowUpRight } from 'lucide-react'
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog'
 import { EditProjectDialog } from '@/components/projects/EditProjectDialog'
 import { PageHeader } from '@/components/layout/PageHeader'
+import { getPattern } from '@/lib/patterns'
 
 export default async function ProjectsPage({
   params,
@@ -74,7 +75,7 @@ function ProjectCard({
   slug,
   issueCount,
 }: {
-  project: { id: string; name: string; key: string; color: string; methodology: string; icon: string | null; logo_url: string | null }
+  project: { id: string; name: string; key: string; color: string; methodology: string; icon: string | null; logo_url: string | null; pattern: string | null }
   slug: string
   issueCount: number
 }) {
@@ -93,6 +94,7 @@ function ProjectCard({
 
   const displayIcon = project.icon || project.key.slice(0, 2)
   const hasLogo = !!project.logo_url
+  const pat = getPattern(project.pattern)
 
   return (
     <div className="group rounded-2xl border border-subtle bg-card overflow-hidden hover:border-strong hover:shadow-lg transition-all">
@@ -101,18 +103,22 @@ function ProjectCard({
         className="relative h-28 flex items-start justify-end p-3"
         style={{ backgroundColor: project.color }}
       >
-        {/* Dot pattern overlay */}
-        <div
-          className="absolute inset-0 opacity-15 pointer-events-none"
-          style={{
-            backgroundImage: `radial-gradient(circle, white 1px, transparent 1px)`,
-            backgroundSize: '20px 20px',
-          }}
-        />
+        {/* Pattern overlay */}
+        {pat.backgroundImage !== 'none' && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              backgroundImage: pat.backgroundImage,
+              backgroundSize: pat.backgroundSize,
+              backgroundPosition: pat.backgroundPosition ?? '0 0',
+              opacity: pat.opacity,
+            }}
+          />
+        )}
 
         {/* Edit button — top right */}
         <div className="relative z-10 opacity-0 group-hover:opacity-100 transition-opacity">
-          <EditProjectDialog project={{ id: project.id, name: project.name, key: project.key, color: project.color, logo_url: project.logo_url }} />
+          <EditProjectDialog project={{ id: project.id, name: project.name, key: project.key, color: project.color, logo_url: project.logo_url, pattern: project.pattern }} />
         </div>
 
         {/* Logo / icon — bottom left */}

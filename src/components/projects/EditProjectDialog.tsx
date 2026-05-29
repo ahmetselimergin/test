@@ -6,6 +6,8 @@ import { toast } from 'sonner'
 import { Settings2, Loader2, Upload, X } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { updateProjectSettings } from '@/app/actions/workspace'
+import { PatternPicker } from '@/components/projects/PatternPicker'
+import { getPattern } from '@/lib/patterns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -29,6 +31,7 @@ interface Props {
     key: string
     color: string
     logo_url: string | null
+    pattern: string | null
   }
 }
 
@@ -38,6 +41,7 @@ export function EditProjectDialog({ project }: Props) {
   const [state, action, pending] = useActionState(updateProjectSettings, null)
   const [name, setName] = useState(project.name)
   const [color, setColor] = useState(project.color)
+  const [pattern, setPattern] = useState(project.pattern ?? 'dots')
   const [logoUrl, setLogoUrl] = useState(project.logo_url ?? '')
   const [uploading, setUploading] = useState(false)
   const fileRef = useRef<HTMLInputElement>(null)
@@ -47,6 +51,7 @@ export function EditProjectDialog({ project }: Props) {
     if (!open) return
     setName(project.name)
     setColor(project.color)
+    setPattern(project.pattern ?? 'dots')
     setLogoUrl(project.logo_url ?? '')
   }, [open, project])
 
@@ -107,6 +112,7 @@ export function EditProjectDialog({ project }: Props) {
           <form action={action} className="space-y-4">
             <input type="hidden" name="project_id" value={project.id} />
             <input type="hidden" name="color" value={color} />
+            <input type="hidden" name="pattern" value={pattern} />
             <input type="hidden" name="logo_url" value={logoUrl} />
 
             {/* Preview + Logo Upload */}
@@ -182,19 +188,25 @@ export function EditProjectDialog({ project }: Props) {
               />
             </div>
 
-            {/* Color */}
-            <div className="space-y-2">
-              <Label className="text-[12px]">Arka plan rengi</Label>
-              <div className="flex flex-wrap gap-2">
-                {PRESET_COLORS.map((c) => (
-                  <button
-                    key={c}
-                    type="button"
-                    onClick={() => setColor(c)}
-                    className="size-7 rounded-lg transition-all hover:scale-110"
-                    style={{ backgroundColor: c, outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: '2px' }}
-                  />
-                ))}
+            {/* Renk + Pattern */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label className="text-[12px]">Arka plan rengi</Label>
+                <div className="flex flex-wrap gap-1.5">
+                  {PRESET_COLORS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setColor(c)}
+                      className="size-6 rounded-md transition-all hover:scale-110"
+                      style={{ backgroundColor: c, outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: '2px' }}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Label className="text-[12px]">Desen</Label>
+                <PatternPicker color={color} selected={pattern} onChange={setPattern} />
               </div>
             </div>
 

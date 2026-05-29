@@ -27,7 +27,8 @@
       "mcp__plugin_playwright_playwright__browser_navigate",
       "mcp__plugin_playwright_playwright__browser_take_screenshot",
       "Bash(node -e \"const t = require\\('/Users/ahmetselim/Desktop/test/node_modules/@base-ui/react/popover'\\); console.log\\(Object.keys\\(t\\)\\)\")",
-      "Bash(xargs cat)"
+      "Bash(xargs cat)",
+      "Bash(git -C /Users/ahmetselim/Desktop/test status --short)"
     ],
     "additionalDirectories": [
       "/Users/ahmetselim/Desktop/test/docs/superpowers/specs"

@@ -24,6 +24,7 @@ export interface Project {
   color: string
   icon: string | null
   logo_url: string | null
+  pattern: string | null
   created_at: string
 }
 

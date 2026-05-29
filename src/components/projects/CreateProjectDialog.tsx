@@ -4,6 +4,8 @@ import { useRef, useState } from 'react'
 import { Plus, Upload, X, Loader2 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { createProjectAction } from '@/app/actions/workspace'
+import { PatternPicker } from '@/components/projects/PatternPicker'
+import { getPattern } from '@/lib/patterns'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -27,6 +29,7 @@ interface Props {
 
 export function CreateProjectDialog({ workspaceId }: Props) {
   const [color, setColor] = useState('#6366f1')
+  const [pattern, setPattern] = useState('dots')
   const [name, setName] = useState('')
   const [key, setKey] = useState('')
   const [logoUrl, setLogoUrl] = useState('')
@@ -35,6 +38,8 @@ export function CreateProjectDialog({ workspaceId }: Props) {
 
   const autoKey = (n: string) =>
     n.split(' ').map((w) => w[0]).join('').slice(0, 4).toUpperCase()
+
+  const pat = getPattern(pattern)
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -73,57 +78,66 @@ export function CreateProjectDialog({ workspaceId }: Props) {
         >
           <input type="hidden" name="workspace_id" value={workspaceId} />
           <input type="hidden" name="color" value={color} />
+          <input type="hidden" name="pattern" value={pattern} />
           <input type="hidden" name="logo_url" value={logoUrl} />
 
-          {/* Preview + Logo Upload */}
-          <div className="flex items-center gap-4 p-3 rounded-xl border border-subtle bg-subtle/40">
-            <div className="relative group/logo shrink-0">
+          {/* Card header preview */}
+          <div className="relative h-20 rounded-xl overflow-hidden" style={{ backgroundColor: color }}>
+            {pat.backgroundImage !== 'none' && (
               <div
-                className="size-14 rounded-xl flex items-center justify-center text-white font-bold text-xl overflow-hidden transition-colors"
-                style={{ backgroundColor: logoUrl ? 'transparent' : color }}
-              >
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  backgroundImage: pat.backgroundImage,
+                  backgroundSize: pat.backgroundSize,
+                  backgroundPosition: pat.backgroundPosition ?? '0 0',
+                  opacity: pat.opacity,
+                }}
+              />
+            )}
+            {/* Logo avatar inside preview */}
+            <div className="absolute bottom-2 left-3">
+              <div className="relative group/logo size-10 rounded-lg bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white font-bold overflow-hidden">
                 {logoUrl ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={logoUrl} alt="logo" className="size-full object-cover rounded-xl" />
+                  <img src={logoUrl} alt="logo" className="size-full object-cover" />
                 ) : (
-                  <span>{key || autoKey(name) || '?'}</span>
+                  <span className="text-sm">{key || autoKey(name) || '?'}</span>
                 )}
-              </div>
-              {/* Upload overlay */}
-              <button
-                type="button"
-                onClick={() => fileRef.current?.click()}
-                disabled={uploading}
-                className="absolute inset-0 rounded-xl bg-black/50 opacity-0 group-hover/logo:opacity-100 transition-opacity flex items-center justify-center"
-              >
-                {uploading
-                  ? <Loader2 size={16} className="text-white animate-spin" />
-                  : <Upload size={16} className="text-white" />
-                }
-              </button>
-              {logoUrl && (
                 <button
                   type="button"
-                  onClick={() => setLogoUrl('')}
-                  className="absolute -top-1.5 -right-1.5 size-5 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 transition-colors z-10"
+                  onClick={() => fileRef.current?.click()}
+                  disabled={uploading}
+                  className="absolute inset-0 bg-black/50 opacity-0 group-hover/logo:opacity-100 transition-opacity flex items-center justify-center rounded-lg"
                 >
-                  <X size={10} />
+                  {uploading
+                    ? <Loader2 size={12} className="text-white animate-spin" />
+                    : <Upload size={12} className="text-white" />
+                  }
                 </button>
-              )}
+              </div>
             </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[14px] font-semibold text-foreground truncate">{name || 'Proje adı'}</p>
-              <p className="text-[11px] text-muted">{key || autoKey(name) || 'Önizleme'}</p>
+            {logoUrl && (
               <button
                 type="button"
-                onClick={() => fileRef.current?.click()}
-                disabled={uploading}
-                className="mt-1.5 text-[11px] text-accent hover:underline flex items-center gap-1"
+                onClick={() => setLogoUrl('')}
+                className="absolute bottom-4 left-10 size-4 rounded-full bg-rose-500 text-white flex items-center justify-center hover:bg-rose-600 z-10"
               >
-                <Upload size={10} />
-                {logoUrl ? 'Logoyu değiştir' : 'Logo yükle'}
+                <X size={8} />
               </button>
+            )}
+            <div className="absolute bottom-2 left-16 text-white">
+              <p className="text-[12px] font-semibold truncate">{name || 'Proje adı'}</p>
+              <p className="text-[10px] text-white/60 font-mono">{key || autoKey(name) || 'KEY'}</p>
             </div>
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              disabled={uploading}
+              className="absolute top-2 right-2 text-[10px] text-white/70 hover:text-white flex items-center gap-1 bg-black/20 hover:bg-black/40 px-2 py-1 rounded-md transition-colors"
+            >
+              <Upload size={10} />
+              {logoUrl ? 'Logo değiştir' : 'Logo ekle'}
+            </button>
           </div>
           <input
             ref={fileRef}
@@ -175,19 +189,25 @@ export function CreateProjectDialog({ workspaceId }: Props) {
             </select>
           </div>
 
-          {/* Color */}
-          <div className="space-y-2">
-            <Label className="text-[12px]">Arka plan rengi</Label>
-            <div className="flex flex-wrap gap-2">
-              {PRESET_COLORS.map((c) => (
-                <button
-                  key={c}
-                  type="button"
-                  onClick={() => setColor(c)}
-                  className="size-7 rounded-lg transition-all hover:scale-110"
-                  style={{ backgroundColor: c, outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: '2px' }}
-                />
-              ))}
+          {/* Renk + Pattern yan yana */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label className="text-[12px]">Renk</Label>
+              <div className="flex flex-wrap gap-1.5">
+                {PRESET_COLORS.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => setColor(c)}
+                    className="size-6 rounded-md transition-all hover:scale-110"
+                    style={{ backgroundColor: c, outline: color === c ? `2px solid ${c}` : 'none', outlineOffset: '2px' }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label className="text-[12px]">Desen</Label>
+              <PatternPicker color={color} selected={pattern} onChange={setPattern} />
             </div>
           </div>
 
