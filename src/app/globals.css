@@ -1,108 +1,111 @@
 @import "tailwindcss";
 @import "shadcn/tailwind.css";
 
+/* @theme inline — CSS değişkenlerini Tailwind class'larına bağlar (runtime override'a izin verir) */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+}
+
 @layer base {
   :root {
-    --bg: 248 248 250;
-    --bg-elevated: 255 255 255;
-    --bg-card: 255 255 255;
-    --bg-subtle: 241 245 249;
-    --bg-muted: 228 228 231;
-    --border: 228 228 231;
-    --border-strong: 161 161 170;
-    --text: 9 9 11;
-    --text-muted: 113 113 122;
-    --accent: 99 102 241;
-    --accent-hover: 79 70 229;
-    --accent-muted: 238 242 255;
+    --background: #f8f8fa;
+    --foreground: #09090b;
+    --card: #ffffff;
+    --card-foreground: #09090b;
+    --popover: #ffffff;
+    --popover-foreground: #09090b;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #f1f5f9;
+    --secondary-foreground: #09090b;
+    --muted: #f1f5f9;
+    --muted-foreground: #71717a;
+    --accent: #f1f5f9;
+    --accent-foreground: #09090b;
+    --destructive: #f43f5e;
+    --destructive-foreground: #ffffff;
+    --border: #e4e4e7;
+    --input: #e4e4e7;
+    --ring: #6366f1;
+    --sidebar: #f8f8fa;
+    --sidebar-foreground: #09090b;
+    --sidebar-border: #e4e4e7;
+    --sidebar-accent: #f1f5f9;
+    --sidebar-accent-foreground: #09090b;
     --sidebar-w: 220px;
     --header-h: 44px;
-    --radius-lg: 10px;
-    --shadow-panel: 0 8px 30px rgba(9, 9, 11, 0.08);
-    /* shadcn/base-ui compat */
-    --popover: 255 255 255;
-    --popover-foreground: 9 9 11;
   }
 
   .dark {
-    --bg: 8 8 10;
-    --bg-elevated: 16 16 20;
-    --bg-card: 22 22 28;
-    --bg-subtle: 13 13 16;
-    --bg-muted: 34 34 42;
-    --border: 38 38 46;
-    --border-strong: 58 58 68;
-    --text: 248 248 250;
-    --text-muted: 120 120 132;
-    --accent: 99 102 241;
-    --accent-hover: 129 140 248;
-    --accent-muted: 30 27 75;
-    --shadow-panel: 0 16px 48px rgba(0, 0, 0, 0.5);
-    /* shadcn/base-ui compat */
-    --popover: 28 28 36;
-    --popover-foreground: 248 248 250;
+    --background: #08080a;
+    --foreground: #f8f8fa;
+    --card: #16161c;
+    --card-foreground: #f8f8fa;
+    --popover: #1c1c24;
+    --popover-foreground: #f8f8fa;
+    --primary: #6366f1;
+    --primary-foreground: #ffffff;
+    --secondary: #1e1e26;
+    --secondary-foreground: #f8f8fa;
+    --muted: #1e1e26;
+    --muted-foreground: #78788c;
+    --accent: #262630;
+    --accent-foreground: #f8f8fa;
+    --destructive: #f43f5e;
+    --destructive-foreground: #ffffff;
+    --border: #26262e;
+    --input: #26262e;
+    --ring: #818cf8;
+    --sidebar: #0d0d10;
+    --sidebar-foreground: #f8f8fa;
+    --sidebar-border: #26262e;
+    --sidebar-accent: #1a1a22;
+    --sidebar-accent-foreground: #f8f8fa;
   }
 
   * {
-    border-color: rgb(var(--border));
+    border-color: var(--color-border, #e4e4e7);
     transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   body {
-    background-color: rgb(var(--bg));
-    color: rgb(var(--text));
+    background-color: var(--color-background);
+    color: var(--color-foreground);
     font-family: var(--font-inter), system-ui, sans-serif;
     font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
   }
 
-  code,
-  .font-mono {
+  code, .font-mono {
     font-family: var(--font-mono), ui-monospace, monospace;
   }
 }
 
 @layer utilities {
-  .surface-elevated {
-    background-color: rgb(var(--bg-elevated));
-  }
-  .bg-card {
-    background-color: rgb(var(--bg-card));
-  }
-  .bg-subtle {
-    background-color: rgb(var(--bg-subtle));
-  }
-  .text-muted {
-    color: rgb(var(--text-muted));
-  }
-  .border-subtle {
-    border-color: rgb(var(--border));
-  }
-  .border-strong {
-    border-color: rgb(var(--border-strong));
-  }
-  .text-accent {
-    color: rgb(var(--accent));
-  }
-  .bg-accent {
-    background-color: rgb(var(--accent));
-  }
-  .bg-accent-muted {
-    background-color: rgb(var(--accent-muted) / 0.35);
-  }
-  .shadow-panel {
-    box-shadow: var(--shadow-panel);
-  }
-  .issue-priority-critical {
-    border-left: 3px solid rgb(244 63 94);
-  }
-  .issue-priority-high {
-    border-left: 3px solid rgb(251 146 60);
-  }
-  .issue-priority-medium {
-    border-left: 3px solid rgb(250 204 21);
-  }
-  .issue-priority-low {
-    border-left: 3px solid rgb(148 163 184);
-  }
-  .grid-board-bg {}
+  .issue-priority-critical { border-left: 3px solid #f43f5e; }
+  .issue-priority-high     { border-left: 3px solid #fb923c; }
+  .issue-priority-medium   { border-left: 3px solid #fbbf24; }
+  .issue-priority-low      { border-left: 3px solid #94a3b8; }
 }
