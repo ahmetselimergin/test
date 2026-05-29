@@ -94,17 +94,17 @@ export default async function TeamPage({
               <select
                 name="role"
                 defaultValue="member"
-                className="h-10 rounded-lg border border-subtle bg-card px-3 text-sm sm:w-36"
+                className="h-10 rounded-lg border border-border bg-card px-3 text-sm sm:w-36"
               >
                 <option value="member">Member</option>
                 <option value="admin">Admin</option>
                 <option value="viewer">Viewer</option>
               </select>
-              <Button type="submit" className="bg-accent text-white shrink-0">
+              <Button type="submit" className="shrink-0">
                 Invite
               </Button>
             </form>
-            <p className="text-xs text-muted mt-3">
+            <p className="text-xs text-muted-foreground mt-3">
               User must already have a FlowTrack account with this email.
             </p>
           </CardContent>
@@ -118,7 +118,7 @@ export default async function TeamPage({
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
-          <ul className="divide-y divide-subtle">
+          <ul className="divide-y divide-border">
             {members?.map((member) => {
               const profile = profileMap.get(member.user_id)
               const name =
@@ -132,7 +132,7 @@ export default async function TeamPage({
                   className="flex items-center gap-4 px-6 py-4"
                 >
                   <Avatar>
-                    <AvatarFallback className="bg-accent-muted text-accent text-xs font-medium">
+                    <AvatarFallback className="bg-primary/10 text-primary text-xs font-medium">
                       {initials}
                     </AvatarFallback>
                   </Avatar>
@@ -140,10 +140,10 @@ export default async function TeamPage({
                     <p className="font-medium truncate">
                       {name}
                       {isSelf && (
-                        <span className="text-muted font-normal ml-1">(you)</span>
+                        <span className="text-muted-foreground font-normal ml-1">(you)</span>
                       )}
                     </p>
-                    <p className="text-xs text-muted truncate">{profile?.email}</p>
+                    <p className="text-xs text-muted-foreground truncate">{profile?.email}</p>
                   </div>
                   <Badge variant="secondary">{roleLabels[member.role as Role]}</Badge>
                   {canManage && !isSelf && member.role !== 'owner' && (

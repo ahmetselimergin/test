@@ -27,7 +27,7 @@ export default function RegisterPage() {
     <div>
       <div className="mb-7">
         <h1 className="text-lg font-medium tracking-tight mb-1">Create account</h1>
-        <p className="text-sm text-muted">Start tracking work with your team</p>
+        <p className="text-sm text-muted-foreground">Start tracking work with your team</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
@@ -37,7 +37,7 @@ export default function RegisterPage() {
             name="name"
             required
             placeholder="Alex Morgan"
-            className="h-10 border-[rgb(var(--border-strong))] bg-[rgb(var(--bg-card))]"
+            className="h-10"
           />
         </div>
         <div className="space-y-1.5">
@@ -48,7 +48,7 @@ export default function RegisterPage() {
             type="email"
             required
             placeholder="you@company.com"
-            className="h-10 border-[rgb(var(--border-strong))] bg-[rgb(var(--bg-card))]"
+            className="h-10"
           />
         </div>
         <div className="space-y-1.5">
@@ -60,7 +60,7 @@ export default function RegisterPage() {
             required
             minLength={6}
             placeholder="Min. 6 characters"
-            className="h-10 border-[rgb(var(--border-strong))] bg-[rgb(var(--bg-card))]"
+            className="h-10"
           />
         </div>
         {error && (
@@ -71,7 +71,7 @@ export default function RegisterPage() {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full h-10 bg-accent text-white hover:brightness-110"
+          className="w-full h-10"
         >
           {loading ? (
             <>
@@ -83,9 +83,9 @@ export default function RegisterPage() {
           )}
         </Button>
       </form>
-      <p className="text-center text-sm text-muted mt-6">
+      <p className="text-center text-sm text-muted-foreground mt-6">
         Already have an account?{' '}
-        <Link href="/login" className="text-accent font-medium hover:underline">
+        <Link href="/login" className="text-primary font-medium hover:underline">
           Sign in
         </Link>
       </p>

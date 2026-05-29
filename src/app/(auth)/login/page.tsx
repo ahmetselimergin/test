@@ -27,7 +27,7 @@ export default function LoginPage() {
     <div>
       <div className="mb-7">
         <h1 className="text-lg font-medium tracking-tight mb-1">Sign in</h1>
-        <p className="text-sm text-muted">Enter your credentials to continue</p>
+        <p className="text-sm text-muted-foreground">Enter your credentials to continue</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
@@ -38,7 +38,7 @@ export default function LoginPage() {
             type="email"
             required
             placeholder="you@company.com"
-            className="h-10 border-[rgb(var(--border-strong))] bg-[rgb(var(--bg-card))]"
+            className="h-10"
           />
         </div>
         <div className="space-y-1.5">
@@ -49,7 +49,7 @@ export default function LoginPage() {
             type="password"
             required
             placeholder="••••••••"
-            className="h-10 border-[rgb(var(--border-strong))] bg-[rgb(var(--bg-card))]"
+            className="h-10"
           />
         </div>
         {error && (
@@ -60,7 +60,7 @@ export default function LoginPage() {
         <Button
           type="submit"
           disabled={loading}
-          className="w-full h-10 bg-accent text-white hover:brightness-110"
+          className="w-full h-10"
         >
           {loading ? (
             <>
@@ -72,9 +72,9 @@ export default function LoginPage() {
           )}
         </Button>
       </form>
-      <p className="text-center text-sm text-muted mt-6">
+      <p className="text-center text-sm text-muted-foreground mt-6">
         No account?{' '}
-        <Link href="/register" className="text-accent font-medium hover:underline">
+        <Link href="/register" className="text-primary font-medium hover:underline">
           Create one
         </Link>
       </p>

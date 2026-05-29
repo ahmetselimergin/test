@@ -36,7 +36,7 @@ export function CreateWorkspaceForm() {
       <Button
         type="submit"
         disabled={isPending}
-        className="w-full h-10 bg-accent text-white hover:opacity-90"
+        className="w-full h-10"
       >
         {isPending ? 'Creating…' : 'Create workspace'}
       </Button>

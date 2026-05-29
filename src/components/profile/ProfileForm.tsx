@@ -44,7 +44,7 @@ export function ProfileForm({ displayName, jobTitle, email }: ProfileFormProps) 
       {state?.error && (
         <p className="text-sm text-red-500">{state.error}</p>
       )}
-      <Button type="submit" className="bg-accent text-white">
+      <Button type="submit">
         Save profile
       </Button>
     </form>

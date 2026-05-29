@@ -55,7 +55,7 @@ export function WorkspaceSettingsForm({ workspaceId, name, color }: Props) {
       <input type="hidden" name="color" value={selectedColor} />
 
       {/* Preview */}
-      <div className="flex items-center gap-3 p-3 rounded-xl bg-subtle/60 border border-subtle">
+      <div className="flex items-center gap-3 p-3 rounded-xl bg-muted/60 border border-border">
         <div
           className="size-10 rounded-xl flex items-center justify-center text-white font-bold text-[15px] shrink-0 transition-colors"
           style={{ backgroundColor: selectedColor }}
@@ -64,7 +64,7 @@ export function WorkspaceSettingsForm({ workspaceId, name, color }: Props) {
         </div>
         <div>
           <p className="text-[13px] font-semibold text-foreground">{nameValue || 'Workspace adı'}</p>
-          <p className="text-[11px] text-muted">Workspace önizlemesi</p>
+          <p className="text-[11px] text-muted-foreground">Workspace önizlemesi</p>
         </div>
       </div>
 
@@ -98,7 +98,7 @@ export function WorkspaceSettingsForm({ workspaceId, name, color }: Props) {
         </div>
       </div>
 
-      <Button type="submit" disabled={pending} className="bg-accent text-white min-w-24 h-9">
+      <Button type="submit" disabled={pending} className="min-w-24 h-9">
         {pending ? (
           <span className="flex items-center gap-2">
             <Loader2 size={13} className="animate-spin" />

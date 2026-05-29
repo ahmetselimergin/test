@@ -48,7 +48,7 @@ export function DangerZone({ workspaceId, workspaceName }: Props) {
         <AlertTriangle size={15} className="text-rose-400 mt-0.5 shrink-0" />
         <div>
           <p className="text-[13px] font-medium text-rose-400">Bu işlem geri alınamaz</p>
-          <p className="text-[12px] text-muted mt-0.5">
+          <p className="text-[12px] text-muted-foreground mt-0.5">
             <span className="font-semibold text-foreground">{workspaceName}</span> workspace'i ve içindeki tüm projeler, issue'lar kalıcı olarak silinecek.
           </p>
         </div>
@@ -73,8 +73,9 @@ export function DangerZone({ workspaceId, workspaceName }: Props) {
         <div className="flex gap-2">
           <Button
             type="submit"
+            variant="destructive"
             disabled={pending || confirmation !== 'SİL'}
-            className="bg-rose-500 hover:bg-rose-600 text-white h-9 text-[13px] min-w-28"
+            className="h-9 text-[13px] min-w-28"
           >
             {pending ? (
               <span className="flex items-center gap-2">

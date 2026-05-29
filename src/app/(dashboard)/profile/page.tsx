@@ -40,20 +40,20 @@ export default async function ProfilePage() {
     : user.email?.[0]?.toUpperCase() ?? '?'
 
   return (
-    <div className="p-8 max-w-lg mx-auto">
+    <div className="p-8 max-w-2xl mx-auto">
       <PageHeader title="Profile" description="Your personal account settings" />
 
       <Card>
         <CardHeader>
           <div className="flex items-center gap-4">
-            <Avatar className="size-14">
-              <AvatarFallback className="bg-accent-muted text-accent text-lg font-semibold">
+            <Avatar className="size-20">
+              <AvatarFallback className="bg-primary/10 text-primary text-lg font-semibold">
                 {initials}
               </AvatarFallback>
             </Avatar>
             <div>
               <CardTitle className="text-base">{displayName || 'Unnamed'}</CardTitle>
-              <p className="text-sm text-muted">{user.email}</p>
+              <p className="text-sm text-muted-foreground">{user.email}</p>
             </div>
           </div>
         </CardHeader>

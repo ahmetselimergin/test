@@ -71,18 +71,18 @@ export default async function WorkspaceSettingsPage({
             <CardContent>
               <Link
                 href="/profile"
-                className="flex items-center justify-between p-3 rounded-xl border border-subtle hover:bg-subtle/60 transition-colors group"
+                className="flex items-center justify-between p-3 rounded-xl border border-border hover:bg-muted/60 transition-colors group"
               >
                 <div className="flex items-center gap-2.5">
-                  <div className="size-8 rounded-lg bg-accent/10 flex items-center justify-center">
-                    <User size={14} className="text-accent" />
+                  <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center">
+                    <User size={14} className="text-primary" />
                   </div>
                   <div>
                     <p className="text-[13px] font-medium text-foreground">Profilini yönet</p>
-                    <p className="text-[11px] text-muted">Ad, unvan ve e-posta</p>
+                    <p className="text-[11px] text-muted-foreground">Ad, unvan ve e-posta</p>
                   </div>
                 </div>
-                <ExternalLink size={13} className="text-muted group-hover:text-foreground transition-colors" />
+                <ExternalLink size={13} className="text-muted-foreground group-hover:text-foreground transition-colors" />
               </Link>
             </CardContent>
           </Card>
