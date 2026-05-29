@@ -1,9 +1,10 @@
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { Kanban, ListTodo, Map, Timer, ArrowUpRight } from 'lucide-react'
+import { Kanban, ArrowUpRight } from 'lucide-react'
 import { CreateProjectDialog } from '@/components/projects/CreateProjectDialog'
 import { EditProjectDialog } from '@/components/projects/EditProjectDialog'
+import { ProjectCardActions } from '@/components/projects/ProjectCardActions'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { getPattern } from '@/lib/patterns'
 
@@ -79,13 +80,6 @@ function ProjectCard({
   slug: string
   issueCount: number
 }) {
-  const views = [
-    { href: 'board', icon: Kanban, label: 'Board' },
-    { href: 'backlog', icon: ListTodo, label: 'Backlog' },
-    { href: 'sprint', icon: Timer, label: 'Sprint' },
-    { href: 'roadmap', icon: Map, label: 'Roadmap' },
-  ]
-
   const methodologyLabel: Record<string, string> = {
     kanban: 'Kanban',
     scrum: 'Scrum',
@@ -164,19 +158,7 @@ function ProjectCard({
           )}
         </div>
 
-        {/* Quick links */}
-        <div className="flex gap-1">
-          {views.map(({ href, icon: Icon, label }) => (
-            <Link
-              key={href}
-              href={`/${slug}/${project.id}/${href}`}
-              title={label}
-              className="flex-1 flex items-center justify-center h-8 rounded-lg text-muted hover:text-accent hover:bg-accent/8 transition-colors"
-            >
-              <Icon size={14} />
-            </Link>
-          ))}
-        </div>
+        <ProjectCardActions slug={slug} projectId={project.id} />
       </div>
     </div>
   )
