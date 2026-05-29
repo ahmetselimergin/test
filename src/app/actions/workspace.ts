@@ -210,6 +210,29 @@ export async function updateProjectSettings(
   return { success: true }
 }
 
+export async function deleteProject(formData: FormData) {
+  const supabase = await createClient()
+  const projectId = formData.get('project_id') as string
+
+  const { data: project } = await supabase
+    .from('projects')
+    .select('workspace_id, workspaces(slug)')
+    .eq('id', projectId)
+    .single()
+
+  const { error } = await supabase
+    .from('projects')
+    .delete()
+    .eq('id', projectId)
+
+  if (error) return { error: error.message }
+
+  const slug = (project?.workspaces as unknown as { slug: string } | null)?.slug
+  if (slug) revalidatePath(`/${slug}/projects`)
+
+  redirect(`/${slug}/projects`)
+}
+
 export async function deleteWorkspace(
   _prevState: { error?: string; success?: boolean } | null,
   formData: FormData,

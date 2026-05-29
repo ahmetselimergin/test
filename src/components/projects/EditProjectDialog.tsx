@@ -3,9 +3,9 @@
 import { useActionState, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
-import { Settings2, Loader2, Upload, X } from 'lucide-react'
+import { Settings2, Loader2, Upload, X, Trash2, AlertTriangle } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
-import { updateProjectSettings } from '@/app/actions/workspace'
+import { updateProjectSettings, deleteProject } from '@/app/actions/workspace'
 import { PatternPicker } from '@/components/projects/PatternPicker'
 import { getPattern } from '@/lib/patterns'
 import { Button } from '@/components/ui/button'
@@ -38,6 +38,9 @@ interface Props {
 export function EditProjectDialog({ project }: Props) {
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+  const [deleteInput, setDeleteInput] = useState('')
+  const [deleting, setDeleting] = useState(false)
   const [state, action, pending] = useActionState(updateProjectSettings, null)
   const [name, setName] = useState(project.name)
   const [color, setColor] = useState(project.color)
@@ -53,7 +56,17 @@ export function EditProjectDialog({ project }: Props) {
     setColor(project.color)
     setPattern(project.pattern ?? 'dots')
     setLogoUrl(project.logo_url ?? '')
+    setConfirmDelete(false)
+    setDeleteInput('')
   }, [open, project])
+
+  async function handleDelete() {
+    if (deleteInput !== project.key) return
+    setDeleting(true)
+    const fd = new FormData()
+    fd.append('project_id', project.id)
+    await deleteProject(fd)
+  }
 
   useEffect(() => {
     if (pending) {
@@ -219,6 +232,55 @@ export function EditProjectDialog({ project }: Props) {
               ) : 'Kaydet'}
             </Button>
           </form>
+
+          {/* Danger zone */}
+          <div className="border-t border-subtle pt-4 mt-2">
+            {!confirmDelete ? (
+              <button
+                type="button"
+                onClick={() => setConfirmDelete(true)}
+                className="flex items-center gap-2 text-[12px] text-muted hover:text-rose-400 transition-colors"
+              >
+                <Trash2 size={13} />
+                Projeyi sil
+              </button>
+            ) : (
+              <div className="space-y-3">
+                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-rose-500/8 border border-rose-500/20">
+                  <AlertTriangle size={13} className="text-rose-400 mt-0.5 shrink-0" />
+                  <p className="text-[11px] text-muted">
+                    Tüm issue&apos;lar silinecek. Onaylamak için{' '}
+                    <span className="font-mono font-semibold text-foreground">{project.key}</span>{' '}
+                    yazın.
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    value={deleteInput}
+                    onChange={(e) => setDeleteInput(e.target.value.toUpperCase())}
+                    placeholder={project.key}
+                    className="h-8 text-[12px] font-mono uppercase flex-1"
+                    disabled={deleting}
+                  />
+                  <Button
+                    type="button"
+                    onClick={handleDelete}
+                    disabled={deleteInput !== project.key || deleting}
+                    className="h-8 bg-rose-500 hover:bg-rose-600 text-white text-[12px] px-3 shrink-0"
+                  >
+                    {deleting ? <Loader2 size={12} className="animate-spin" /> : 'Sil'}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => { setConfirmDelete(false); setDeleteInput('') }}
+                    className="h-8 px-3 text-[12px] text-muted hover:text-foreground"
+                  >
+                    İptal
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
     </>
