@@ -42,8 +42,8 @@ function ToolbarButton({
       className={cn(
         'size-6 flex items-center justify-center rounded transition-colors',
         active
-          ? 'bg-accent/20 text-accent'
-          : 'text-muted hover:text-foreground hover:bg-subtle'
+          ? 'bg-primary/20 text-primary'
+          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
       )}
     >
       {children}
@@ -95,8 +95,8 @@ export function IssueEditor(props: IssueEditorProps) {
   if (!editor) return null
 
   return (
-    <div className="rounded-lg border border-subtle bg-[rgb(var(--bg-subtle)/0.5)] overflow-hidden focus-within:border-accent/40 transition-colors">
-      <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-subtle">
+    <div className="rounded-lg border border-border bg-muted/50 overflow-hidden focus-within:border-primary/40 transition-colors">
+      <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-border">
         <ToolbarButton
           onClick={() => editor.chain().focus().toggleBold().run()}
           active={editor.isActive('bold')}

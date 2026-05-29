@@ -130,8 +130,8 @@ export function CreateIssueDialog({
     cn(
       'flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[12px] font-medium border transition-all cursor-pointer select-none',
       active
-        ? 'border-accent/40 bg-accent/10 text-accent'
-        : 'border-subtle bg-transparent text-muted hover:border-strong hover:text-foreground'
+        ? 'border-primary/40 bg-primary/10 text-primary'
+        : 'border-border bg-transparent text-muted-foreground hover:border-foreground/20 hover:text-foreground'
     )
 
   return (
@@ -158,7 +158,7 @@ export function CreateIssueDialog({
                 }}
                 placeholder="Issue başlığı..."
                 rows={1}
-                className="flex-1 resize-none bg-transparent text-[15px] font-semibold placeholder:text-muted/40 outline-none leading-snug overflow-hidden tracking-tight"
+                className="flex-1 resize-none bg-transparent text-[15px] font-semibold placeholder:text-muted-foreground/40 outline-none leading-snug overflow-hidden tracking-tight"
                 style={{ height: 'auto' }}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && !e.shiftKey) e.preventDefault()
@@ -183,7 +183,7 @@ export function CreateIssueDialog({
               animate={open ? 'show' : 'hidden'}
             >
               <motion.div variants={rowVariants} className="flex items-center gap-3">
-                <span className="text-[11px] text-muted w-[76px] shrink-0 font-medium uppercase tracking-wider">Tür</span>
+                <span className="text-[11px] text-muted-foreground w-[76px] shrink-0 font-medium uppercase tracking-wider">Tür</span>
                 <div className="flex flex-wrap gap-1.5">
                   {ISSUE_TYPES.map((t) => (
                     <motion.button key={t} type="button" onClick={() => setType(t)} whileTap={{ scale: 0.92 }} className={pill(type === t)}>
@@ -195,7 +195,7 @@ export function CreateIssueDialog({
               </motion.div>
 
               <motion.div variants={rowVariants} className="flex items-center gap-3">
-                <span className="text-[11px] text-muted w-[76px] shrink-0 font-medium uppercase tracking-wider">Öncelik</span>
+                <span className="text-[11px] text-muted-foreground w-[76px] shrink-0 font-medium uppercase tracking-wider">Öncelik</span>
                 <div className="flex flex-wrap gap-1.5">
                   {PRIORITIES.map((p) => (
                     <motion.button key={p} type="button" onClick={() => setPriority(p)} whileTap={{ scale: 0.92 }} className={pill(priority === p)}>
@@ -207,35 +207,35 @@ export function CreateIssueDialog({
               </motion.div>
 
               <motion.div variants={rowVariants} className="flex items-center gap-3">
-                <span className="text-[11px] text-muted w-[76px] shrink-0 font-medium uppercase tracking-wider">Atanan</span>
+                <span className="text-[11px] text-muted-foreground w-[76px] shrink-0 font-medium uppercase tracking-wider">Atanan</span>
                 <MemberPicker members={members} value={assigneeId} onChange={setAssigneeId} />
               </motion.div>
 
               <motion.div variants={rowVariants} className="flex items-start gap-3">
-                <span className="text-[11px] text-muted w-[76px] shrink-0 font-medium uppercase tracking-wider pt-1">Etiketler</span>
+                <span className="text-[11px] text-muted-foreground w-[76px] shrink-0 font-medium uppercase tracking-wider pt-1">Etiketler</span>
                 <div className="flex flex-wrap gap-1.5 flex-1 min-w-0">
                   <AnimatePresence>
                     {labels.map((l) => (
                       <motion.span key={l} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.8 }} transition={{ duration: 0.12 }}
-                        className="flex items-center gap-1 text-[11px] bg-subtle border border-subtle rounded px-2 py-0.5 text-foreground">
+                        className="flex items-center gap-1 text-[11px] bg-muted border border-border rounded px-2 py-0.5 text-foreground">
                         {l}
-                        <button type="button" onClick={() => setLabels((p) => p.filter((x) => x !== l))} className="text-muted hover:text-foreground transition-colors">
+                        <button type="button" onClick={() => setLabels((p) => p.filter((x) => x !== l))} className="text-muted-foreground hover:text-foreground transition-colors">
                           <X size={10} />
                         </button>
                       </motion.span>
                     ))}
                   </AnimatePresence>
                   <input value={labelInput} onChange={(e) => setLabelInput(e.target.value)} onKeyDown={handleLabelKey} onBlur={() => labelInput && addLabel(labelInput)}
-                    placeholder={labels.length === 0 ? 'Etiket ekle...' : '+'} className="text-[12px] bg-transparent outline-none text-foreground placeholder:text-muted/40 min-w-[72px] flex-1 py-0.5" />
+                    placeholder={labels.length === 0 ? 'Etiket ekle...' : '+'} className="text-[12px] bg-transparent outline-none text-foreground placeholder:text-muted-foreground/40 min-w-[72px] flex-1 py-0.5" />
                 </div>
               </motion.div>
 
               <motion.div variants={rowVariants} className="flex items-center gap-3">
-                <span className="text-[11px] text-muted w-[76px] shrink-0 font-medium uppercase tracking-wider">Tahmin</span>
+                <span className="text-[11px] text-muted-foreground w-[76px] shrink-0 font-medium uppercase tracking-wider">Tahmin</span>
                 <div className="flex items-center gap-2">
                   <input type="number" min={0} value={estimate} onChange={(e) => setEstimate(e.target.value)} placeholder="—"
-                    className="w-14 h-7 text-[12px] bg-subtle border border-subtle rounded-md px-2 outline-none focus:border-accent/50 transition-colors text-center tabular-nums" />
-                  <span className="text-[11px] text-muted">story point</span>
+                    className="w-14 h-7 text-[12px] bg-muted border border-border rounded-md px-2 outline-none focus:border-primary/50 transition-colors text-center tabular-nums" />
+                  <span className="text-[11px] text-muted-foreground">story point</span>
                 </div>
               </motion.div>
             </motion.div>
@@ -243,7 +243,7 @@ export function CreateIssueDialog({
             <div className="h-px bg-border mx-5" />
 
             <div className="flex items-center justify-between px-5 py-3">
-              <div className="flex items-center gap-2 text-[11px] text-muted">
+              <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                 <span>Kolon:</span>
                 <span className="font-medium px-1.5 py-0.5 rounded text-[10px] uppercase tracking-wider"
                   style={{ backgroundColor: column.color + '22', color: column.color }}>
@@ -253,7 +253,7 @@ export function CreateIssueDialog({
               <div className="flex gap-2">
                 <Button type="button" variant="ghost" size="sm" onClick={() => onOpenChange(false)} className="h-7 text-xs px-3">İptal</Button>
                 <Button type="submit" disabled={loading || !title.trim()} size="sm"
-                  className="h-7 text-xs px-3 bg-accent text-white hover:opacity-90 disabled:opacity-40 transition-opacity">
+                  className="h-7 text-xs px-3 disabled:opacity-40 transition-opacity">
                   {loading ? 'Oluşturuluyor...' : 'Issue Oluştur'}
                 </Button>
               </div>

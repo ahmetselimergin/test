@@ -59,7 +59,7 @@ export function IssueActivityLog({ issueId }: IssueActivityLogProps) {
 
   if (activityLogs.length === 0) {
     return (
-      <p className="text-[12px] text-muted px-4 py-6 text-center">
+      <p className="text-[12px] text-muted-foreground px-4 py-6 text-center">
         Henüz aktivite yok.
       </p>
     )
@@ -77,7 +77,7 @@ export function IssueActivityLog({ issueId }: IssueActivityLogProps) {
                 className="size-full object-cover rounded-full"
               />
             ) : (
-              <AvatarFallback className="text-[9px] bg-accent/20 text-accent font-bold">
+              <AvatarFallback className="text-[9px] bg-primary/20 text-primary font-bold">
                 {(log.actor?.full_name ?? '?').slice(0, 2).toUpperCase()}
               </AvatarFallback>
             )}
@@ -86,7 +86,7 @@ export function IssueActivityLog({ issueId }: IssueActivityLogProps) {
             <span className="text-[12px] text-foreground leading-snug">
               {describeAction(log)}
             </span>
-            <span className="text-[11px] text-muted shrink-0 whitespace-nowrap">
+            <span className="text-[11px] text-muted-foreground shrink-0 whitespace-nowrap">
               {relativeTime(log.created_at)}
             </span>
           </div>

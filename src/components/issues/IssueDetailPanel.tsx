@@ -44,8 +44,8 @@ const PRIORITY_DOT: Record<Priority, string> = {
 
 function PropRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <div className="py-3 border-b border-subtle/40 last:border-0 flex flex-col gap-1.5">
-      <span className="text-[10px] font-semibold text-muted uppercase tracking-widest">
+    <div className="py-3 border-b border-border/40 last:border-0 flex flex-col gap-1.5">
+      <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
         {label}
       </span>
       <div>{children}</div>
@@ -225,25 +225,25 @@ function IssueDetailContent({
   return (
     <div className="flex flex-col h-full">
       {/* ── Top bar ── */}
-      <div className="flex items-center justify-between px-4 h-11 border-b border-subtle shrink-0">
-        <div className="flex items-center gap-2 text-[12px] text-muted min-w-0">
+      <div className="flex items-center justify-between px-4 h-11 border-b border-border shrink-0">
+        <div className="flex items-center gap-2 text-[12px] text-muted-foreground min-w-0">
           <TypeIcon type={issue.type} size={14} />
           <button
             type="button"
             onClick={copyKey}
-            className="font-mono text-accent hover:underline cursor-pointer"
+            className="font-mono text-primary hover:underline cursor-pointer"
           >
             {issueKey}
           </button>
         </div>
         <div className="flex items-center gap-0.5">
-          <Button variant="ghost" size="icon" className="size-7 text-muted hover:text-foreground" onClick={copyKey}>
+          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground hover:text-foreground" onClick={copyKey}>
             <Link2 size={13} />
           </Button>
-          <Button variant="ghost" size="icon" className="size-7 text-muted hover:text-rose-400" onClick={handleDelete}>
+          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground hover:text-rose-400" onClick={handleDelete}>
             <Trash2 size={13} />
           </Button>
-          <Button variant="ghost" size="icon" className="size-7 text-muted hover:text-foreground" onClick={onClose}>
+          <Button variant="ghost" size="icon" className="size-7 text-muted-foreground hover:text-foreground" onClick={onClose}>
             <X size={15} />
           </Button>
         </div>
@@ -266,7 +266,7 @@ function IssueDetailContent({
                 if (e.key === 'Escape') { setTitleDraft(issue.title); setEditingTitle(false) }
               }}
               rows={2}
-              className="w-full text-[17px] font-semibold leading-snug tracking-tight bg-subtle border border-accent/30 rounded-lg px-2 py-1 outline-none resize-none text-foreground"
+              className="w-full text-[17px] font-semibold leading-snug tracking-tight bg-muted border border-primary/30 rounded-lg px-2 py-1 outline-none resize-none text-foreground"
             />
           ) : (
             <div className="flex items-start gap-2 group/title">
@@ -276,7 +276,7 @@ function IssueDetailContent({
               <button
                 type="button"
                 onClick={() => { setTitleDraft(issue.title); setEditingTitle(true) }}
-                className="opacity-0 group-hover/title:opacity-100 transition-opacity text-muted hover:text-foreground shrink-0 mt-0.5"
+                className="opacity-0 group-hover/title:opacity-100 transition-opacity text-muted-foreground hover:text-foreground shrink-0 mt-0.5"
               >
                 <Pencil size={13} />
               </button>
@@ -302,7 +302,7 @@ function IssueDetailContent({
                     <span className={cn('flex-1', s === issue.status && 'font-medium')}>
                       {statusConfig[s].label}
                     </span>
-                    {s === issue.status && <Check size={11} className="text-accent" />}
+                    {s === issue.status && <Check size={11} className="text-primary" />}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -311,20 +311,20 @@ function IssueDetailContent({
             {/* Priority badge */}
             <DropdownMenu>
               <DropdownMenuTrigger
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-subtle bg-transparent text-[11px] font-medium outline-none hover:bg-subtle transition-colors cursor-pointer"
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-transparent text-[11px] font-medium outline-none hover:bg-muted transition-colors cursor-pointer"
               >
                 <span className={cn('size-[6px] rounded-full shrink-0', PRIORITY_DOT[issue.priority])} />
                 <span className={cn(PRIORITY_COLORS[issue.priority])}>
                   {priorityConfig[issue.priority].label}
                 </span>
-                <ChevronDown size={10} className="text-muted" />
+                <ChevronDown size={10} className="text-muted-foreground" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-36">
                 {priorities.map((p) => (
                   <DropdownMenuItem key={p} onClick={() => handlePriorityChange(p)} className="text-xs">
                     <span className={cn('size-[6px] rounded-full shrink-0', PRIORITY_DOT[p])} />
                     <span className={cn('flex-1', PRIORITY_COLORS[p])}>{priorityConfig[p].label}</span>
-                    {p === issue.priority && <Check size={11} className="text-accent" />}
+                    {p === issue.priority && <Check size={11} className="text-primary" />}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -333,21 +333,21 @@ function IssueDetailContent({
 
           {/* Description */}
           <div>
-            <p className="text-[11px] font-medium text-muted uppercase tracking-wider mb-2">Açıklama</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Açıklama</p>
             <IssueEditor mode="edit" issueId={issue.id} initialContent={issue.description ?? ''} />
           </div>
 
           {/* Labels */}
           <div>
-            <p className="text-[11px] font-medium text-muted uppercase tracking-wider mb-2">Etiketler</p>
+            <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Etiketler</p>
             <div className="flex flex-wrap gap-1.5 items-center">
               {issue.labels.map((label) => (
-                <span key={label} className="flex items-center gap-1 text-[11px] bg-subtle border border-subtle rounded px-2 py-0.5">
+                <span key={label} className="flex items-center gap-1 text-[11px] bg-muted border border-border rounded px-2 py-0.5">
                   {label}
                   <button
                     type="button"
                     onClick={() => removeLabel(label)}
-                    className="text-muted hover:text-foreground"
+                    className="text-muted-foreground hover:text-foreground"
                   >
                     <X size={9} />
                   </button>
@@ -364,13 +364,13 @@ function IssueDetailContent({
                   }}
                   onBlur={() => { setLabelInput(''); setShowLabelInput(false) }}
                   placeholder="Etiket ekle..."
-                  className="text-[11px] bg-subtle border border-accent/30 rounded px-2 py-0.5 outline-none w-28"
+                  className="text-[11px] bg-muted border border-primary/30 rounded px-2 py-0.5 outline-none w-28"
                 />
               ) : (
                 <button
                   type="button"
                   onClick={() => setShowLabelInput(true)}
-                  className="text-[11px] text-muted hover:text-foreground border border-dashed border-subtle rounded px-2 py-0.5"
+                  className="text-[11px] text-muted-foreground hover:text-foreground border border-dashed border-border rounded px-2 py-0.5"
                 >
                   + Ekle
                 </button>
@@ -382,7 +382,7 @@ function IssueDetailContent({
         </div>
 
         {/* ── Right sidebar ── */}
-        <div className="w-[240px] shrink-0 border-l border-subtle px-4 py-2 overflow-y-auto flex flex-col gap-0">
+        <div className="w-[240px] shrink-0 border-l border-border px-4 py-2 overflow-y-auto flex flex-col gap-0">
 
           <PropRow label="Atanan">
             <MemberPicker members={members} value={issue.assignee_id} onChange={handleAssigneeChange} />
@@ -393,14 +393,14 @@ function IssueDetailContent({
               <DropdownMenuTrigger className="flex items-center gap-1.5 outline-none hover:opacity-75 transition-opacity cursor-pointer">
                 <TypeIcon type={issue.type} size={12} />
                 <span className="text-[12px] text-foreground">{typeConfig[issue.type].label}</span>
-                <ChevronDown size={9} className="text-muted" />
+                <ChevronDown size={9} className="text-muted-foreground" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-36">
                 {types.map((t) => (
                   <DropdownMenuItem key={t} onClick={() => handleTypeChange(t)} className="text-xs gap-2">
                     <TypeIcon type={t} size={12} />
                     <span className="flex-1">{typeConfig[t].label}</span>
-                    {t === issue.type && <Check size={11} className="text-accent" />}
+                    {t === issue.type && <Check size={11} className="text-primary" />}
                   </DropdownMenuItem>
                 ))}
               </DropdownMenuContent>
@@ -420,13 +420,13 @@ function IssueDetailContent({
                   if (e.key === 'Enter') e.currentTarget.blur()
                   if (e.key === 'Escape') { setEstimateDraft(String(issue.estimate ?? '')); setEditingEstimate(false) }
                 }}
-                className="w-16 text-[12px] bg-subtle border border-accent/30 rounded px-1.5 py-0.5 outline-none tabular-nums"
+                className="w-16 text-[12px] bg-muted border border-primary/30 rounded px-1.5 py-0.5 outline-none tabular-nums"
               />
             ) : (
               <button
                 type="button"
                 onClick={() => { setEstimateDraft(String(issue.estimate ?? '')); setEditingEstimate(true) }}
-                className="text-[12px] text-foreground font-medium tabular-nums hover:text-accent transition-colors"
+                className="text-[12px] text-foreground font-medium tabular-nums hover:text-primary transition-colors"
               >
                 {issue.estimate !== null ? `${issue.estimate} pts` : '—'}
               </button>
@@ -434,13 +434,13 @@ function IssueDetailContent({
           </PropRow>
 
           <PropRow label="Oluşturulma">
-            <span className="text-[11px] text-muted">
+            <span className="text-[11px] text-muted-foreground">
               {new Date(issue.created_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
           </PropRow>
 
           <PropRow label="Güncelleme">
-            <span className="text-[11px] text-muted">
+            <span className="text-[11px] text-muted-foreground">
               {new Date(issue.updated_at).toLocaleDateString('tr-TR', { day: 'numeric', month: 'short', year: 'numeric' })}
             </span>
           </PropRow>
@@ -476,7 +476,7 @@ export function IssueDetailPanel() {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 36, stiffness: 420 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-[640px] z-50 surface-elevated border-l border-subtle shadow-panel"
+            className="fixed right-0 top-0 bottom-0 w-full max-w-[640px] z-50 bg-background border-l border-border shadow-xl"
           >
             <IssueDetailContent
               key={selectedIssue.id}

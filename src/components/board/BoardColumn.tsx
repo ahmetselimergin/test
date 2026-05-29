@@ -95,7 +95,7 @@ export function BoardColumn({
           <button
             {...attributes}
             {...listeners}
-            className="shrink-0 text-muted hover:text-foreground cursor-grab active:cursor-grabbing"
+            className="shrink-0 text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing"
             aria-label="Drag to reorder"
           >
             <GripVertical size={14} />
@@ -112,14 +112,14 @@ export function BoardColumn({
               if (e.key === 'Enter') e.currentTarget.blur()
               if (e.key === 'Escape') { setName(column.name); e.currentTarget.blur() }
             }}
-            className="bg-transparent text-[12px] font-semibold outline-none focus:ring-1 focus:ring-accent/40 rounded px-1 -mx-1 w-full truncate tracking-tight text-foreground"
+            className="bg-transparent text-[12px] font-semibold outline-none focus:ring-1 focus:ring-primary/40 rounded px-1 -mx-1 w-full truncate tracking-tight text-foreground"
           />
           <span
             className={cn(
               'text-[11px] font-semibold px-1.5 py-0 rounded-md tabular-nums',
               isOverLimit
                 ? 'bg-rose-500/15 text-rose-400'
-                : 'bg-[rgb(var(--bg-subtle))] text-muted'
+                : 'bg-muted text-muted-foreground'
             )}
           >
             {issues.length}
@@ -131,14 +131,14 @@ export function BoardColumn({
             type="button"
             variant="ghost"
             size="icon"
-            className="size-6 text-muted hover:text-foreground"
+            className="size-6 text-muted-foreground hover:text-foreground"
             onClick={() => setCreateOpen(true)}
             aria-label="Add issue"
           >
             <Plus size={14} />
           </Button>
           <DropdownMenu>
-            <DropdownMenuTrigger className="inline-flex size-6 items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-foreground">
+            <DropdownMenuTrigger className="inline-flex size-6 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground">
               <MoreHorizontal size={14} />
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-40">
@@ -173,8 +173,8 @@ export function BoardColumn({
         className={cn(
           'flex-1 rounded-xl border p-2 flex flex-col gap-2 min-h-[120px] overflow-y-auto transition-all duration-200',
           isOver
-            ? 'border-accent/50 bg-accent/5'
-            : 'border-subtle bg-[rgb(var(--bg-subtle)/0.4)]'
+            ? 'border-primary/50 bg-primary/5'
+            : 'border-border bg-muted/40'
         )}
       >
         <SortableContext
@@ -189,7 +189,7 @@ export function BoardColumn({
           <button
             type="button"
             onClick={() => setCreateOpen(true)}
-            className="w-full py-5 text-xs text-muted hover:text-accent border border-dashed border-subtle rounded-lg hover:border-accent/40 transition-colors"
+            className="w-full py-5 text-xs text-muted-foreground hover:text-primary border border-dashed border-border rounded-lg hover:border-primary/40 transition-colors"
           >
             + Add issue
           </button>

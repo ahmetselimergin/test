@@ -48,7 +48,7 @@ function CommentItem({ comment }: { comment: CommentWithAuthor }) {
             className="size-full object-cover rounded-full"
           />
         ) : (
-          <AvatarFallback className="text-[9px] bg-accent/20 text-accent font-bold">
+          <AvatarFallback className="text-[9px] bg-primary/20 text-primary font-bold">
             {(comment.author?.full_name ?? '?').slice(0, 2).toUpperCase()}
           </AvatarFallback>
         )}
@@ -58,7 +58,7 @@ function CommentItem({ comment }: { comment: CommentWithAuthor }) {
           <span className="text-[12px] font-medium text-foreground">
             {comment.author?.full_name ?? 'Anonim'}
           </span>
-          <span className="text-[11px] text-muted">{formatDate(comment.created_at)}</span>
+          <span className="text-[11px] text-muted-foreground">{formatDate(comment.created_at)}</span>
         </div>
         <EditorContent editor={editor} />
       </div>
@@ -123,11 +123,11 @@ export function IssueCommentThread({ issueId }: IssueCommentThreadProps) {
     <div className="flex flex-col px-4 py-2">
       {/* Comment list */}
       {comments.length === 0 ? (
-        <p className="text-[12px] text-muted py-4 text-center">
+        <p className="text-[12px] text-muted-foreground py-4 text-center">
           Henüz yorum yok. İlk yorumu sen yaz.
         </p>
       ) : (
-        <div className="divide-y divide-subtle/40">
+        <div className="divide-y divide-border/40">
           {(comments as CommentWithAuthor[]).map((c) => (
             <CommentItem key={c.id} comment={c} />
           ))}
@@ -135,14 +135,14 @@ export function IssueCommentThread({ issueId }: IssueCommentThreadProps) {
       )}
 
       {/* Write area */}
-      <div className="mt-3 rounded-lg border border-subtle bg-[rgb(var(--bg-subtle)/0.5)] overflow-hidden focus-within:border-accent/40 transition-colors">
-        <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-subtle">
+      <div className="mt-3 rounded-lg border border-border bg-muted/50 overflow-hidden focus-within:border-primary/40 transition-colors">
+        <div className="flex items-center gap-0.5 px-2 py-1.5 border-b border-border">
           <button
             type="button"
             onMouseDown={(e) => { e.preventDefault(); writeEditor?.chain().focus().toggleBold().run() }}
             className={cn(
               'size-6 flex items-center justify-center rounded transition-colors',
-              writeEditor?.isActive('bold') ? 'bg-accent/20 text-accent' : 'text-muted hover:text-foreground hover:bg-subtle'
+              writeEditor?.isActive('bold') ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
           >
             <Bold size={12} />
@@ -152,7 +152,7 @@ export function IssueCommentThread({ issueId }: IssueCommentThreadProps) {
             onMouseDown={(e) => { e.preventDefault(); writeEditor?.chain().focus().toggleItalic().run() }}
             className={cn(
               'size-6 flex items-center justify-center rounded transition-colors',
-              writeEditor?.isActive('italic') ? 'bg-accent/20 text-accent' : 'text-muted hover:text-foreground hover:bg-subtle'
+              writeEditor?.isActive('italic') ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
           >
             <Italic size={12} />
@@ -162,7 +162,7 @@ export function IssueCommentThread({ issueId }: IssueCommentThreadProps) {
             onMouseDown={(e) => { e.preventDefault(); writeEditor?.chain().focus().toggleCode().run() }}
             className={cn(
               'size-6 flex items-center justify-center rounded transition-colors',
-              writeEditor?.isActive('code') ? 'bg-accent/20 text-accent' : 'text-muted hover:text-foreground hover:bg-subtle'
+              writeEditor?.isActive('code') ? 'bg-primary/20 text-primary' : 'text-muted-foreground hover:text-foreground hover:bg-muted'
             )}
           >
             <Code size={12} />

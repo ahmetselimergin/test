@@ -56,7 +56,7 @@ export function AddColumnButton({ project, workspaceSlug }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger className="flex-shrink-0 w-[272px] min-h-[120px] rounded-lg border border-dashed border-subtle flex items-center justify-center gap-2 text-sm text-muted hover:text-accent hover:border-accent/40 hover:bg-accent-muted/20 transition-colors">
+      <DialogTrigger className="flex-shrink-0 w-[272px] min-h-[120px] rounded-lg border border-dashed border-border flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-muted/20 transition-colors">
         <Plus size={16} />
         Add column
       </DialogTrigger>
@@ -72,7 +72,7 @@ export function AddColumnButton({ project, workspaceSlug }: Props) {
               name="name"
               required
               placeholder="Ör: Testing"
-              className="bg-[rgb(var(--bg-card))] border-[rgb(var(--border-strong))]"
+              className="border-foreground/20"
             />
           </div>
           <div className="space-y-1.5">
@@ -98,7 +98,7 @@ export function AddColumnButton({ project, workspaceSlug }: Props) {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full bg-accent text-white hover:opacity-90"
+            className="w-full"
           >
             {loading ? 'Ekleniyor...' : 'Kolon Oluştur'}
           </Button>

@@ -13,8 +13,8 @@ export function IssueDetailTabs({ issueId }: IssueDetailTabsProps) {
   const [tab, setTab] = useState<'comments' | 'activity'>('comments')
 
   return (
-    <div className="flex flex-col min-h-0 border-t border-subtle mt-2">
-      <div className="flex border-b border-subtle shrink-0">
+    <div className="flex flex-col min-h-0 border-t border-border mt-2">
+      <div className="flex border-b border-border shrink-0">
         {(['comments', 'activity'] as const).map((t) => (
           <button
             key={t}
@@ -23,8 +23,8 @@ export function IssueDetailTabs({ issueId }: IssueDetailTabsProps) {
             className={cn(
               'px-4 py-2 text-[12px] font-medium border-b-2 transition-colors -mb-px',
               tab === t
-                ? 'border-accent text-accent'
-                : 'border-transparent text-muted hover:text-foreground'
+                ? 'border-primary text-primary'
+                : 'border-transparent text-muted-foreground hover:text-foreground'
             )}
           >
             {t === 'comments' ? 'Yorumlar' : 'Aktivite'}
