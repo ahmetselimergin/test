@@ -92,8 +92,8 @@ function ProjectCard({
     both: 'Kanban + Scrum',
   }
 
-  const displayIcon = project.icon || project.key.slice(0, 2)
   const hasLogo = !!project.logo_url
+  const displayKey = project.key.slice(0, 2).toUpperCase()
   const pat = getPattern(project.pattern)
 
   return (
@@ -126,12 +126,12 @@ function ProjectCard({
           href={`/${slug}/${project.id}/board`}
           className="absolute bottom-3 left-4"
         >
-          <div className="size-12 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white font-bold text-xl overflow-hidden">
+          <div className="size-12 rounded-xl bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center text-white font-bold overflow-hidden">
             {hasLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={project.logo_url!} alt={project.name} className="size-full object-cover" />
             ) : (
-              displayIcon
+              <span className="text-[15px] tracking-wide">{displayKey}</span>
             )}
           </div>
         </Link>
