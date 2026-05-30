@@ -3,12 +3,13 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Search, Plus, Bell } from 'lucide-react'
+import { Search, Plus } from 'lucide-react'
 import { useWorkspaceStore } from '@/lib/stores/workspace.store'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import { ThemeToggle } from '@/components/layout/ThemeToggle'
 import { CommandPalette } from '@/components/layout/CommandPalette'
+import { NotificationBell } from '@/components/notifications/NotificationBell'
 import { Button } from '@/components/ui/button'
 import {
   Breadcrumb,
@@ -125,15 +126,7 @@ export function AppHeader() {
               Create
             </Button>
           )}
-          <Button
-            variant="ghost"
-            size="icon"
-            className="size-7 text-muted-foreground"
-            aria-label="Bildirimler"
-            title="Bildirimler — yakında"
-          >
-            <Bell size={15} />
-          </Button>
+          <NotificationBell />
           <ThemeToggle />
         </div>
       </header>
