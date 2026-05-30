@@ -3,6 +3,7 @@
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { notifyMemberAdded } from '@/app/actions/notifications'
 import type { MemberSummary } from '@/lib/supabase/types'
 
 export async function updateProfile(
@@ -109,6 +110,21 @@ export async function inviteTeamMember(
     .select('slug')
     .eq('id', workspaceId)
     .single()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (user) {
+    const { data: newProfile } = await adminClient
+      .from('profiles')
+      .select('full_name, email')
+      .eq('id', profile.id)
+      .single()
+
+    notifyMemberAdded(
+      workspaceId,
+      user.id,
+      newProfile?.full_name ?? newProfile?.email ?? email
+    )
+  }
 
   revalidatePath(`/${workspace?.slug}/team`)
   return { success: true }
