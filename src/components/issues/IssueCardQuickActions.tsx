@@ -88,7 +88,7 @@ export function IssueCardQuickActions({ issue, members }: IssueCardQuickActionsP
                   className="size-full object-cover rounded-full"
                 />
               ) : (
-                <AvatarFallback className="text-[9px] bg-accent/20 text-accent font-bold">
+                <AvatarFallback className="text-[9px] bg-primary/20 text-primary font-bold">
                   {(assignee.full_name ?? assignee.email ?? '?').slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               )}
@@ -117,7 +117,7 @@ export function IssueCardQuickActions({ issue, members }: IssueCardQuickActionsP
                     className="size-full object-cover rounded-full"
                   />
                 ) : (
-                  <AvatarFallback className="text-[8px] bg-accent/20 text-accent font-bold">
+                  <AvatarFallback className="text-[8px] bg-primary/20 text-primary font-bold">
                     {(m.full_name ?? m.email ?? '?').slice(0, 2).toUpperCase()}
                   </AvatarFallback>
                 )}

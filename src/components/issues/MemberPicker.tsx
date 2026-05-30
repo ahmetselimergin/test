@@ -54,7 +54,7 @@ export function MemberPicker({ members, value, onChange }: Props) {
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          'flex items-center gap-2 h-7 px-2.5 rounded-md border text-[12px] transition-all',
+          'flex items-center gap-2 h-7 px-2.5 rounded-md border text-[12px] transition-all max-w-full overflow-hidden',
           open
             ? 'border-primary/50 bg-primary/10 text-primary'
             : 'border-border bg-transparent text-muted-foreground hover:border-foreground/20 hover:text-foreground'
@@ -67,19 +67,14 @@ export function MemberPicker({ members, value, onChange }: Props) {
                 {initials(selected.full_name, selected.email)}
               </AvatarFallback>
             </Avatar>
-            <span className="font-medium text-foreground max-w-[120px] truncate">
+            <span className="font-medium text-foreground truncate min-w-0">
               {selected.full_name ?? selected.email}
             </span>
-            {selected.job_title && (
-              <span className="text-[10px] text-muted-foreground bg-muted border border-border rounded px-1.5 py-0 leading-5">
-                {selected.job_title}
-              </span>
-            )}
             <span
               role="button"
               tabIndex={-1}
               onClick={(e) => { e.stopPropagation(); onChange(null) }}
-              className="ml-0.5 text-muted-foreground hover:text-foreground transition-colors"
+              className="ml-auto shrink-0 text-muted-foreground hover:text-foreground transition-colors"
             >
               <X size={10} />
             </span>
@@ -99,7 +94,7 @@ export function MemberPicker({ members, value, onChange }: Props) {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: -6, scale: 0.97 }}
             transition={{ duration: 0.14, ease: [0.16, 1, 0.3, 1] as const }}
-            className="absolute top-full left-0 mt-1.5 z-50 w-64 rounded-xl border border-border bg-background shadow-xl overflow-hidden"
+            className="absolute top-full right-0 mt-1.5 z-50 w-64 rounded-xl border border-border bg-background shadow-xl overflow-hidden"
           >
             <div className="flex items-center gap-2 px-3 py-2.5 border-b border-border">
               <Search size={12} className="text-muted-foreground shrink-0" />
@@ -118,34 +113,38 @@ export function MemberPicker({ members, value, onChange }: Props) {
               ) : filtered.length === 0 ? (
                 <p className="text-[11px] text-muted-foreground text-center py-5">Eşleşen üye yok</p>
               ) : (
-                filtered.map((m) => (
-                  <button
-                    key={m.id}
-                    type="button"
-                    onClick={() => handleSelect(m.id)}
-                    className={cn(
-                      'w-full flex items-center gap-2.5 px-3 py-2 text-left transition-colors hover:bg-muted',
-                      value === m.id && 'bg-primary/10'
-                    )}
-                  >
-                    <Avatar className="size-6 shrink-0">
-                      <AvatarFallback className="text-[10px] bg-primary/20 text-primary font-medium">
-                        {initials(m.full_name, m.email)}
-                      </AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-[12px] font-medium text-foreground truncate">
-                        {m.full_name ?? m.email}
-                      </p>
-                      {m.job_title && (
-                        <p className="text-[10px] text-muted-foreground truncate">{m.job_title}</p>
+                <div className="flex flex-col gap-1.5 p-2">
+                  {filtered.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      onClick={() => handleSelect(m.id)}
+                      className={cn(
+                        'w-full flex items-center gap-3 px-3 py-2.5 rounded-lg border text-left transition-all',
+                        value === m.id
+                          ? 'border-primary/40 bg-primary/10'
+                          : 'border-border bg-card hover:border-foreground/20 hover:bg-muted'
                       )}
-                    </div>
-                    {value === m.id && (
-                      <span className="size-[5px] rounded-full bg-primary shrink-0" />
-                    )}
-                  </button>
-                ))
+                    >
+                      <Avatar className="size-8 shrink-0">
+                        <AvatarFallback className="text-[11px] bg-primary/20 text-primary font-semibold">
+                          {initials(m.full_name, m.email)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-[12px] font-semibold text-foreground truncate leading-tight">
+                          {m.full_name ?? m.email}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground truncate leading-tight mt-0.5">
+                          {m.email}
+                        </p>
+                      </div>
+                      {value === m.id && (
+                        <span className="size-[6px] rounded-full bg-primary shrink-0" />
+                      )}
+                    </button>
+                  ))}
+                </div>
               )}
             </div>
           </motion.div>

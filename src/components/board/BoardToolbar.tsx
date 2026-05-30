@@ -4,6 +4,7 @@ import { Filter, SlidersHorizontal, LayoutList } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
+import { toast } from 'sonner'
 import type { Project } from '@/lib/supabase/types'
 
 interface BoardToolbarProps {
@@ -50,11 +51,21 @@ export function BoardToolbar({ project, issueCount, filterBarOpen, onFilterToggl
             </Badge>
           )}
         </Button>
-        <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs hidden sm:inline-flex">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 h-8 text-xs hidden sm:inline-flex"
+          onClick={() => toast.info('Gruplama yakında geliyor')}
+        >
           <SlidersHorizontal size={14} />
           Group
         </Button>
-        <Button variant="outline" size="sm" className="gap-1.5 h-8 text-xs hidden md:inline-flex">
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5 h-8 text-xs hidden md:inline-flex"
+          onClick={() => toast.info('Kolon yönetimi yakında geliyor')}
+        >
           <LayoutList size={14} />
           Columns
         </Button>

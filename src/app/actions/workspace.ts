@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import type { MemberSummary } from '@/lib/supabase/types'
@@ -65,7 +65,10 @@ export async function updateWorkspaceSettings(
   return { success: true }
 }
 
-export async function inviteTeamMember(formData: FormData) {
+export async function inviteTeamMember(
+  _prevState: { error?: string; success?: boolean } | null,
+  formData: FormData,
+) {
   const supabase = await createClient()
   const workspaceId = formData.get('workspace_id') as string
   const email = (formData.get('email') as string)?.trim().toLowerCase()
@@ -76,7 +79,8 @@ export async function inviteTeamMember(formData: FormData) {
     return { error: 'Geçersiz rol' }
   }
 
-  const { data: profile } = await supabase
+  const adminClient = createAdminClient()
+  const { data: profile } = await adminClient
     .from('profiles')
     .select('id')
     .eq('email', email)
@@ -89,7 +93,7 @@ export async function inviteTeamMember(formData: FormData) {
     }
   }
 
-  const { error } = await supabase.from('workspace_members').insert({
+  const { error } = await adminClient.from('workspace_members').insert({
     workspace_id: workspaceId,
     user_id: profile.id,
     role,
@@ -255,11 +259,12 @@ export async function deleteWorkspace(
 
 export async function getWorkspaceMembers(workspaceSlug: string): Promise<MemberSummary[]> {
   const supabase = await createClient()
+  const adminClient = createAdminClient()
 
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) return []
 
-  const { data: workspace } = await supabase
+  const { data: workspace } = await adminClient
     .from('workspaces')
     .select('id')
     .eq('slug', workspaceSlug)
@@ -267,22 +272,26 @@ export async function getWorkspaceMembers(workspaceSlug: string): Promise<Member
 
   if (!workspace) return []
 
-  const { data, error } = await supabase
+  const { data: memberships } = await adminClient
     .from('workspace_members')
-    .select('user_id, profiles(id, full_name, email, avatar_url, job_title)')
+    .select('user_id')
     .eq('workspace_id', workspace.id)
 
-  if (error || !data) return []
+  if (!memberships?.length) return []
 
-  return data.flatMap((row) => {
-    const profile = Array.isArray(row.profiles) ? row.profiles[0] : row.profiles
-    if (!profile) return []
-    return [{
-      id: row.user_id,
-      full_name: profile.full_name ?? null,
-      email: profile.email ?? null,
-      avatar_url: profile.avatar_url ?? null,
-      job_title: profile.job_title ?? null,
-    }]
-  })
+  const userIds = memberships.map((m) => m.user_id)
+  const { data: profiles } = await adminClient
+    .from('profiles')
+    .select('id, full_name, email, avatar_url, job_title')
+    .in('id', userIds)
+
+  if (!profiles) return []
+
+  return profiles.map((p) => ({
+    id: p.id,
+    full_name: p.full_name ?? null,
+    email: p.email ?? null,
+    avatar_url: p.avatar_url ?? null,
+    job_title: p.job_title ?? null,
+  }))
 }

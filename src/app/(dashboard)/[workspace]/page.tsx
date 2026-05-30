@@ -118,27 +118,38 @@ export default async function WorkspaceDashboard({
         criticalBugHref={heroHref('/backlog?priority=critical&type=bug')}
       />
 
-      <div className="flex flex-1 min-h-0">
+      <div className="flex flex-1 min-h-0 overflow-hidden">
         {/* Projects list */}
-        <div className="flex-[3] overflow-y-auto p-6 border-r border-border">
-          <div className="flex items-center justify-between mb-4">
-            <p className="text-[11px] font-semibold uppercase tracking-widest text-primary">
-              Projeler
-            </p>
-            <Link href={`/${slug}/projects`} className="text-[11px] text-primary hover:underline">
-              Tümünü gör →
+        <div className="flex-[3] overflow-y-auto px-8 py-6 border-r border-border">
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                Projeler
+              </p>
+              <p className="text-[13px] font-semibold text-foreground mt-0.5">
+                {projectList.length} aktif proje
+              </p>
+            </div>
+            <Link
+              href={`/${slug}/projects`}
+              className="text-[12px] font-medium text-primary hover:text-primary/80 transition-colors flex items-center gap-1"
+            >
+              Tümünü gör
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2 6h8M6 2l4 4-4 4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </Link>
           </div>
 
           {projectList.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-16 text-center border border-dashed border-border rounded-xl">
-              <p className="text-muted-foreground mb-4 text-sm">
-                Henüz proje yok. İlk projeyi oluştur.
-              </p>
+            <div className="flex flex-col items-center justify-center py-20 text-center border border-dashed border-border rounded-2xl bg-muted/20">
+              <div className="size-12 rounded-2xl bg-muted flex items-center justify-center mb-3">
+                <span className="text-[24px]">📁</span>
+              </div>
+              <p className="text-[14px] font-semibold text-foreground mb-1">Henüz proje yok</p>
+              <p className="text-[12px] text-muted-foreground mb-5">İlk projeyi oluşturarak başla</p>
               <CreateProjectDialog workspaceId={workspace.id} />
             </div>
           ) : (
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-2">
               {projectList.map((project) => {
                 const counts = issueCounts.find((c) => c.projectId === project.id)
                 return (
@@ -156,10 +167,13 @@ export default async function WorkspaceDashboard({
         </div>
 
         {/* Activity feed */}
-        <div className="flex-[2] overflow-y-auto p-6">
-          <p className="text-[11px] font-semibold uppercase tracking-widest text-primary mb-4">
-            Son 24 Saat
-          </p>
+        <div className="flex-[2] overflow-y-auto px-6 py-6">
+          <div className="mb-5">
+            <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+              Aktivite
+            </p>
+            <p className="text-[13px] font-semibold text-foreground mt-0.5">Son 24 saat</p>
+          </div>
           <ActivityFeed items={activityItems} />
         </div>
       </div>

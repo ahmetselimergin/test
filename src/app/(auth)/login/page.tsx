@@ -26,8 +26,8 @@ export default function LoginPage() {
   return (
     <div>
       <div className="mb-7">
-        <h1 className="text-lg font-medium tracking-tight mb-1">Sign in</h1>
-        <p className="text-sm text-muted-foreground">Enter your credentials to continue</p>
+        <h1 className="text-lg font-medium tracking-tight mb-1">Giriş Yap</h1>
+        <p className="text-sm text-muted-foreground">Devam etmek için bilgilerini gir</p>
       </div>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
@@ -65,17 +65,17 @@ export default function LoginPage() {
           {loading ? (
             <>
               <Loader2 className="animate-spin" size={15} />
-              Signing in…
+              Giriş yapılıyor…
             </>
           ) : (
-            'Sign in'
+            'Giriş Yap'
           )}
         </Button>
       </form>
       <p className="text-center text-sm text-muted-foreground mt-6">
-        No account?{' '}
+        Hesabın yok mu?{' '}
         <Link href="/register" className="text-primary font-medium hover:underline">
-          Create one
+          Oluştur
         </Link>
       </p>
     </div>

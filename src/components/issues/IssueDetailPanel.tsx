@@ -17,15 +17,15 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
-import { formatIssueId, statusConfig, priorityConfig, typeConfig, cn } from '@/lib/utils'
+import { formatIssueId, statusConfig, priorityConfig, typeConfig, cn, formatEstimate, parseEstimate } from '@/lib/utils'
 import type { Issue, IssueStatus, Priority, IssueType, MemberSummary } from '@/lib/supabase/types'
 import { toast } from 'sonner'
 
 const STATUS_COLORS: Record<IssueStatus, string> = {
-  todo:        'bg-slate-500/15 text-slate-300 border-slate-500/25 hover:bg-slate-500/25',
-  in_progress: 'bg-blue-500/15 text-blue-300 border-blue-500/25 hover:bg-blue-500/25',
-  review:      'bg-amber-500/15 text-amber-300 border-amber-500/25 hover:bg-amber-500/25',
-  done:        'bg-emerald-500/15 text-emerald-300 border-emerald-500/25 hover:bg-emerald-500/25',
+  todo:        'bg-slate-100 text-slate-600 border-slate-300 hover:bg-slate-200',
+  in_progress: 'bg-blue-100 text-blue-700 border-blue-300 hover:bg-blue-200',
+  review:      'bg-amber-100 text-amber-700 border-amber-300 hover:bg-amber-200',
+  done:        'bg-emerald-100 text-emerald-700 border-emerald-300 hover:bg-emerald-200',
 }
 
 const PRIORITY_COLORS: Record<Priority, string> = {
@@ -76,7 +76,7 @@ function IssueDetailContent({
 
   // Estimate editing
   const [editingEstimate, setEditingEstimate] = useState(false)
-  const [estimateDraft, setEstimateDraft] = useState(String(issue.estimate ?? ''))
+  const [estimateDraft, setEstimateDraft] = useState(formatEstimate(issue.estimate))
 
   // Clear stale data when panel opens a new issue
   useEffect(() => {
@@ -210,8 +210,7 @@ function IssueDetailContent({
 
   async function handleEstimateSave() {
     setEditingEstimate(false)
-    const parsed = estimateDraft.trim() === '' ? null : parseInt(estimateDraft, 10)
-    const value = isNaN(parsed as number) ? null : parsed
+    const value = estimateDraft.trim() === '—' || estimateDraft.trim() === '' ? null : parseEstimate(estimateDraft)
     if (value === issue.estimate) return
     updateIssue(issue.id, { estimate: value })
     const supabase = createClient()
@@ -283,54 +282,6 @@ function IssueDetailContent({
             </div>
           )}
 
-          {/* Status + Priority chips */}
-          <div className="flex items-center gap-2 flex-wrap">
-            {/* Status dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className={cn(
-                  'flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-semibold uppercase tracking-wider outline-none transition-colors cursor-pointer',
-                  STATUS_COLORS[issue.status]
-                )}
-              >
-                {statusConfig[issue.status].label}
-                <ChevronDown size={10} />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-40">
-                {statuses.map((s) => (
-                  <DropdownMenuItem key={s} onClick={() => handleStatusChange(s)} className="text-xs">
-                    <span className={cn('flex-1', s === issue.status && 'font-medium')}>
-                      {statusConfig[s].label}
-                    </span>
-                    {s === issue.status && <Check size={11} className="text-primary" />}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-
-            {/* Priority badge */}
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-transparent text-[11px] font-medium outline-none hover:bg-muted transition-colors cursor-pointer"
-              >
-                <span className={cn('size-[6px] rounded-full shrink-0', PRIORITY_DOT[issue.priority])} />
-                <span className={cn(PRIORITY_COLORS[issue.priority])}>
-                  {priorityConfig[issue.priority].label}
-                </span>
-                <ChevronDown size={10} className="text-muted-foreground" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-36">
-                {priorities.map((p) => (
-                  <DropdownMenuItem key={p} onClick={() => handlePriorityChange(p)} className="text-xs">
-                    <span className={cn('size-[6px] rounded-full shrink-0', PRIORITY_DOT[p])} />
-                    <span className={cn('flex-1', PRIORITY_COLORS[p])}>{priorityConfig[p].label}</span>
-                    {p === issue.priority && <Check size={11} className="text-primary" />}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
           {/* Description */}
           <div>
             <p className="text-[11px] font-medium text-muted-foreground uppercase tracking-wider mb-2">Açıklama</p>
@@ -382,10 +333,66 @@ function IssueDetailContent({
         </div>
 
         {/* ── Right sidebar ── */}
-        <div className="w-[240px] shrink-0 border-l border-border px-4 py-2 overflow-y-auto flex flex-col gap-0">
+        <div className="w-[300px] shrink-0 border-l border-border px-5 py-2 overflow-y-auto flex flex-col gap-0">
+
+          <PropRow label="Durum">
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className={cn(
+                  'flex items-center gap-1.5 px-2.5 py-1 rounded-md border text-[11px] font-semibold uppercase tracking-wider outline-none transition-colors cursor-pointer',
+                  STATUS_COLORS[issue.status]
+                )}
+              >
+                {statusConfig[issue.status].label}
+                <ChevronDown size={10} />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-40">
+                {statuses.map((s) => (
+                  <DropdownMenuItem key={s} onClick={() => handleStatusChange(s)} className="text-xs">
+                    <span className={cn('flex-1', s === issue.status && 'font-medium')}>{statusConfig[s].label}</span>
+                    {s === issue.status && <Check size={11} className="text-primary" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </PropRow>
+
+          <PropRow label="Öncelik">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="flex items-center gap-1.5 px-2.5 py-1 rounded-md border border-border bg-transparent text-[11px] font-medium outline-none hover:bg-muted transition-colors cursor-pointer">
+                <span className={cn('size-[6px] rounded-full shrink-0', PRIORITY_DOT[issue.priority])} />
+                <span className={cn(PRIORITY_COLORS[issue.priority])}>{priorityConfig[issue.priority].label}</span>
+                <ChevronDown size={10} className="text-muted-foreground" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-36">
+                {priorities.map((p) => (
+                  <DropdownMenuItem key={p} onClick={() => handlePriorityChange(p)} className="text-xs">
+                    <span className={cn('size-[6px] rounded-full shrink-0', PRIORITY_DOT[p])} />
+                    <span className={cn('flex-1', PRIORITY_COLORS[p])}>{priorityConfig[p].label}</span>
+                    {p === issue.priority && <Check size={11} className="text-primary" />}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </PropRow>
 
           <PropRow label="Atanan">
             <MemberPicker members={members} value={issue.assignee_id} onChange={handleAssigneeChange} />
+          </PropRow>
+
+          <PropRow label="Oluşturan">
+            {(() => {
+              const reporter = members.find((m) => m.id === issue.reporter_id)
+              if (!reporter) return <span className="text-[12px] text-muted-foreground">—</span>
+              return (
+                <div className="flex items-center gap-2">
+                  <div className="size-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary shrink-0">
+                    {(reporter.full_name ?? reporter.email ?? '?').slice(0, 2).toUpperCase()}
+                  </div>
+                  <span className="text-[12px] text-foreground">{reporter.full_name ?? reporter.email}</span>
+                </div>
+              )
+            })()}
           </PropRow>
 
           <PropRow label="Tür">
@@ -411,24 +418,24 @@ function IssueDetailContent({
             {editingEstimate ? (
               <input
                 autoFocus
-                type="number"
-                min={0}
-                value={estimateDraft}
+                type="text"
+                value={estimateDraft === '—' ? '' : estimateDraft}
                 onChange={(e) => setEstimateDraft(e.target.value)}
                 onBlur={handleEstimateSave}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') e.currentTarget.blur()
-                  if (e.key === 'Escape') { setEstimateDraft(String(issue.estimate ?? '')); setEditingEstimate(false) }
+                  if (e.key === 'Escape') { setEstimateDraft(formatEstimate(issue.estimate)); setEditingEstimate(false) }
                 }}
-                className="w-16 text-[12px] bg-muted border border-primary/30 rounded px-1.5 py-0.5 outline-none tabular-nums"
+                placeholder="1h 2g 4s"
+                className="w-28 text-[12px] bg-muted border border-primary/30 rounded px-1.5 py-0.5 outline-none"
               />
             ) : (
               <button
                 type="button"
-                onClick={() => { setEstimateDraft(String(issue.estimate ?? '')); setEditingEstimate(true) }}
-                className="text-[12px] text-foreground font-medium tabular-nums hover:text-primary transition-colors"
+                onClick={() => { setEstimateDraft(formatEstimate(issue.estimate)); setEditingEstimate(true) }}
+                className="text-[12px] text-foreground font-medium hover:text-primary transition-colors"
               >
-                {issue.estimate !== null ? `${issue.estimate} pts` : '—'}
+                {formatEstimate(issue.estimate)}
               </button>
             )}
           </PropRow>
@@ -464,19 +471,12 @@ export function IssueDetailPanel() {
     <AnimatePresence>
       {selectedIssue && (
         <>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/40 backdrop-blur-[1px]"
-            onClick={() => setSelectedIssue(null)}
-          />
           <motion.aside
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 36, stiffness: 420 }}
-            className="fixed right-0 top-0 bottom-0 w-full max-w-[640px] z-50 bg-background border-l border-border shadow-xl"
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] as const }}
+            className="fixed inset-0 z-50 bg-background overflow-hidden"
           >
             <IssueDetailContent
               key={selectedIssue.id}

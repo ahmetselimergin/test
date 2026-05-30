@@ -18,7 +18,7 @@ export default async function DashboardPage() {
   if (!memberRows?.length) {
     return (
       <div className="flex items-center justify-center h-full p-6">
-        <Card className="w-full max-w-md shadow-panel">
+        <Card className="w-full max-w-md shadow-lg">
           <CardHeader className="text-center">
             <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center mx-auto mb-2">
               <span className="text-2xl">🚀</span>

@@ -33,6 +33,33 @@ export function formatIssueId(projectKey: string, issueNumber: number) {
   return `${projectKey}-${issueNumber}`
 }
 
+// 1w = 5d = 40h, 1d = 8h. Input: "1w 3d 2h" → stored hours
+export function parseEstimate(input: string): number | null {
+  const s = input.trim().toLowerCase()
+  if (!s) return null
+  let hours = 0
+  const w = s.match(/(\d+(?:\.\d+)?)w/)
+  const d = s.match(/(\d+(?:\.\d+)?)d/)
+  const h = s.match(/(\d+(?:\.\d+)?)h/)
+  if (w) hours += parseFloat(w[1]) * 40
+  if (d) hours += parseFloat(d[1]) * 8
+  if (h) hours += parseFloat(h[1])
+  if (!w && !d && !h) {
+    const n = parseFloat(s)
+    if (!isNaN(n)) hours = n
+  }
+  return hours > 0 ? Math.round(hours) : null
+}
+
+export function formatEstimate(hours: number | null | undefined): string {
+  if (!hours) return '—'
+  let r = hours
+  const w = Math.floor(r / 40); r -= w * 40
+  const d = Math.floor(r / 8);  r -= d * 8
+  const h = Math.round(r)
+  return [w && `${w}h`, d && `${d}g`, h && `${h}s`].filter(Boolean).join(' ') || '—'
+}
+
 export function timeAgo(dateString: string): string {
   const seconds = Math.floor((Date.now() - new Date(dateString).getTime()) / 1000)
   if (seconds < 60) return 'az önce'

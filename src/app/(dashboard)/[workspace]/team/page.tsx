@@ -1,20 +1,19 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { inviteTeamMember, removeTeamMember } from '@/app/actions/workspace'
+import { removeTeamMember } from '@/app/actions/workspace'
 import { PageHeader } from '@/components/layout/PageHeader'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
 import { Badge } from '@/components/ui/badge'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { InviteForm } from '@/components/team/InviteForm'
 import type { Role } from '@/lib/supabase/types'
 
 const roleLabels: Record<Role, string> = {
-  owner: 'Owner',
-  admin: 'Admin',
-  member: 'Member',
-  viewer: 'Viewer',
+  owner: 'Sahip',
+  admin: 'Yönetici',
+  member: 'Üye',
+  viewer: 'İzleyici',
 }
 
 export default async function TeamPage({
@@ -70,43 +69,10 @@ export default async function TeamPage({
       {canManage && (
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle className="text-base">Invite member</CardTitle>
+            <CardTitle className="text-base">Üye davet et</CardTitle>
           </CardHeader>
           <CardContent>
-            <form
-              action={inviteTeamMember as unknown as (formData: FormData) => void}
-              className="flex flex-col sm:flex-row gap-3"
-            >
-              <input type="hidden" name="workspace_id" value={workspace.id} />
-              <div className="flex-1 space-y-2">
-                <Label htmlFor="email" className="sr-only">
-                  Email
-                </Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  placeholder="teammate@company.com"
-                  className="h-10"
-                />
-              </div>
-              <select
-                name="role"
-                defaultValue="member"
-                className="h-10 rounded-lg border border-border bg-card px-3 text-sm sm:w-36"
-              >
-                <option value="member">Member</option>
-                <option value="admin">Admin</option>
-                <option value="viewer">Viewer</option>
-              </select>
-              <Button type="submit" className="shrink-0">
-                Invite
-              </Button>
-            </form>
-            <p className="text-xs text-muted-foreground mt-3">
-              User must already have a FlowTrack account with this email.
-            </p>
+            <InviteForm workspaceId={workspace.id} />
           </CardContent>
         </Card>
       )}
@@ -114,7 +80,7 @@ export default async function TeamPage({
       <Card>
         <CardHeader>
           <CardTitle className="text-base">
-            Members ({members?.length ?? 0})
+            Üyeler ({members?.length ?? 0})
           </CardTitle>
         </CardHeader>
         <CardContent className="p-0">
@@ -160,7 +126,7 @@ export default async function TeamPage({
                         size="sm"
                         className="text-destructive"
                       >
-                        Remove
+                        Çıkar
                       </Button>
                     </form>
                   )}

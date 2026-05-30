@@ -5,7 +5,7 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import type { Issue, Project } from '@/lib/supabase/types'
 import { TypeIcon } from './TypeIcon'
-import { formatIssueId, cn } from '@/lib/utils'
+import { formatIssueId, formatEstimate, cn } from '@/lib/utils'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { IssueCardQuickActions } from './IssueCardQuickActions'
@@ -128,7 +128,7 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
           <div className="flex items-center gap-2 shrink-0">
             {issue.estimate !== null && (
               <span className="text-[10.5px] text-muted-foreground bg-muted border border-border rounded-md px-1.5 py-0.5 font-medium tabular-nums">
-                {issue.estimate}pt
+                {formatEstimate(issue.estimate)}
               </span>
             )}
             <IssueCardQuickActions issue={issue} members={members} />

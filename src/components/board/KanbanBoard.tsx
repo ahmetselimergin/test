@@ -11,10 +11,11 @@ import {
   closestCenter,
 } from '@dnd-kit/core'
 import { SortableContext, arrayMove, horizontalListSortingStrategy } from '@dnd-kit/sortable'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { useIssueStore } from '@/lib/stores/issue.store'
+import { CreateIssueDialog } from './CreateIssueDialog'
 import { createClient } from '@/lib/supabase/client'
 import { BoardColumn as BoardColumnComponent } from './BoardColumn'
 import { AddColumnButton } from './AddColumnButton'
@@ -45,8 +46,18 @@ export function KanbanBoard({
   // Using issuesProp/columnsProp here would ignore optimistic store updates from drag.
   const columns = useProjectStore((s) => s.columns)
   const issues = useIssueStore((s) => s.issues)
+  const globalCreateOpen = useIssueStore((s) => s.globalCreateOpen)
+  const setGlobalCreateOpen = useIssueStore((s) => s.setGlobalCreateOpen)
   const [activeIssue, setActiveIssue] = useState<Issue | null>(null)
   const [activeColumn, setActiveColumn] = useState<BoardColumn | null>(null)
+  const [globalDialogOpen, setGlobalDialogOpen] = useState(false)
+
+  useEffect(() => {
+    if (globalCreateOpen && columns.length > 0) {
+      setGlobalDialogOpen(true)
+      setGlobalCreateOpen(false)
+    }
+  }, [globalCreateOpen, columns, setGlobalCreateOpen])
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
@@ -179,6 +190,17 @@ export function KanbanBoard({
         </SortableContext>
         <AddColumnButton project={project} workspaceSlug={workspaceSlug} />
       </div>
+
+      {columns[0] && (
+        <CreateIssueDialog
+          project={project}
+          column={columns[0]}
+          workspaceSlug={workspaceSlug}
+          members={members}
+          open={globalDialogOpen}
+          onOpenChange={setGlobalDialogOpen}
+        />
+      )}
 
       <DragOverlay dropAnimation={null}>
         {activeIssue && (

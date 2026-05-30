@@ -28,7 +28,14 @@
       "mcp__plugin_playwright_playwright__browser_take_screenshot",
       "Bash(node -e \"const t = require\\('/Users/ahmetselim/Desktop/test/node_modules/@base-ui/react/popover'\\); console.log\\(Object.keys\\(t\\)\\)\")",
       "Bash(xargs cat)",
-      "Bash(git -C /Users/ahmetselim/Desktop/test status --short)"
+      "Bash(git -C /Users/ahmetselim/Desktop/test status --short)",
+      "Bash(npx shadcn@latest mcp init --client claude)",
+      "Bash(npx shadcn@latest info)",
+      "Bash(npx shadcn@latest add collapsible scroll-area table breadcrumb --yes)",
+      "Bash(npx eslint *)",
+      "Bash(grep -c '<__TRACKED_VAR__' /Users/ahmetselim/Desktop/test/src/components/layout/Sidebar.tsx)",
+      "Bash(npx tailwindcss *)",
+      "Bash(node -e \"const tw = require\\('tailwindcss'\\); console.log\\(Object.keys\\(require\\('tailwindcss/defaultConfig'\\).theme?.boxShadow || {}\\).slice\\(0, 20\\)\\)\")"
     ],
     "additionalDirectories": [
       "/Users/ahmetselim/Desktop/test/docs/superpowers/specs"

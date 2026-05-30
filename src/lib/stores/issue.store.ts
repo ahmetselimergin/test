@@ -6,6 +6,7 @@ interface IssueState {
   selectedIssue: Issue | null
   comments: Comment[]
   activityLogs: ActivityLog[]
+  globalCreateOpen: boolean
   setIssues: (issues: Issue[]) => void
   setSelectedIssue: (issue: Issue | null) => void
   setComments: (comments: Comment[]) => void
@@ -14,6 +15,7 @@ interface IssueState {
   updateIssue: (id: string, updates: Partial<Issue>) => void
   removeIssue: (id: string) => void
   moveIssue: (issueId: string, newColumnId: string, newOrder: number) => void
+  setGlobalCreateOpen: (open: boolean) => void
 }
 
 export const useIssueStore = create<IssueState>((set) => ({
@@ -21,12 +23,19 @@ export const useIssueStore = create<IssueState>((set) => ({
   selectedIssue: null,
   comments: [],
   activityLogs: [],
+  globalCreateOpen: false,
+  setGlobalCreateOpen: (globalCreateOpen) => set({ globalCreateOpen }),
   setIssues: (issues) =>
     set((state) => (state.issues === issues ? state : { issues })),
   setSelectedIssue: (selectedIssue) => set({ selectedIssue }),
   setComments: (comments) => set({ comments }),
   setActivityLogs: (activityLogs) => set({ activityLogs }),
-  addIssue: (issue) => set((state) => ({ issues: [issue, ...state.issues] })),
+  addIssue: (issue) =>
+    set((state) => ({
+      issues: state.issues.some((i) => i.id === issue.id)
+        ? state.issues
+        : [issue, ...state.issues],
+    })),
   updateIssue: (id, updates) =>
     set((state) => ({
       issues: state.issues.map((i) => (i.id === id ? { ...i, ...updates } : i)),

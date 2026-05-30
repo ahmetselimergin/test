@@ -23,9 +23,9 @@ const projectViews = [
 ]
 
 const workspaceLinks = [
-  { label: 'All projects', icon: LayoutGrid, href: 'projects' },
-  { label: 'Team', icon: Users, href: 'team' },
-  { label: 'Settings', icon: Settings, href: 'settings' },
+  { label: 'Tüm Projeler', icon: LayoutGrid, href: 'projects' },
+  { label: 'Takım', icon: Users, href: 'team' },
+  { label: 'Ayarlar', icon: Settings, href: 'settings' },
 ]
 
 function NavLink({
@@ -111,17 +111,17 @@ export function Sidebar() {
         <div>
           <div className="flex items-center justify-between px-2 mb-1">
             <p className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-              Projects
+              Projeler
             </p>
             {slug && (
               <Link href={`/${slug}/projects`} className="text-[10px] text-primary hover:underline">
-                View all
+                Tümünü gör
               </Link>
             )}
           </div>
           <nav className="space-y-0.5">
             {projects.length === 0 && (
-              <p className="px-2 text-xs text-muted-foreground">No projects yet</p>
+              <p className="px-2 text-xs text-muted-foreground">Henüz proje yok</p>
             )}
             {projects.map((project) => {
               const isActive = currentProject?.id === project.id
@@ -185,14 +185,14 @@ export function Sidebar() {
       {/* Footer */}
       <Separator className="bg-sidebar-border" />
       <div className="p-2.5 space-y-0.5">
-        <NavLink href="/profile" icon={User} label="Profile" active={pathname === '/profile'} />
+        <NavLink href="/profile" icon={User} label="Profil" active={pathname === '/profile'} />
         <Button
           variant="ghost"
           className="w-full justify-start gap-2 px-2 h-8 text-[12px] text-muted-foreground hover:text-destructive"
           onClick={() => signOut()}
         >
           <LogOut size={15} />
-          Sign out
+          Çıkış Yap
         </Button>
       </div>
     </aside>
