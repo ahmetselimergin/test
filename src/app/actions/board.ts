@@ -1,6 +1,6 @@
 'use server'
 
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export async function createBoardColumn(formData: FormData) {
@@ -133,6 +133,28 @@ export async function createIssue(formData: FormData) {
     action: 'issue_created',
     new_value: title,
   })
+
+  // Notify assignee if set and different from creator
+  if (assigneeId && assigneeId !== user.id) {
+    const adminClient = createAdminClient()
+    const { data: project } = await supabase
+      .from('projects')
+      .select('name, workspace_id')
+      .eq('id', projectId)
+      .single()
+
+    await adminClient.from('notifications').insert({
+      user_id: assigneeId,
+      actor_id: user.id,
+      type: 'issue_assigned',
+      issue_id: issue.id,
+      workspace_id: project?.workspace_id ?? '',
+      data: {
+        issue_title: title,
+        project_name: project?.name ?? '',
+      },
+    })
+  }
 
   revalidatePath(`/${workspaceSlug}/${projectId}/board`)
   return { success: true, issue }
