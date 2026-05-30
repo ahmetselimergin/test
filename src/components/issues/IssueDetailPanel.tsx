@@ -17,6 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
+import { notifyIssueAssigned, notifyIssueUpdated } from '@/app/actions/notifications'
 import { formatIssueId, statusConfig, priorityConfig, typeConfig, cn, formatEstimate, parseEstimate } from '@/lib/utils'
 import type { Issue, IssueStatus, Priority, IssueType, MemberSummary } from '@/lib/supabase/types'
 import { toast } from 'sonner'
@@ -110,6 +111,19 @@ function IssueDetailContent({
         { id: crypto.randomUUID(), issue_id: issue.id, actor_id: user.id, action: 'status_changed', old_value: oldStatus, new_value: status, created_at: new Date().toISOString() },
         ...useIssueStore.getState().activityLogs,
       ])
+      const { data: project } = await supabase
+        .from('projects')
+        .select('name, workspace_id')
+        .eq('id', issue.project_id)
+        .single()
+      notifyIssueUpdated(issue.id, project?.workspace_id ?? '', {
+        issue_title: issue.title,
+        project_name: project?.name ?? '',
+        new_status: status,
+        old_status: oldStatus,
+        assignee_id: issue.assignee_id,
+        reporter_id: issue.reporter_id,
+      })
     }
   }
 
@@ -158,6 +172,17 @@ function IssueDetailContent({
         { id: crypto.randomUUID(), issue_id: issue.id, actor_id: user.id, action: 'assignee_changed', old_value: oldAssigneeId ?? null, new_value: id ?? null, created_at: new Date().toISOString() },
         ...useIssueStore.getState().activityLogs,
       ])
+      if (id) {
+        const { data: project } = await supabase
+          .from('projects')
+          .select('name, workspace_id')
+          .eq('id', issue.project_id)
+          .single()
+        notifyIssueAssigned(issue.id, id, project?.workspace_id ?? '', {
+          issue_title: issue.title,
+          project_name: project?.name ?? '',
+        })
+      }
     }
   }
 
