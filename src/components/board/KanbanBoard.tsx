@@ -165,10 +165,22 @@ export function KanbanBoard({
     }
 
     const supabase = createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+
     await supabase
       .from('issues')
       .update({ board_column_id: moved.board_column_id, order: moved.order, status: newStatus })
       .eq('id', moved.id)
+
+    if (user && newStatus !== moved.status) {
+      await supabase.from('activity_logs').insert({
+        issue_id: moved.id,
+        actor_id: user.id,
+        action: 'status_changed',
+        old_value: moved.status,
+        new_value: newStatus,
+      })
+    }
   }, [])
 
   return (
