@@ -89,23 +89,14 @@ export default async function WorkspaceDashboard({
       .select('id')
       .in('project_id', projectIds)
     const ids = (issueIds ?? []).map((i) => i.id)
-    console.log('[ActivityDebug] projectIds:', projectIds, 'issueIds:', ids, 'since:', since)
     if (ids.length > 0) {
-      const { data, error } = await adminClient
-        .from('activity_logs')
-        .select('id, action, old_value, new_value, actor_id, created_at')
-        .in('issue_id', ids)
-        .order('created_at', { ascending: false })
-        .limit(10)
-      console.log('[ActivityDebug] ALL logs (no time filter):', JSON.stringify(data), 'error:', error)
-      const { data: recentData, error: recentError } = await adminClient
+      const { data: recentData } = await adminClient
         .from('activity_logs')
         .select('*, issue:issues(title, project_id), actor:profiles(full_name, avatar_url)')
         .in('issue_id', ids)
         .gte('created_at', since)
         .order('created_at', { ascending: false })
         .limit(20)
-      console.log('[ActivityDebug] recent logs count:', recentData?.length, 'error:', recentError)
       rawActivity = recentData ?? []
     }
   }
