@@ -2,6 +2,30 @@
 
 import { createClient, createAdminClient } from '@/lib/supabase/server'
 
+export async function logActivity(params: {
+  issueId: string
+  action: string
+  oldValue?: string | null
+  newValue?: string | null
+}) {
+  try {
+    const supabase = await createClient()
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return
+
+    const adminClient = createAdminClient()
+    await adminClient.from('activity_logs').insert({
+      issue_id: params.issueId,
+      actor_id: user.id,
+      action: params.action,
+      old_value: params.oldValue ?? null,
+      new_value: params.newValue ?? null,
+    })
+  } catch {
+    // fire-and-forget
+  }
+}
+
 export async function notifyIssueAssigned(
   issueId: string,
   newAssigneeId: string,

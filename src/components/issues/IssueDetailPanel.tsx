@@ -17,7 +17,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { createClient } from '@/lib/supabase/client'
-import { notifyIssueAssigned, notifyIssueUpdated } from '@/app/actions/notifications'
+import { notifyIssueAssigned, notifyIssueUpdated, logActivity } from '@/app/actions/notifications'
 import { formatIssueId, statusConfig, priorityConfig, typeConfig, cn, formatEstimate, parseEstimate } from '@/lib/utils'
 import type { Issue, IssueStatus, Priority, IssueType, MemberSummary } from '@/lib/supabase/types'
 import { toast } from 'sonner'
@@ -98,17 +98,10 @@ function IssueDetailContent({
     updateIssue(issue.id, { status })
     const supabase = createClient()
     await supabase.from('issues').update({ status }).eq('id', issue.id)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user && oldStatus !== status) {
-      await supabase.from('activity_logs').insert({
-        issue_id: issue.id,
-        actor_id: user.id,
-        action: 'status_changed',
-        old_value: oldStatus,
-        new_value: status,
-      })
+    if (oldStatus !== status) {
+      logActivity({ issueId: issue.id, action: 'status_changed', oldValue: oldStatus, newValue: status })
       useIssueStore.getState().setActivityLogs([
-        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: user.id, action: 'status_changed', old_value: oldStatus, new_value: status, created_at: new Date().toISOString() },
+        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: null, action: 'status_changed', old_value: oldStatus, new_value: status, created_at: new Date().toISOString() },
         ...useIssueStore.getState().activityLogs,
       ])
       const { data: project } = await supabase
@@ -132,17 +125,10 @@ function IssueDetailContent({
     updateIssue(issue.id, { priority })
     const supabase = createClient()
     await supabase.from('issues').update({ priority }).eq('id', issue.id)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user && oldPriority !== priority) {
-      await supabase.from('activity_logs').insert({
-        issue_id: issue.id,
-        actor_id: user.id,
-        action: 'priority_changed',
-        old_value: oldPriority,
-        new_value: priority,
-      })
+    if (oldPriority !== priority) {
+      logActivity({ issueId: issue.id, action: 'priority_changed', oldValue: oldPriority, newValue: priority })
       useIssueStore.getState().setActivityLogs([
-        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: user.id, action: 'priority_changed', old_value: oldPriority, new_value: priority, created_at: new Date().toISOString() },
+        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: null, action: 'priority_changed', old_value: oldPriority, new_value: priority, created_at: new Date().toISOString() },
         ...useIssueStore.getState().activityLogs,
       ])
     }
@@ -159,17 +145,10 @@ function IssueDetailContent({
     updateIssue(issue.id, { assignee_id: id })
     const supabase = createClient()
     await supabase.from('issues').update({ assignee_id: id }).eq('id', issue.id)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user && oldAssigneeId !== id) {
-      await supabase.from('activity_logs').insert({
-        issue_id: issue.id,
-        actor_id: user.id,
-        action: 'assignee_changed',
-        old_value: oldAssigneeId ?? null,
-        new_value: id ?? null,
-      })
+    if (oldAssigneeId !== id) {
+      logActivity({ issueId: issue.id, action: 'assignee_changed', oldValue: oldAssigneeId, newValue: id })
       useIssueStore.getState().setActivityLogs([
-        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: user.id, action: 'assignee_changed', old_value: oldAssigneeId ?? null, new_value: id ?? null, created_at: new Date().toISOString() },
+        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: null, action: 'assignee_changed', old_value: oldAssigneeId ?? null, new_value: id ?? null, created_at: new Date().toISOString() },
         ...useIssueStore.getState().activityLogs,
       ])
       if (id) {
@@ -201,17 +180,10 @@ function IssueDetailContent({
     setEditingTitle(false)
     const supabase = createClient()
     await supabase.from('issues').update({ title: trimmed }).eq('id', issue.id)
-    const { data: { user } } = await supabase.auth.getUser()
-    if (user) {
-      await supabase.from('activity_logs').insert({
-        issue_id: issue.id,
-        actor_id: user.id,
-        action: 'title_changed',
-        old_value: oldTitle,
-        new_value: trimmed,
-      })
+    {
+      logActivity({ issueId: issue.id, action: 'title_changed', oldValue: oldTitle, newValue: trimmed })
       useIssueStore.getState().setActivityLogs([
-        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: user.id, action: 'title_changed', old_value: oldTitle, new_value: trimmed, created_at: new Date().toISOString() },
+        { id: crypto.randomUUID(), issue_id: issue.id, actor_id: null, action: 'title_changed', old_value: oldTitle, new_value: trimmed, created_at: new Date().toISOString() },
         ...useIssueStore.getState().activityLogs,
       ])
     }

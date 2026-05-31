@@ -109,7 +109,7 @@ export function DashboardHero({
         </div>
 
         {/* Metrics */}
-        <div className="flex items-stretch gap-3">
+        <div className="grid grid-cols-3 gap-3">
           <Metric
             value={assignedCount}
             label="Bana Atanan"
