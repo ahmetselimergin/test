@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useEditor, EditorContent } from '@tiptap/react'
 import StarterKit from '@tiptap/starter-kit'
 import Placeholder from '@tiptap/extension-placeholder'
@@ -90,11 +90,14 @@ export function IssueCommentThread({ issueId }: IssueCommentThreadProps) {
     return () => { cancelled = true }
   }, [issueId])
 
+  const [hasContent, setHasContent] = useState(false)
+
   const writeEditor = useEditor({
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: 'Yorum yaz...' }),
     ],
+    onUpdate: ({ editor }) => setHasContent(!editor.isEmpty),
     editorProps: {
       attributes: {
         class: 'prose prose-sm max-w-none focus:outline-none min-h-[60px] text-[13px] leading-relaxed text-foreground prose-p:my-0.5',
@@ -103,13 +106,14 @@ export function IssueCommentThread({ issueId }: IssueCommentThreadProps) {
   })
 
   async function handleSubmit() {
-    if (!writeEditor || writeEditor.isEmpty) return
+    if (!writeEditor || !hasContent) return
     const content = writeEditor.getHTML()
     const result = await addComment(issueId, content)
     if ('error' in result && result.error) { toast.error(result.error); return }
     if ('comment' in result && result.comment) {
       useIssueStore.getState().setComments([...useIssueStore.getState().comments, result.comment as CommentWithAuthor])
       writeEditor.commands.clearContent()
+      setHasContent(false)
     }
   }
 
@@ -167,7 +171,7 @@ export function IssueCommentThread({ issueId }: IssueCommentThreadProps) {
             size="sm"
             variant="ghost"
             onClick={handleSubmit}
-            disabled={!writeEditor || writeEditor.isEmpty}
+            disabled={!writeEditor || !hasContent}
             className="h-6 px-2.5 text-[11px] font-medium"
           >
             Gönder
