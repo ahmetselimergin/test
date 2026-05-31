@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient, createAdminClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { DashboardHero } from '@/components/dashboard/DashboardHero'
@@ -78,13 +78,28 @@ export default async function WorkspaceDashboard({
   ])
 
   // Activity feed — last 24 hours
+  // adminClient bypasses RLS to read all workspace activity
+  const adminClient = createAdminClient()
   const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
-  const { data: rawActivity } = await supabase
-    .from('activity_logs')
-    .select('*, issue:issues(title, project_id), actor:profiles(full_name, avatar_url)')
-    .gte('created_at', since)
-    .order('created_at', { ascending: false })
-    .limit(20)
+
+  let rawActivity: unknown[] = []
+  if (projectIds.length > 0) {
+    const { data: issueIds } = await adminClient
+      .from('issues')
+      .select('id')
+      .in('project_id', projectIds)
+    const ids = (issueIds ?? []).map((i) => i.id)
+    if (ids.length > 0) {
+      const { data } = await adminClient
+        .from('activity_logs')
+        .select('*, issue:issues(title, project_id), actor:profiles(full_name, avatar_url)')
+        .in('issue_id', ids)
+        .gte('created_at', since)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      rawActivity = data ?? []
+    }
+  }
 
   const activityItems: ActivityItem[] = ((rawActivity ?? []) as any[])
     .filter((row) => {
