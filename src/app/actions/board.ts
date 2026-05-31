@@ -170,6 +170,34 @@ export async function renameBoardColumn(columnId: string, name: string) {
   return { success: true }
 }
 
+export async function deleteIssue(issueId: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Giriş gerekli' }
+
+  const { error } = await supabase
+    .from('issues')
+    .delete()
+    .eq('id', issueId)
+
+  if (error) return { error: error.message }
+  return { success: true }
+}
+
+export async function moveIssueToBoardColumn(issueId: string, boardColumnId: string, newStatus: string) {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return { error: 'Giriş gerekli' }
+
+  const { error } = await supabase
+    .from('issues')
+    .update({ board_column_id: boardColumnId, status: newStatus })
+    .eq('id', issueId)
+
+  if (error) return { error: error.message }
+  return { success: true }
+}
+
 export async function reorderBoardColumns(
   columns: Array<{ id: string; order: number }>
 ) {

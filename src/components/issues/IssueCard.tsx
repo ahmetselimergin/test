@@ -9,6 +9,7 @@ import { formatIssueId, formatEstimate, cn } from '@/lib/utils'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { IssueCardQuickActions } from './IssueCardQuickActions'
+import { IssueCardContextMenu } from './IssueCardContextMenu'
 
 interface IssueCardProps {
   issue: Issue
@@ -51,7 +52,7 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
 
   const plainDescription = issue.description ? stripHtml(issue.description) : ''
 
-  return (
+  const card = (
     <div
       ref={overlay ? undefined : setNodeRef}
       style={overlay ? undefined : { transform: CSS.Transform.toString(transform), transition }}
@@ -137,4 +138,8 @@ export function IssueCard({ issue, project, overlay }: IssueCardProps) {
       </motion.article>
     </div>
   )
+
+  if (overlay) return card
+
+  return <IssueCardContextMenu issue={issue}>{card}</IssueCardContextMenu>
 }
