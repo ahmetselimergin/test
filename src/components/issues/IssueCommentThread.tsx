@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
-import { notifyCommentAdded } from '@/app/actions/notifications'
+import { addComment } from '@/app/actions/notifications'
 import type { Comment } from '@/lib/supabase/types'
 
 interface CommentWithAuthor extends Comment {
@@ -105,35 +105,11 @@ export function IssueCommentThread({ issueId }: IssueCommentThreadProps) {
   async function handleSubmit() {
     if (!writeEditor || writeEditor.isEmpty) return
     const content = writeEditor.getHTML()
-    const supabase = createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) return
-    const { data: comment, error } = await supabase
-      .from('comments')
-      .insert({ issue_id: issueId, author_id: user.id, content })
-      .select('*, author:profiles(full_name, avatar_url)')
-      .single()
-    if (error) { toast.error(error.message); return }
-    if (comment) {
-      useIssueStore.getState().setComments([...useIssueStore.getState().comments, comment as CommentWithAuthor])
+    const result = await addComment(issueId, content)
+    if ('error' in result && result.error) { toast.error(result.error); return }
+    if ('comment' in result && result.comment) {
+      useIssueStore.getState().setComments([...useIssueStore.getState().comments, result.comment as CommentWithAuthor])
       writeEditor.commands.clearContent()
-
-      const { data: issueData } = await supabase
-        .from('issues')
-        .select('assignee_id, reporter_id, project:projects(name, workspace_id)')
-        .eq('id', issueId)
-        .single()
-
-      if (issueData) {
-        const project = Array.isArray(issueData.project) ? issueData.project[0] : issueData.project as { name: string; workspace_id: string } | null
-        notifyCommentAdded(issueId, project?.workspace_id ?? '', {
-          issue_title: issueId,
-          project_name: project?.name ?? '',
-          comment_preview: content.replace(/<[^>]+>/g, '').slice(0, 80),
-          assignee_id: issueData.assignee_id,
-          reporter_id: issueData.reporter_id,
-        })
-      }
     }
   }
 
