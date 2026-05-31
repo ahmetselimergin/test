@@ -147,12 +147,27 @@ export function KanbanBoard({
     }
     setActiveIssue(null)
     const { issues: freshIssues } = useIssueStore.getState()
+    const { columns: freshCols } = useProjectStore.getState()
     const moved = freshIssues.find((i) => i.id === active.id)
     if (!moved) return
+
+    const statusMap: Record<string, string> = {
+      'Todo': 'todo',
+      'In Progress': 'in_progress',
+      'Review': 'review',
+      'Done': 'done',
+    }
+    const col = freshCols.find((c) => c.id === moved.board_column_id)
+    const newStatus = col ? (statusMap[col.name] ?? moved.status) : moved.status
+
+    if (newStatus !== moved.status) {
+      useIssueStore.getState().updateIssue(moved.id, { status: newStatus as typeof moved.status })
+    }
+
     const supabase = createClient()
     await supabase
       .from('issues')
-      .update({ board_column_id: moved.board_column_id, order: moved.order })
+      .update({ board_column_id: moved.board_column_id, order: moved.order, status: newStatus })
       .eq('id', moved.id)
   }, [])
 
