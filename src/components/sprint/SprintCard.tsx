@@ -1,13 +1,20 @@
 'use client'
+import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { Play, CheckCircle, Calendar } from 'lucide-react'
+import { Play, CheckCircle, Calendar, ChevronRight } from 'lucide-react'
 import type { Sprint, Issue } from '@/lib/supabase/types'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 import { Progress } from '@/components/ui/progress'
 import { Card, CardHeader, CardContent } from '@/components/ui/card'
+import {
+  Collapsible,
+  CollapsibleTrigger,
+  CollapsibleContent,
+} from '@/components/ui/collapsible'
 import { createClient } from '@/lib/supabase/client'
 import { useProjectStore } from '@/lib/stores/project.store'
+import { IssueRow } from '@/components/issues/IssueRow'
 import { format, parseISO } from 'date-fns'
 import { tr } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
@@ -19,6 +26,8 @@ interface SprintCardProps {
 
 export function SprintCard({ sprint, issues }: SprintCardProps) {
   const { setSprints, sprints } = useProjectStore()
+  const currentProject = useProjectStore((s) => s.currentProject)
+  const [issuesOpen, setIssuesOpen] = useState(sprint.status === 'active')
   const doneIssues = issues.filter((i) => i.status === 'done').length
   const progress = issues.length > 0 ? (doneIssues / issues.length) * 100 : 0
 
@@ -105,6 +114,32 @@ export function SprintCard({ sprint, issues }: SprintCardProps) {
             </span>
           </div>
         </CardContent>
+
+        {currentProject && (
+          <Collapsible open={issuesOpen} onOpenChange={setIssuesOpen}>
+            <CollapsibleTrigger className="w-full flex items-center gap-2 px-4 py-2 border-t border-border hover:bg-muted/30 transition-colors">
+              <motion.div animate={{ rotate: issuesOpen ? 90 : 0 }} transition={{ duration: 0.15 }}>
+                <ChevronRight size={12} className="text-muted-foreground" />
+              </motion.div>
+              <span className="text-[11px] text-muted-foreground">
+                Issue&apos;lar ({issues.length})
+              </span>
+            </CollapsibleTrigger>
+            <CollapsibleContent>
+              <div className="px-2 pb-2">
+                {issues.length === 0 ? (
+                  <p className="text-[12px] text-muted-foreground text-center py-3">
+                    Issue yok — backlog&apos;dan sağ tıkla ekle
+                  </p>
+                ) : (
+                  issues.map((issue) => (
+                    <IssueRow key={issue.id} issue={issue} project={currentProject} />
+                  ))
+                )}
+              </div>
+            </CollapsibleContent>
+          </Collapsible>
+        )}
       </Card>
     </motion.div>
   )
