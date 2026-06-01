@@ -14,6 +14,9 @@ interface ProjectState {
   setEpics: (epics: Epic[]) => void
   setSprints: (sprints: Sprint[]) => void
   setMembers: (members: MemberSummary[]) => void
+  addSprint: (sprint: Sprint) => void
+  addEpic: (epic: Epic) => void
+  updateEpic: (id: string, updates: Partial<Epic>) => void
   hydrateProjectView: (payload: {
     project: Project
     columns: BoardColumn[]
@@ -57,6 +60,14 @@ export const useProjectStore = create<ProjectState>((set) => ({
     set((state) => (state.sprints === sprints ? state : { sprints })),
   setMembers: (members) =>
     set((state) => (state.members === members ? state : { members })),
+  addSprint: (sprint) =>
+    set((state) => ({ sprints: [...state.sprints, sprint] })),
+  addEpic: (epic) =>
+    set((state) => ({ epics: [...state.epics, epic] })),
+  updateEpic: (id, updates) =>
+    set((state) => ({
+      epics: state.epics.map((e) => (e.id === id ? { ...e, ...updates } : e)),
+    })),
   hydrateProjectView: ({ project, columns, epics, sprints, members }) =>
     set((state) => {
       const sameProject =
