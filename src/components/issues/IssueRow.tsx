@@ -6,9 +6,9 @@ import { IssueCardContextMenu } from './IssueCardContextMenu'
 import { TypeIcon } from './TypeIcon'
 import { Avatar, AvatarFallback } from '@/components/ui/avatar'
 import { formatIssueId, formatEstimate, cn, priorityConfig } from '@/lib/utils'
-import type { Issue, Project } from '@/lib/supabase/types'
+import type { Issue, Project, Priority } from '@/lib/supabase/types'
 
-const PRIORITY_DOT: Record<string, string> = {
+const PRIORITY_DOT: Record<Priority, string> = {
   critical: 'bg-rose-500',
   high: 'bg-orange-500',
   medium: 'bg-amber-400',
@@ -28,7 +28,7 @@ export function IssueRow({ issue, project }: IssueRowProps) {
   return (
     <IssueCardContextMenu issue={issue}>
       <div
-        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer group"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-muted/50 transition-colors cursor-pointer"
         onClick={() => setSelectedIssue(issue)}
       >
         <TypeIcon type={issue.type} size={13} className="shrink-0 text-muted-foreground" />
