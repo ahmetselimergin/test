@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Trash2, ExternalLink, ArrowRight } from 'lucide-react'
+import { Trash2, ExternalLink, ArrowRight, Calendar } from 'lucide-react'
 import { toast } from 'sonner'
 import {
   ContextMenu,
@@ -26,6 +26,7 @@ import {
 import { useIssueStore } from '@/lib/stores/issue.store'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { deleteIssue, moveIssueToBoardColumn } from '@/app/actions/board'
+import { assignIssueToSprint } from '@/app/actions/sprint'
 import { cn, priorityConfig } from '@/lib/utils'
 import type { Issue, Priority } from '@/lib/supabase/types'
 import { createClient } from '@/lib/supabase/client'
@@ -86,6 +87,20 @@ export function IssueCardContextMenu({ issue, children }: IssueCardContextMenuPr
 
   const otherColumns = columns.filter((c) => c.id !== issue.board_column_id)
 
+  const sprints = useProjectStore((s) => s.sprints).filter(
+    (s) => s.status !== 'completed'
+  )
+
+  async function handleSprintAssign(sprintId: string | null) {
+    const prevSprintId = issue.sprint_id
+    updateIssue(issue.id, { sprint_id: sprintId })
+    const result = await assignIssueToSprint(issue.id, sprintId)
+    if ('error' in result && result.error) {
+      updateIssue(issue.id, { sprint_id: prevSprintId })
+      toast.error(result.error)
+    }
+  }
+
   return (
     <>
       <ContextMenu>
@@ -125,6 +140,51 @@ export function IssueCardContextMenu({ issue, children }: IssueCardContextMenuPr
               </ContextMenuSubContent>
             </ContextMenuSub>
           )}
+
+          {/* Assign to sprint */}
+          <ContextMenuSub>
+            <ContextMenuSubTrigger className="gap-2 cursor-pointer">
+              <Calendar size={13} className="text-muted-foreground" />
+              Sprint'e Ekle
+            </ContextMenuSubTrigger>
+            <ContextMenuSubContent className="w-48">
+              {sprints.length === 0 ? (
+                <ContextMenuItem disabled className="text-[12px] text-muted-foreground">
+                  Sprint yok
+                </ContextMenuItem>
+              ) : (
+                sprints.map((sprint) => (
+                  <ContextMenuItem
+                    key={sprint.id}
+                    className="gap-2 cursor-pointer"
+                    onClick={() => handleSprintAssign(sprint.id)}
+                    disabled={issue.sprint_id === sprint.id}
+                  >
+                    <span
+                      className={cn(
+                        'size-1.5 rounded-full shrink-0',
+                        sprint.status === 'active' ? 'bg-indigo-400' : 'bg-muted-foreground'
+                      )}
+                    />
+                    <span className="truncate flex-1">{sprint.name}</span>
+                    {issue.sprint_id === sprint.id && (
+                      <span className="ml-auto text-[11px] text-muted-foreground">✓</span>
+                    )}
+                  </ContextMenuItem>
+                ))
+              )}
+              {issue.sprint_id && (
+                <div className="border-t border-border mt-1 pt-1">
+                  <ContextMenuItem
+                    className="gap-2 cursor-pointer text-muted-foreground"
+                    onClick={() => handleSprintAssign(null)}
+                  >
+                    Sprint'ten çıkar
+                  </ContextMenuItem>
+                </div>
+              )}
+            </ContextMenuSubContent>
+          </ContextMenuSub>
 
           {/* Change priority */}
           <ContextMenuSub>
