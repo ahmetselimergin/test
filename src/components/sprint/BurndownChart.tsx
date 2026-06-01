@@ -9,7 +9,13 @@ import {
   ResponsiveContainer,
 } from 'recharts'
 import type { Sprint, Issue } from '@/lib/supabase/types'
-import { eachDayOfInterval, format, parseISO } from 'date-fns'
+import {
+  eachDayOfInterval,
+  format,
+  parseISO,
+  differenceInDays,
+  isAfter,
+} from 'date-fns'
 import { tr } from 'date-fns/locale'
 
 interface BurndownChartProps {
@@ -22,14 +28,38 @@ export function BurndownChart({ sprint, issues }: BurndownChartProps) {
 
   const start = parseISO(sprint.start_date)
   const end = parseISO(sprint.end_date)
-  const totalPoints = issues.reduce((sum, i) => sum + (i.estimate ?? 1), 0)
-  const days = eachDayOfInterval({ start, end })
+  const today = new Date()
 
-  const data = days.map((day, i) => ({
-    date: format(day, 'd MMM', { locale: tr }),
-    ideal: Math.round(totalPoints - (totalPoints / Math.max(days.length - 1, 1)) * i),
-    actual: i < 3 ? Math.max(0, totalPoints - i * Math.round(totalPoints * 0.1)) : undefined,
-  }))
+  const totalPoints = issues.reduce((sum, i) => sum + (i.estimate ?? 1), 0)
+  const donePoints = issues
+    .filter((i) => i.status === 'done')
+    .reduce((sum, i) => sum + (i.estimate ?? 1), 0)
+  const remaining = totalPoints - donePoints
+  const days = eachDayOfInterval({ start, end })
+  const sprintLength = Math.max(days.length - 1, 1)
+  const daysPassed = Math.max(
+    0,
+    Math.min(differenceInDays(today, start), sprintLength)
+  )
+
+  const data = days.map((day, i) => {
+    const ideal = Math.round(totalPoints - (totalPoints / sprintLength) * i)
+    let actual: number | undefined
+    if (!isAfter(day, today)) {
+      actual =
+        daysPassed === 0
+          ? totalPoints
+          : Math.max(
+              0,
+              Math.round(totalPoints - (totalPoints - remaining) * (i / daysPassed))
+            )
+    }
+    return {
+      date: format(day, 'd MMM', { locale: tr }),
+      ideal,
+      actual,
+    }
+  })
 
   return (
     <div className="bg-card border border-border rounded-xl p-5">
