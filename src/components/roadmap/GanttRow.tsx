@@ -6,9 +6,10 @@ interface GanttRowProps {
   epic: Epic
   viewStart: Date
   totalDays: number
+  onEdit?: (epic: Epic) => void
 }
 
-export function GanttRow({ epic, viewStart, totalDays }: GanttRowProps) {
+export function GanttRow({ epic, viewStart, totalDays, onEdit }: GanttRowProps) {
   if (!epic.start_date || !epic.end_date) return null
 
   const epicStart = parseISO(epic.start_date)
@@ -29,9 +30,11 @@ export function GanttRow({ epic, viewStart, totalDays }: GanttRowProps) {
     <div className="relative h-8 flex items-center">
       <div
         title={epic.title}
+        onClick={() => onEdit?.(epic)}
         className={cn(
           'absolute h-6 rounded-lg flex items-center px-2 text-xs font-medium text-white shadow-md transition-opacity',
-          epic.status === 'completed' && 'opacity-50'
+          epic.status === 'completed' && 'opacity-50',
+          onEdit && 'cursor-pointer hover:brightness-110 transition-all'
         )}
         style={{
           left: `${clampedLeft}%`,
