@@ -72,6 +72,7 @@ export async function createIssue(formData: FormData) {
   const parsed = estimateRaw ? parseInt(estimateRaw, 10) : NaN
   const estimate = isNaN(parsed) ? null : parsed
   const assigneeId = (formData.get('assignee_id') as string) || null
+  const epicId = (formData.get('epic_id') as string) || null
   let labels: string[] = []
   try {
     const raw = formData.get('labels') as string
@@ -119,6 +120,7 @@ export async function createIssue(formData: FormData) {
       status,
       reporter_id: user.id,
       assignee_id: assigneeId,
+      epic_id: epicId,
       order: nextOrder,
     })
     .select()

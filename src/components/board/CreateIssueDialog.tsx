@@ -32,6 +32,7 @@ interface Props {
   members: MemberSummary[]
   open: boolean
   onOpenChange: (open: boolean) => void
+  defaultEpicId?: string
 }
 
 function PropSelect({ label, children }: { label: string; children: React.ReactNode }) {
@@ -52,6 +53,7 @@ export function CreateIssueDialog({
   members,
   open,
   onOpenChange,
+  defaultEpicId,
 }: Props) {
   const [loading, setLoading] = useState(false)
   const [title, setTitle] = useState('')
@@ -104,6 +106,7 @@ export function CreateIssueDialog({
 
     const formData = new FormData()
     formData.set('project_id', project.id)
+    if (defaultEpicId) formData.set('epic_id', defaultEpicId)
     formData.set('board_column_id', column.id)
     formData.set('workspace_slug', workspaceSlug)
     formData.set('title', title.trim())
