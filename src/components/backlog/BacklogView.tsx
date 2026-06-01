@@ -8,15 +8,22 @@ import type { Project } from '@/lib/supabase/types'
 type GroupBy = 'epic' | 'priority' | 'none'
 
 const groupByLabels: Record<GroupBy, string> = {
-  epic: 'Epic\'e Göre',
+  epic: "Epic'e Göre",
   priority: 'Önceliğe Göre',
   none: 'Gruplandırma Yok',
 }
 
-export function BacklogView({ project }: { project: Project }) {
+interface BacklogViewProps {
+  project: Project
+  workspaceSlug: string
+}
+
+export function BacklogView({ project, workspaceSlug }: BacklogViewProps) {
   const { issues } = useIssueStore()
-  const { epics } = useProjectStore()
+  const { epics, columns, members } = useProjectStore()
   const [groupBy, setGroupBy] = useState<GroupBy>('epic')
+
+  const defaultColumn = columns[0]
 
   const backlogIssues = useMemo(
     () => issues.filter((i) => !i.sprint_id),
@@ -29,12 +36,13 @@ export function BacklogView({ project }: { project: Project }) {
         id: epic.id,
         title: epic.title,
         color: epic.color,
+        epicId: epic.id,
         issues: backlogIssues.filter((i) => i.epic_id === epic.id),
       }))
       const noEpic = backlogIssues.filter((i) => !i.epic_id)
       return [
         ...epicGroups,
-        { id: 'none', title: 'Epic Yok', color: undefined, issues: noEpic },
+        { id: 'none', title: 'Epic Yok', color: undefined, epicId: undefined, issues: noEpic },
       ]
     }
 
@@ -43,6 +51,7 @@ export function BacklogView({ project }: { project: Project }) {
         id: p,
         title: p.charAt(0).toUpperCase() + p.slice(1),
         color: undefined,
+        epicId: undefined,
         issues: backlogIssues.filter((i) => i.priority === p),
       }))
     }
@@ -50,8 +59,9 @@ export function BacklogView({ project }: { project: Project }) {
     return [
       {
         id: 'all',
-        title: 'Tüm Issue\'lar',
+        title: "Tüm Issue'lar",
         color: undefined,
+        epicId: undefined,
         issues: backlogIssues,
       },
     ]
@@ -89,6 +99,10 @@ export function BacklogView({ project }: { project: Project }) {
             issues={group.issues}
             project={project}
             color={group.color}
+            epicId={group.epicId}
+            defaultColumn={defaultColumn}
+            workspaceSlug={workspaceSlug}
+            members={members}
           />
         ))}
       </div>

@@ -7,7 +7,7 @@ export default async function BacklogPage({
 }: {
   params: Promise<{ workspace: string; project: string }>
 }) {
-  const { project: projectId } = await params
+  const { workspace: workspaceSlug, project: projectId } = await params
   const supabase = await createClient()
 
   const [
@@ -45,7 +45,7 @@ export default async function BacklogPage({
       issues={issues ?? []}
       epics={epics ?? []}
     >
-      <BacklogView project={project} />
+      <BacklogView project={project} workspaceSlug={workspaceSlug} />
     </BoardDataLoader>
   )
 }
