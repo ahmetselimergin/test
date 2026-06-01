@@ -1,12 +1,17 @@
 'use client'
+import { useState } from 'react'
+import { Plus } from 'lucide-react'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { useIssueStore } from '@/lib/stores/issue.store'
 import { SprintCard } from './SprintCard'
 import { BurndownChart } from './BurndownChart'
+import { CreateSprintDialog } from './CreateSprintDialog'
+import { Button } from '@/components/ui/button'
 
 export function SprintView() {
-  const { sprints } = useProjectStore()
+  const { sprints, currentProject } = useProjectStore()
   const { issues } = useIssueStore()
+  const [createOpen, setCreateOpen] = useState(false)
 
   const activeSprint = sprints.find((s) => s.status === 'active')
   const activeIssues = activeSprint
@@ -15,7 +20,15 @@ export function SprintView() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-xl font-semibold">Sprint</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-xl font-semibold">Sprint</h1>
+        {currentProject && (
+          <Button size="sm" onClick={() => setCreateOpen(true)}>
+            <Plus size={14} className="mr-1.5" />
+            Sprint Oluştur
+          </Button>
+        )}
+      </div>
 
       {activeSprint && (
         <BurndownChart sprint={activeSprint} issues={activeIssues} />
@@ -36,6 +49,14 @@ export function SprintView() {
           />
         ))}
       </div>
+
+      {currentProject && (
+        <CreateSprintDialog
+          projectId={currentProject.id}
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+        />
+      )}
     </div>
   )
 }
