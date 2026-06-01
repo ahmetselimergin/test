@@ -1,7 +1,11 @@
 'use client'
 import { useState, useMemo } from 'react'
+import { Plus } from 'lucide-react'
 import { useProjectStore } from '@/lib/stores/project.store'
 import { GanttRow } from './GanttRow'
+import { CreateEpicDialog } from './CreateEpicDialog'
+import { EpicDateDialog } from './EpicDateDialog'
+import { Button } from '@/components/ui/button'
 import {
   addMonths,
   startOfMonth,
@@ -14,10 +18,13 @@ import { tr } from 'date-fns/locale'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Card } from '@/components/ui/card'
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import type { Epic } from '@/lib/supabase/types'
 
 export function RoadmapView() {
-  const { epics } = useProjectStore()
+  const { epics, currentProject } = useProjectStore()
   const [viewStart, setViewStart] = useState(() => startOfMonth(new Date()))
+  const [createOpen, setCreateOpen] = useState(false)
+  const [editingEpic, setEditingEpic] = useState<Epic | null>(null)
 
   const viewEnd = useMemo(() => endOfMonth(addMonths(viewStart, 5)), [viewStart])
   const months = useMemo(
@@ -39,6 +46,12 @@ export function RoadmapView() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">Roadmap</h1>
         <div className="flex items-center gap-2">
+          {currentProject && (
+            <Button size="sm" onClick={() => setCreateOpen(true)}>
+              <Plus size={14} className="mr-1.5" />
+              Epic Oluştur
+            </Button>
+          )}
           <button
             onClick={() => setViewStart((s) => addMonths(s, -1))}
             className="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-white/5 text-muted-foreground hover:text-foreground transition-colors"
@@ -60,7 +73,6 @@ export function RoadmapView() {
 
       <Card className="overflow-hidden">
         <ScrollArea className="w-full">
-          {/* Header — months */}
           <div className="flex border-b border-border">
             <div className="w-48 flex-shrink-0 px-4 py-2 border-r border-border">
               <span className="text-xs text-muted-foreground">Epic</span>
@@ -77,14 +89,12 @@ export function RoadmapView() {
             </div>
           </div>
 
-          {/* Empty state */}
           {visibleEpics.length === 0 && (
             <div className="py-12 text-center text-sm text-muted-foreground">
               Tarih girilmiş epic bulunamadı
             </div>
           )}
 
-          {/* Rows */}
           {visibleEpics.map((epic) => (
             <div
               key={epic.id}
@@ -102,6 +112,7 @@ export function RoadmapView() {
                   epic={epic}
                   viewStart={viewStart}
                   totalDays={totalDays}
+                  onEdit={setEditingEpic}
                 />
               </div>
             </div>
@@ -110,6 +121,22 @@ export function RoadmapView() {
           <ScrollBar orientation="horizontal" />
         </ScrollArea>
       </Card>
+
+      {currentProject && (
+        <CreateEpicDialog
+          projectId={currentProject.id}
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+        />
+      )}
+
+      {editingEpic && (
+        <EpicDateDialog
+          epic={editingEpic}
+          open={!!editingEpic}
+          onOpenChange={(open) => { if (!open) setEditingEpic(null) }}
+        />
+      )}
     </div>
   )
 }
