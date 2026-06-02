@@ -35,7 +35,10 @@
       "Bash(npx eslint *)",
       "Bash(grep -c '<__TRACKED_VAR__' /Users/ahmetselim/Desktop/test/src/components/layout/Sidebar.tsx)",
       "Bash(npx tailwindcss *)",
-      "Bash(node -e \"const tw = require\\('tailwindcss'\\); console.log\\(Object.keys\\(require\\('tailwindcss/defaultConfig'\\).theme?.boxShadow || {}\\).slice\\(0, 20\\)\\)\")"
+      "Bash(node -e \"const tw = require\\('tailwindcss'\\); console.log\\(Object.keys\\(require\\('tailwindcss/defaultConfig'\\).theme?.boxShadow || {}\\).slice\\(0, 20\\)\\)\")",
+      "Bash(npx shadcn@latest add context-menu --yes)",
+      "Bash(cat \"/Users/ahmetselim/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/requesting-code-review/code-reviewer.md\" 2>/dev/null | head -60)",
+      "Read(//Users/ahmetselim/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/requesting-code-review/**)"
     ],
     "additionalDirectories": [
       "/Users/ahmetselim/Desktop/test/docs/superpowers/specs"
